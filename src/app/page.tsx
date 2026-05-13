@@ -4,7 +4,6 @@ import { useRef, useCallback, useEffect, useState } from 'react';
 import PanoViewer from '@/components/pano-viewer';
 import FloorPlan from '@/components/floor-plan';
 import TourControls from '@/components/tour-controls';
-import SceneSelector from '@/components/scene-selector';
 import InfoPanel from '@/components/info-panel';
 import LeftSidebar from '@/components/left-sidebar';
 import BuildingSelector from '@/components/building-selector';
@@ -290,7 +289,6 @@ export default function Home() {
           <FloorPlan />
           <InfoPanel />
           <TourControls viewerRef={viewerRef} />
-          <SceneSelector />
         </>
       )}
     </div>

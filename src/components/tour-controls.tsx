@@ -9,7 +9,6 @@ import {
   ZoomIn,
   ZoomOut,
   MapPin,
-  LayoutGrid,
   Maximize2,
   Minimize2,
 } from 'lucide-react'
@@ -33,11 +32,9 @@ export default function TourControls({ viewerRef }: TourControlsProps) {
   const currentSceneIndex = useTourStore((s) => s.currentSceneIndex)
   const isFullscreen = useTourStore((s) => s.isFullscreen)
   const showFloorPlan = useTourStore((s) => s.showFloorPlan)
-  const showSceneList = useTourStore((s) => s.showSceneList)
   const autoRotate = useTourStore((s) => s.autoRotate)
   const toggleFullscreen = useTourStore((s) => s.toggleFullscreen)
   const toggleFloorPlan = useTourStore((s) => s.toggleFloorPlan)
-  const toggleSceneList = useTourStore((s) => s.toggleSceneList)
   const toggleAutoRotate = useTourStore((s) => s.toggleAutoRotate)
   const nextScene = useTourStore((s) => s.nextScene)
   const prevScene = useTourStore((s) => s.prevScene)
@@ -209,16 +206,6 @@ export default function TourControls({ viewerRef }: TourControlsProps) {
           title="Floor plan"
         >
           <MapPin size={18} />
-        </button>
-
-        {/* Scene list */}
-        <button
-          onClick={toggleSceneList}
-          className={`${btnBase} ${btnActive(showSceneList)}`}
-          aria-label="Toggle scene list"
-          title="Scene list"
-        >
-          <LayoutGrid size={18} />
         </button>
 
         {separator}
