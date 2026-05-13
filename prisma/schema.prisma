@@ -1,0 +1,79 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Post {
+  id        String   @id @default(cuid())
+  title     String
+  content   String?
+  published Boolean  @default(false)
+  authorId  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Tour {
+  id          String   @id @default(cuid())
+  name        String
+  description String   @default("")
+  brandName   String   @default("")
+  brandLogo   String   @default("")
+  autoRotate  Boolean  @default(true)
+  autoRotateSpeed Float @default(-2)
+  showFloorPlan Boolean @default(true)
+  showControls Boolean @default(true)
+  tourData    String   // JSON string of full tour config
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  scenes      Scene[]
+}
+
+model Scene {
+  id          String   @id @default(cuid())
+  tourId      String
+  name        String
+  description String   @default("")
+  panoramaUrl String
+  pitch       Float    @default(0)
+  yaw         Float    @default(0)
+  hfov        Float    @default(75)
+  mapX        Float    @default(0)
+  mapY        Float    @default(0)
+  order       Int      @default(0)
+  tour        Tour     @relation(fields: [tourId], references: [id], onDelete: Cascade)
+  hotspots    Hotspot[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Hotspot {
+  id            String   @id @default(cuid())
+  sceneId       String
+  scene         Scene    @relation(fields: [sceneId], references: [id], onDelete: Cascade)
+  pitch         Float
+  yaw           Float
+  type          String   @default("info")
+  text          String   @default("")
+  targetSceneId String?
+  url           String?
+  color         String   @default("#10b981")
+  icon          String   @default("info")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
