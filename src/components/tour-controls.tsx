@@ -26,6 +26,9 @@ interface TourControlsProps {
   viewerRef: React.RefObject<PanoViewerHandle | null>
 }
 
+// Gold color constant
+const GOLD = '#D4AF37'
+
 export default function TourControls({ viewerRef }: TourControlsProps) {
   const selectedApartment = useTourStore((s) => s.selectedApartment)
   const currentSceneIndex = useTourStore((s) => s.currentSceneIndex)
@@ -55,15 +58,15 @@ export default function TourControls({ viewerRef }: TourControlsProps) {
   )
 
   const btnBase = 'w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 cursor-pointer select-none'
-  const btnDefault = `${btnBase} bg-black/40 backdrop-blur-md border border-white/8 text-white/50 hover:text-white hover:bg-black/60 hover:border-white/15 hover:scale-105 active:scale-95`
-  const btnActive = `${btnBase} bg-white text-black`
+  const btnDefault = `${btnBase} bg-black/50 backdrop-blur-md border border-[rgba(212,175,55,0.12)] text-[rgba(212,175,55,0.55)] hover:text-[#D4AF37] hover:bg-black/70 hover:border-[rgba(212,175,55,0.25)] hover:scale-105 active:scale-95`
+  const btnActive = `${btnBase} bg-[#D4AF37] text-black shadow-md shadow-[rgba(212,175,55,0.25)]`
 
   return (
     <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center gap-2">
       {/* ─── Scene Dots Strip ─── */}
       <div
         className="flex items-center gap-2 px-4 py-2 rounded-full
-          bg-black/30 backdrop-blur-md border border-white/8"
+          bg-black/40 backdrop-blur-md border border-[rgba(212,175,55,0.1)]"
       >
         {/* Prev arrow */}
         <button
@@ -89,7 +92,8 @@ export default function TourControls({ viewerRef }: TourControlsProps) {
                 style={{
                   width: isActive ? 22 : 7,
                   height: 7,
-                  backgroundColor: isActive ? '#ffffff' : 'rgba(255,255,255,0.3)',
+                  backgroundColor: isActive ? GOLD : 'rgba(212, 175, 55, 0.3)',
+                  boxShadow: isActive ? `0 0 8px ${GOLD}44` : 'none',
                 }}
               />
             )
@@ -108,10 +112,10 @@ export default function TourControls({ viewerRef }: TourControlsProps) {
         </button>
 
         {/* Divider */}
-        <div className="w-px h-4 bg-white/15 mx-0.5" />
+        <div className="w-px h-4 bg-[rgba(212,175,55,0.15)] mx-0.5" />
 
         {/* Scene label */}
-        <span className="text-[11px] text-white/50 font-medium tracking-wide whitespace-nowrap tabular-nums">
+        <span className="text-[11px] text-[rgba(212,175,55,0.6)] font-medium tracking-wide whitespace-nowrap tabular-nums">
           {currentScene?.name ?? ''}&nbsp;&middot;&nbsp;{currentSceneIndex + 1}/{totalScenes}
         </span>
       </div>
@@ -119,7 +123,7 @@ export default function TourControls({ viewerRef }: TourControlsProps) {
       {/* ─── Controls Strip ─── */}
       <div
         className="flex items-center gap-1.5 px-3 py-1.5 rounded-full
-          bg-black/30 backdrop-blur-md border border-white/8"
+          bg-black/40 backdrop-blur-md border border-[rgba(212,175,55,0.1)]"
       >
         {/* Home */}
         <button
@@ -147,7 +151,7 @@ export default function TourControls({ viewerRef }: TourControlsProps) {
           />
         </button>
 
-        <div className="w-px h-4 bg-white/15" />
+        <div className="w-px h-4 bg-[rgba(212,175,55,0.15)]" />
 
         {/* Zoom out */}
         <button
@@ -173,7 +177,7 @@ export default function TourControls({ viewerRef }: TourControlsProps) {
           <ZoomIn size={14} />
         </button>
 
-        <div className="w-px h-4 bg-white/15" />
+        <div className="w-px h-4 bg-[rgba(212,175,55,0.15)]" />
 
         {/* Floor plan */}
         <button

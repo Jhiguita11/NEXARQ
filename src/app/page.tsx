@@ -34,22 +34,22 @@ function LoadingScreen() {
         <div
           className="absolute inset-0 rounded-full border-2 border-transparent"
           style={{
-            borderTopColor: '#ffffff',
+            borderTopColor: '#D4AF37',
             animation: 'loading-ring-spin 1.2s linear infinite',
           }}
         />
         <div
           className="absolute inset-2 rounded-full border-2 border-transparent"
           style={{
-            borderTopColor: 'rgba(255,255,255,0.3)',
+            borderTopColor: 'rgba(212,175,55,0.3)',
             animation: 'loading-ring-spin 1.8s linear infinite reverse',
           }}
         />
         <div className="absolute inset-0 flex items-center justify-center">
-          <Building2 size={24} className="text-white" />
+          <Building2 size={24} style={{ color: '#D4AF37' }} />
         </div>
       </div>
-      <h1 className="text-2xl font-bold mb-1 tracking-wider text-white">
+      <h1 className="text-2xl font-bold mb-1 tracking-wider" style={{ color: '#D4AF37' }}>
         {config.brand.name}
       </h1>
       <p className="text-sm mb-6 text-white/30">
@@ -59,10 +59,8 @@ function LoadingScreen() {
         {[0, 1, 2].map(i => (
           <div
             key={i}
-            className="w-1.5 h-1.5 rounded-full bg-white"
-            style={{
-              animation: `loading-pulse 1.4s ease-in-out ${i * 0.2}s infinite`,
-            }}
+            className="w-1.5 h-1.5 rounded-full"
+            style={{ backgroundColor: '#D4AF37', animation: `loading-pulse 1.4s ease-in-out ${i * 0.2}s infinite` }}
           />
         ))}
       </div>
@@ -87,19 +85,20 @@ function TourWelcome({ onStart }: { onStart: () => void }) {
         style={{ animation: 'welcome-scale-in 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)' }}
       >
         <div
-          className="w-24 h-24 mx-auto mb-8 rounded-2xl flex items-center justify-center border border-white/10"
+          className="w-24 h-24 mx-auto mb-8 rounded-2xl flex items-center justify-center border"
           style={{
-            background: 'rgba(255,255,255,0.08)',
-            boxShadow: '0 16px 48px rgba(0,0,0,0.5)',
+            background: 'rgba(212,175,55,0.08)',
+            borderColor: 'rgba(212,175,55,0.15)',
+            boxShadow: '0 16px 48px rgba(212,175,55,0.1)',
             animation: 'welcome-fade-in 0.6s ease 0.2s both',
           }}
         >
-          <Building2 size={44} className="text-white" />
+          <Building2 size={44} style={{ color: '#D4AF37' }} />
         </div>
 
         <h1
-          className="text-white text-3xl font-extrabold tracking-tight mb-2"
-          style={{ animation: 'welcome-fade-up 0.6s ease 0.3s both' }}
+          className="text-3xl font-extrabold tracking-tight mb-2"
+          style={{ color: '#D4AF37', animation: 'welcome-fade-up 0.6s ease 0.3s both' }}
         >
           {selectedApartment?.name ?? ''}
         </h1>
@@ -113,10 +112,8 @@ function TourWelcome({ onStart }: { onStart: () => void }) {
 
         <button
           onClick={e => { e.stopPropagation(); onStart(); }}
-          className="group relative px-10 py-3.5 rounded-2xl text-base font-semibold text-black bg-white transition-all duration-300 hover:scale-105 active:scale-95 inline-flex items-center gap-3 cursor-pointer"
-          style={{
-            animation: 'welcome-fade-up 0.6s ease 0.5s both',
-          }}
+          className="group relative px-10 py-3.5 rounded-2xl text-base font-semibold text-black transition-all duration-300 hover:scale-105 active:scale-95 inline-flex items-center gap-3 cursor-pointer"
+          style={{ background: '#D4AF37', animation: 'welcome-fade-up 0.6s ease 0.5s both' }}
         >
           <Eye size={20} />
           Iniciar Recorrido 360°
@@ -144,14 +141,14 @@ function BrandBadge() {
       className="fixed top-4 right-4 z-[60] flex items-center gap-2.5 px-4 py-2.5 rounded-xl backdrop-blur-xl border cursor-default select-none"
       style={{
         background: 'rgba(0,0,0,0.5)',
-        borderColor: 'rgba(255,255,255,0.08)',
+        borderColor: 'rgba(212,175,55,0.12)',
       }}
     >
-      <div className="w-7 h-7 rounded-lg flex items-center justify-center bg-white/10">
-        <Building2 size={14} className="text-white" />
+      <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: 'rgba(212,175,55,0.12)' }}>
+        <Building2 size={14} style={{ color: '#D4AF37' }} />
       </div>
       <div>
-        <p className="text-xs font-bold tracking-wide text-white">
+        <p className="text-xs font-bold tracking-wide" style={{ color: '#D4AF37' }}>
           {selectedApartment ? selectedApartment.name : config.brand.name}
         </p>
         <p className="text-[10px] text-white/30">
@@ -171,10 +168,10 @@ function HelpHint() {
       className="fixed bottom-28 left-1/2 -translate-x-1/2 z-20 px-4 py-2 rounded-full backdrop-blur-md border text-center pointer-events-none animate-fade-in"
       style={{
         background: 'rgba(0,0,0,0.4)',
-        borderColor: 'rgba(255,255,255,0.06)',
+        borderColor: 'rgba(212,175,55,0.1)',
       }}
     >
-      <p className="text-[11px] whitespace-nowrap text-white/35">
+      <p className="text-[11px] whitespace-nowrap" style={{ color: 'rgba(212,175,55,0.45)' }}>
         Arrastra para mirar · Scroll para zoom · Toca los puntos para navegar
       </p>
     </div>

@@ -41,14 +41,14 @@ export default function LeftSidebar() {
         onClick={clearApartment}
         title="Volver a edificios"
         className="w-9 h-9 rounded-full flex items-center justify-center
-          bg-black/40 backdrop-blur-md border border-white/8
-          text-white/40 hover:text-white hover:bg-black/60 hover:border-white/15
+          bg-black/50 backdrop-blur-md border border-[rgba(212,175,55,0.15)]
+          text-[rgba(212,175,55,0.6)] hover:text-[#D4AF37] hover:bg-black/70 hover:border-[rgba(212,175,55,0.3)]
           transition-all duration-200 cursor-pointer"
       >
         <ArrowLeft size={13} />
       </button>
 
-      <div className="w-5 h-px bg-white/10" />
+      <div className="w-5 h-px bg-[rgba(212,175,55,0.15)]" />
 
       {/* Room icons */}
       {scenes.map((scene) => {
@@ -61,8 +61,8 @@ export default function LeftSidebar() {
             className={`w-9 h-9 rounded-full flex items-center justify-center
               transition-all duration-200 cursor-pointer
               ${isActive
-                ? 'bg-white text-black scale-110 shadow-lg shadow-white/20'
-                : 'bg-black/40 backdrop-blur-md border border-white/8 text-white/45 hover:text-white hover:bg-black/60 hover:border-white/15 hover:scale-105'
+                ? 'bg-[#D4AF37] text-black scale-110 shadow-lg shadow-[rgba(212,175,55,0.3)]'
+                : 'bg-black/50 backdrop-blur-md border border-[rgba(212,175,55,0.12)] text-[rgba(212,175,55,0.5)] hover:text-[#D4AF37] hover:bg-black/70 hover:border-[rgba(212,175,55,0.25)] hover:scale-105'
               }`}
           >
             {getRoomIcon(scene.name)}

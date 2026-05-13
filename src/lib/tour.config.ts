@@ -1,7 +1,7 @@
 import { TourConfig } from './tour-types';
 
 // ╔══════════════════════════════════════════════════════════════════════╗
-// ║  MIES 360 — CONFIGURACIÓN DEL RECORRIDO VIRTUAL                    ║
+// ║  NEXARQ 360 — CONFIGURACIÓN DEL RECORRIDO VIRTUAL                    ║
 // ║                                                                    ║
 // ║  📋 INSTRUCCIONES:                                                 ║
 // ║  1. Edita los edificios y apartamentos en la sección "buildings"   ║
@@ -20,22 +20,22 @@ const tourConfig: TourConfig = {
   //  MARCA / BRAND
   // ─────────────────────────────────────────────────────────────────
   brand: {
-    name: 'MIES 360',
+    name: 'NEXARQ 360',
     tagline: 'Recorrido Virtual Arquitectónico',
     logo: '',
     website: '',
   },
 
   // ─────────────────────────────────────────────────────────────────
-  //  TEMA VISUAL — Blanco y Negro
+  //  TEMA VISUAL — Negro y Dorado Premium
   // ─────────────────────────────────────────────────────────────────
   theme: {
-    primary: '#ffffff',
-    secondary: '#888888',
-    panelBg: 'rgba(0, 0, 0, 0.75)',
+    primary: '#D4AF37',
+    secondary: '#B8962E',
+    panelBg: 'rgba(0, 0, 0, 0.80)',
     textPrimary: '#ffffff',
     textMuted: 'rgba(255, 255, 255, 0.45)',
-    borderColor: 'rgba(255, 255, 255, 0.12)',
+    borderColor: 'rgba(212, 175, 55, 0.15)',
     fontFamily: "'Inter', system-ui, -apple-system, sans-serif",
   },
 

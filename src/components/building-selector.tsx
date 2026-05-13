@@ -2,8 +2,10 @@
 
 import { useState } from 'react';
 import { useTourStore } from '@/lib/tour-store';
-import { Building2, Bed, Bath, Maximize2, Eye, ArrowLeft, ArrowRight } from 'lucide-react';
+import { Building2, Bed, Bath, Maximize2, Eye, ArrowRight } from 'lucide-react';
 import type { BuildingConfig, ApartmentConfig } from '@/lib/tour-types';
+
+const GOLD = '#D4AF37';
 
 export default function BuildingSelector() {
   const { config, setApartment } = useTourStore();
@@ -25,17 +27,20 @@ export default function BuildingSelector() {
           className="w-full h-full object-cover"
         />
         {/* Dark overlay for readability */}
-        <div className="absolute inset-0 bg-black/40" />
+        <div className="absolute inset-0 bg-black/50" />
       </div>
 
       {/* ── Top header bar ── */}
       <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-6 py-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-white/10 backdrop-blur-xl border border-white/15 flex items-center justify-center">
-            <Building2 size={20} className="text-white" />
+          <div
+            className="w-10 h-10 rounded-xl backdrop-blur-xl border flex items-center justify-center"
+            style={{ background: `${GOLD}15`, borderColor: `${GOLD}30` }}
+          >
+            <Building2 size={20} style={{ color: GOLD }} />
           </div>
           <div>
-            <h1 className="text-xl font-extrabold text-white tracking-tight">
+            <h1 className="text-xl font-extrabold tracking-tight" style={{ color: GOLD }}>
               {config.brand.name}
             </h1>
             <p className="text-[11px] text-white/50 font-medium">
@@ -53,9 +58,13 @@ export default function BuildingSelector() {
                 onClick={() => setSelectedBuilding(b)}
                 className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
                   currentBuilding.id === b.id
-                    ? 'bg-white text-black'
-                    : 'bg-white/10 text-white/70 backdrop-blur-sm border border-white/10 hover:bg-white/20'
+                    ? 'text-black'
+                    : 'text-white/60 backdrop-blur-sm border border-white/10 hover:bg-white/10'
                 }`}
+                style={{
+                  background: currentBuilding.id === b.id ? GOLD : 'rgba(255,255,255,0.06)',
+                  borderColor: currentBuilding.id === b.id ? GOLD : 'rgba(255,255,255,0.1)',
+                }}
               >
                 {b.name}
               </button>
@@ -81,11 +90,11 @@ export default function BuildingSelector() {
 
       {/* ── Bottom panel: apartment list ── */}
       <div className="absolute bottom-0 left-0 right-0 z-10">
-        <div className="bg-gradient-to-t from-black/80 via-black/60 to-transparent pt-16 pb-6 px-6">
+        <div className="bg-gradient-to-t from-black/90 via-black/70 to-transparent pt-16 pb-6 px-6">
           <div className="max-w-5xl mx-auto">
             {/* Section title */}
             <div className="flex items-center justify-between mb-4">
-              <p className="text-xs font-bold text-white/40 uppercase tracking-widest">
+              <p className="text-xs font-bold uppercase tracking-widest" style={{ color: `${GOLD}99` }}>
                 Apartamentos Disponibles
               </p>
               <p className="text-xs text-white/30">
@@ -131,16 +140,12 @@ function BuildingHotspot({
   onLeave: () => void;
   onClick: () => void;
 }) {
-  // Position hotspots based on floor and position
-  // Floor 0 = bottom, higher floors go up
+  const GOLD = '#D4AF37';
   const floors = building.floors;
   const aptPerFloor = building.apartmentsPerFloor;
 
-  // Horizontal: spread across center (50-90% of width)
   const baseX = aptPerFloor === 1 ? 50 : apt.position === 0 ? 38 : 62;
-  // Vertical: bottom floor at 65%, top floor at 30%
   const baseY = 65 - (apt.floor / (floors - 1 || 1)) * 35;
-
   const isPH = apt.name.toLowerCase().includes('ph');
 
   return (
@@ -157,8 +162,9 @@ function BuildingHotspot({
     >
       {/* Pulse ring */}
       <div
-        className="absolute -inset-3 rounded-full border-2 border-white/50"
+        className="absolute -inset-3 rounded-full border-2"
         style={{
+          borderColor: `${GOLD}80`,
           animation: 'building-pulse 2.5s ease-out infinite',
         }}
       />
@@ -169,10 +175,10 @@ function BuildingHotspot({
           isHovered ? 'scale-125' : ''
         }`}
         style={{
-          background: isHovered ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.7)',
+          background: isHovered ? GOLD : `${GOLD}BB`,
           boxShadow: isHovered
-            ? '0 0 30px rgba(255,255,255,0.5)'
-            : '0 0 15px rgba(255,255,255,0.25)',
+            ? `0 0 30px ${GOLD}80`
+            : `0 0 15px ${GOLD}40`,
         }}
       >
         <Eye size={18} className="text-black" />
@@ -186,9 +192,9 @@ function BuildingHotspot({
           transform: isHovered ? 'translate(-50%, 0)' : 'translate(-50%, 4px)',
         }}
       >
-        <div className="bg-black/80 backdrop-blur-xl border border-white/15 rounded-lg px-3 py-1.5">
+        <div className="bg-black/80 backdrop-blur-xl border rounded-lg px-3 py-1.5" style={{ borderColor: `${GOLD}25` }}>
           <p className="text-xs font-bold text-white">{apt.name}</p>
-          {isPH && <p className="text-[9px] text-white/50 font-semibold">PENTHOUSE</p>}
+          {isPH && <p className="text-[9px] font-semibold" style={{ color: `${GOLD}99` }}>PENTHOUSE</p>}
         </div>
       </div>
 
@@ -219,6 +225,7 @@ function ApartmentCard({
   onLeave: () => void;
   onSelect: () => void;
 }) {
+  const GOLD = '#D4AF37';
   const isPH = apt.name.toLowerCase().includes('ph');
 
   return (
@@ -226,14 +233,21 @@ function ApartmentCard({
       onClick={onSelect}
       onMouseEnter={onHover}
       onMouseLeave={onLeave}
-      className={`relative flex-shrink-0 w-56 bg-white/[0.06] backdrop-blur-xl border rounded-2xl p-4 text-left transition-all duration-300 cursor-pointer ${
+      className={`relative flex-shrink-0 w-56 backdrop-blur-xl border rounded-2xl p-4 text-left transition-all duration-300 cursor-pointer ${
         isHovered
-          ? 'bg-white/[0.12] border-white/30 -translate-y-1'
-          : 'border-white/10 hover:bg-white/[0.08] hover:border-white/15'
+          ? '-translate-y-1'
+          : 'hover:-translate-y-0.5'
       }`}
+      style={{
+        background: isHovered ? `${GOLD}12` : 'rgba(255,255,255,0.04)',
+        borderColor: isHovered ? `${GOLD}50` : 'rgba(255,255,255,0.08)',
+      }}
     >
       {isPH && (
-        <div className="absolute top-2 right-2 px-2 py-0.5 rounded-md bg-white/15 text-[9px] font-bold text-white/60 uppercase tracking-wider">
+        <div
+          className="absolute top-2 right-2 px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider"
+          style={{ background: `${GOLD}20`, color: `${GOLD}CC` }}
+        >
           PH
         </div>
       )}
@@ -241,7 +255,7 @@ function ApartmentCard({
       <h4 className="text-sm font-bold text-white mb-0.5">{apt.name}</h4>
       <p className="text-[11px] text-white/35 mb-3">{apt.description}</p>
 
-      <div className="flex items-center gap-3 text-[11px] text-white/50">
+      <div className="flex items-center gap-3 text-[11px]" style={{ color: `${GOLD}88` }}>
         <span className="flex items-center gap-1">
           <Bed size={12} /> {apt.bedrooms}
         </span>
@@ -253,7 +267,7 @@ function ApartmentCard({
         </span>
       </div>
 
-      <div className="mt-3 flex items-center gap-1.5 text-[11px] font-semibold text-white group-hover:gap-2.5 transition-all">
+      <div className="mt-3 flex items-center gap-1.5 text-[11px] font-semibold" style={{ color: GOLD }}>
         <Eye size={13} />
         Recorrido 360°
         <ArrowRight size={13} className="ml-auto" />

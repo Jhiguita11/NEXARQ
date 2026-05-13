@@ -18,7 +18,7 @@ export default function FloorPlan() {
 
   const [expanded, setExpanded] = useState(false);
 
-  const primary = '#ffffff';
+  const primary = '#D4AF37';
 
   const currentScene = selectedApartment?.scenes?.find((s) => s.id === currentSceneId);
   const currentSceneName = currentScene?.name ?? '';
@@ -126,9 +126,10 @@ export default function FloorPlan() {
 
       {/* Floor plan container */}
       <div
-        className="fixed z-[9999] flex flex-col items-center justify-end overflow-hidden rounded-2xl border border-white/20 shadow-2xl backdrop-blur-xl transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)]"
+        className="fixed z-[9999] flex flex-col items-center justify-end overflow-hidden rounded-2xl border shadow-2xl backdrop-blur-xl transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)]"
         style={{
-          background: 'rgba(15, 23, 42, 0.72)',
+          background: 'rgba(10, 10, 10, 0.78)',
+          borderColor: 'rgba(212, 175, 55, 0.2)',
           ...(expanded
             ? {
                 bottom: 24,
@@ -150,9 +151,9 @@ export default function FloorPlan() {
         {/* Header bar */}
         <div className="flex w-full items-center justify-between mb-2">
           <div className="flex items-center gap-1.5">
-            <MapPin size={expanded ? 16 : 13} className="text-white/70" />
+            <MapPin size={expanded ? 16 : 13} className="text-[#D4AF37]/70" />
             <span
-              className="font-semibold tracking-wide text-white/80 select-none"
+              className="font-semibold tracking-wide text-[#D4AF37]/80 select-none"
               style={{ fontSize: expanded ? 13 : 11 }}
             >
               Floor Plan
@@ -162,7 +163,7 @@ export default function FloorPlan() {
             {/* Close button */}
             <button
               onClick={toggleFloorPlan}
-              className="flex items-center justify-center rounded-lg p-1.5 text-white/60 transition-colors hover:bg-white/10 hover:text-white/90"
+              className="flex items-center justify-center rounded-lg p-1.5 text-white/60 transition-colors hover:bg-[rgba(212,175,55,0.1)] hover:text-white/90"
               aria-label="Close floor plan"
             >
               <svg
@@ -181,7 +182,7 @@ export default function FloorPlan() {
             {/* Expand / Collapse */}
             <button
               onClick={toggleExpand}
-              className="flex items-center justify-center rounded-lg p-1.5 text-white/60 transition-colors hover:bg-white/10 hover:text-white/90"
+              className="flex items-center justify-center rounded-lg p-1.5 text-white/60 transition-colors hover:bg-[rgba(212,175,55,0.1)] hover:text-white/90"
               aria-label={expanded ? 'Collapse floor plan' : 'Expand floor plan'}
             >
               {expanded ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
@@ -267,8 +268,8 @@ export default function FloorPlan() {
                     height={rh}
                     rx={radius}
                     ry={radius}
-                    fill={isCurrent ? primary : 'rgba(255,255,255,0.08)'}
-                    stroke={isCurrent ? primary : 'rgba(255,255,255,0.18)'}
+                    fill={isCurrent ? primary : 'rgba(212,175,55,0.08)'}
+                    stroke={isCurrent ? primary : 'rgba(212,175,55,0.18)'}
                     strokeWidth={isCurrent ? 2 : 1}
                     filter={isCurrent ? 'url(#fp-glow)' : undefined}
                     className="transition-all duration-300"
@@ -282,7 +283,7 @@ export default function FloorPlan() {
                     height={rh}
                     rx={radius}
                     ry={radius}
-                    fill="rgba(255,255,255,0.06)"
+                    fill="rgba(212,175,55,0.06)"
                     className="opacity-0 hover:opacity-100 transition-opacity duration-200 pointer-events-none"
                   />
                   {/* Label text */}
@@ -291,7 +292,7 @@ export default function FloorPlan() {
                     y={center.cy - (isCurrent ? 10 : 0)}
                     textAnchor="middle"
                     dominantBaseline="central"
-                    fill={isCurrent ? '#ffffff' : 'rgba(255,255,255,0.6)'}
+                    fill={isCurrent ? '#D4AF37' : 'rgba(212,175,55,0.6)'}
                     fontSize={fontSize}
                     fontWeight={isCurrent ? 700 : 500}
                     className="pointer-events-none select-none"
@@ -313,7 +314,7 @@ export default function FloorPlan() {
                       <circle
                         cx={center.cx}
                         cy={center.cy + 10}
-                        fill="#ffffff"
+                        fill="#D4AF37"
                         className="fp-pulse-dot"
                       />
                     </g>
