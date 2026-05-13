@@ -2,9 +2,9 @@ import { TourData } from './tour-types';
 
 export const defaultTour: TourData = {
   id: 'tour-1',
-  name: 'Residencia Verdant',
-  description: 'Recorrido virtual 360° - Apartamento de lujo',
-  brandName: 'Constructora Melendez',
+  name: 'MIES 360',
+  description: 'Recorrido virtual arquitectónico 360°',
+  brandName: 'MIES 360',
   autoRotate: true,
   autoRotateSpeed: -2,
   showFloorPlan: true,
@@ -43,7 +43,7 @@ export const defaultTour: TourData = {
           pitch: -5,
           yaw: 170,
           type: 'info',
-          text: 'Bienvenido a Residencia Verdant. Un apartamento de lujo con acabados premium y vistas panorámicas.',
+          text: 'Bienvenido a MIES 360. Explore cada espacio de este proyecto arquitectónico con nuestro recorrido virtual inmersivo.',
           color: '#3b82f6',
           icon: 'info',
         },

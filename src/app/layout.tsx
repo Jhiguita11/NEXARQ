@@ -14,16 +14,16 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Recorrido Virtual 360° | Constructora Melendez",
-  description: "Recorrido virtual arquitectónico 360° - Residencia Verdant. Explore cada espacio de nuestro proyecto inmobiliario de lujo con tecnología panorámica interactiva.",
-  keywords: ["recorrido 360", "tour virtual", "arquitectura", "inmobiliaria", "panorámica", "constructora"],
-  authors: [{ name: "Constructora Melendez" }],
+  title: "MIES 360 | Recorrido Virtual Arquitectónico",
+  description: "Explore cada espacio del proyecto arquitectónico MIES 360 con tecnología panorámica interactiva 360°.",
+  keywords: ["MIES 360", "recorrido 360", "tour virtual", "arquitectura", "panorámica", "inmobiliaria"],
+  authors: [{ name: "MIES 360" }],
   icons: {
     icon: "https://z-cdn.chatglm.cn/z-ai/static/logo.svg",
   },
   openGraph: {
-    title: "Recorrido Virtual 360° | Residencia Verdant",
-    description: "Explore cada espacio de nuestro proyecto inmobiliario de lujo con tecnología panorámica interactiva.",
+    title: "MIES 360 | Recorrido Virtual Arquitectónico",
+    description: "Explore cada espacio del proyecto arquitectónico MIES 360 con tecnología panorámica interactiva 360°.",
     type: "website",
   },
 };
