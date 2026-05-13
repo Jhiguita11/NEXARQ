@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import React, { useCallback } from 'react'
 import {
   ChevronLeft,
   ChevronRight,
@@ -28,7 +28,6 @@ interface TourControlsProps {
 
 export default function TourControls({ viewerRef }: TourControlsProps) {
   const selectedApartment = useTourStore((s) => s.selectedApartment)
-  const primary = useTourStore((s) => s.config.theme.primary)
   const currentSceneIndex = useTourStore((s) => s.currentSceneIndex)
   const isFullscreen = useTourStore((s) => s.isFullscreen)
   const showFloorPlan = useTourStore((s) => s.showFloorPlan)
@@ -44,185 +43,156 @@ export default function TourControls({ viewerRef }: TourControlsProps) {
   const currentScene = scenes[currentSceneIndex]
   const totalScenes = scenes.length
 
-  // ---------- Handlers ----------
+  const handlePrev = useCallback(() => prevScene(), [prevScene])
+  const handleNext = useCallback(() => nextScene(), [nextScene])
 
-  const handleHome = () => {
-    const scene = scenes[currentSceneIndex]
-    if (!scene?.defaultView) return
-    viewerRef.current?.lookAt(
-      scene.defaultView.pitch,
-      scene.defaultView.yaw,
-      scene.defaultView.hfov,
-    )
-  }
+  const handleSceneDot = useCallback(
+    (index: number) => {
+      const scene = scenes[index]
+      if (scene) setCurrentScene(scene.id)
+    },
+    [scenes, setCurrentScene],
+  )
 
-  const handleZoomIn = () => {
-    const hfov = viewerRef.current?.getHfov() ?? 100
-    viewerRef.current?.lookAt(undefined, undefined, Math.max(30, hfov - 15))
-  }
-
-  const handleZoomOut = () => {
-    const hfov = viewerRef.current?.getHfov() ?? 100
-    viewerRef.current?.lookAt(undefined, undefined, Math.min(150, hfov + 15))
-  }
-
-  const handlePrev = () => prevScene()
-  const handleNext = () => nextScene()
-  const handleSceneDot = (index: number) => {
-    const scene = scenes[index]
-    if (scene) setCurrentScene(scene.id)
-  }
-
-  // ---------- Shared button class ----------
-
-  const btnBase = `relative flex items-center justify-center w-10 h-10 rounded-lg transition-all duration-200 cursor-pointer select-none
-    bg-white/10 backdrop-blur-sm border border-white/10
-    hover:bg-white/20 hover:border-white/20 hover:scale-105
-    active:scale-95 text-white/70 hover:text-white`
-
-  const btnActive = (active: boolean) =>
-    active ? `!bg-[var(--tw-primary-opacity,${primary}22)] !text-[${primary}] !border-[${primary}44]` : ''
-
-  const separator = <div className="w-px h-5 bg-white/15 mx-0.5" />
+  const btnBase = 'w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 cursor-pointer select-none'
+  const btnDefault = `${btnBase} bg-black/40 backdrop-blur-md border border-white/8 text-white/50 hover:text-white hover:bg-black/60 hover:border-white/15 hover:scale-105 active:scale-95`
+  const btnActive = `${btnBase} bg-white text-black`
 
   return (
-    <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center gap-2.5 w-[calc(100%-2rem)] max-w-lg">
-      {/* ─── Scene Navigation Bar ─── */}
+    <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center gap-2">
+      {/* ─── Scene Dots Strip ─── */}
       <div
-        className="flex items-center gap-3 px-4 py-3 rounded-2xl w-full justify-between
-          bg-black/30 backdrop-blur-xl border border-white/10 shadow-lg shadow-black/20"
+        className="flex items-center gap-2 px-4 py-2 rounded-full
+          bg-black/30 backdrop-blur-md border border-white/8"
       >
-        {/* Prev */}
+        {/* Prev arrow */}
         <button
           onClick={handlePrev}
           disabled={currentSceneIndex === 0}
-          className={`flex items-center justify-center w-9 h-9 rounded-lg transition-all duration-200 cursor-pointer select-none
-            bg-white/10 border border-white/10 text-white/70 hover:text-white hover:bg-white/20 hover:scale-105 active:scale-95
-            disabled:opacity-30 disabled:pointer-events-none`}
-          aria-label="Previous scene"
+          className={`${btnDefault} disabled:opacity-25 disabled:pointer-events-none`}
+          aria-label="Anterior"
+          title="Anterior"
         >
-          <ChevronLeft size={18} />
+          <ChevronLeft size={14} />
         </button>
 
-        {/* Dots + label */}
-        <div className="flex flex-col items-center gap-1.5 flex-1 min-w-0">
-          <div className="flex items-center gap-1.5">
-            {scenes.map((scene, i) => {
-              const isActive = i === currentSceneIndex
-              return (
-                <button
-                  key={scene.id}
-                  onClick={() => handleSceneDot(i)}
-                  className="rounded-full transition-all duration-300 cursor-pointer outline-none border-0 p-0"
-                  style={{
-                    width: isActive ? 28 : 10,
-                    height: 10,
-                    backgroundColor: isActive ? primary : 'rgba(255,255,255,0.35)',
-                    borderRadius: 9999,
-                    boxShadow: isActive ? `0 0 10px ${primary}66` : 'none',
-                  }}
-                  aria-label={`Go to ${scene.name}`}
-                  title={scene.name}
-                />
-              )
-            })}
-          </div>
-          <span className="text-[11px] text-white/50 font-medium tracking-wide truncate max-w-full">
-            {currentScene?.name ?? ''}&nbsp;&middot;&nbsp;{currentSceneIndex + 1}/{totalScenes}
-          </span>
+        {/* Dots */}
+        <div className="flex items-center gap-1">
+          {scenes.map((scene, i) => {
+            const isActive = i === currentSceneIndex
+            return (
+              <button
+                key={scene.id}
+                onClick={() => handleSceneDot(i)}
+                title={scene.name}
+                className="rounded-full transition-all duration-300 cursor-pointer outline-none border-0 p-0"
+                style={{
+                  width: isActive ? 22 : 7,
+                  height: 7,
+                  backgroundColor: isActive ? '#ffffff' : 'rgba(255,255,255,0.3)',
+                }}
+              />
+            )
+          })}
         </div>
 
-        {/* Next */}
+        {/* Next arrow */}
         <button
           onClick={handleNext}
           disabled={currentSceneIndex === totalScenes - 1}
-          className={`flex items-center justify-center w-9 h-9 rounded-lg transition-all duration-200 cursor-pointer select-none
-            bg-white/10 border border-white/10 text-white/70 hover:text-white hover:bg-white/20 hover:scale-105 active:scale-95
-            disabled:opacity-30 disabled:pointer-events-none`}
-          aria-label="Next scene"
+          className={`${btnDefault} disabled:opacity-25 disabled:pointer-events-none`}
+          aria-label="Siguiente"
+          title="Siguiente"
         >
-          <ChevronRight size={18} />
+          <ChevronRight size={14} />
         </button>
+
+        {/* Divider */}
+        <div className="w-px h-4 bg-white/15 mx-0.5" />
+
+        {/* Scene label */}
+        <span className="text-[11px] text-white/50 font-medium tracking-wide whitespace-nowrap tabular-nums">
+          {currentScene?.name ?? ''}&nbsp;&middot;&nbsp;{currentSceneIndex + 1}/{totalScenes}
+        </span>
       </div>
 
-      {/* ─── Controls Bar ─── */}
+      {/* ─── Controls Strip ─── */}
       <div
-        className="flex items-center gap-1.5 px-3 py-2 rounded-2xl
-          bg-black/30 backdrop-blur-xl border border-white/10 shadow-lg shadow-black/20"
+        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full
+          bg-black/30 backdrop-blur-md border border-white/8"
       >
         {/* Home */}
         <button
-          onClick={handleHome}
-          className={`${btnBase}`}
-          aria-label="Reset camera"
-          title="Reset view"
+          onClick={() => {
+            const scene = scenes[currentSceneIndex]
+            if (!scene?.defaultView) return
+            viewerRef.current?.lookAt(scene.defaultView.pitch, scene.defaultView.yaw, scene.defaultView.hfov)
+          }}
+          className={btnDefault}
+          title="Restablecer vista"
         >
-          <Home size={18} />
+          <Home size={14} />
         </button>
 
         {/* Auto-rotate */}
         <button
           onClick={toggleAutoRotate}
-          className={`${btnBase} ${btnActive(autoRotate)}`}
-          aria-label="Toggle auto-rotate"
-          title="Auto-rotate"
+          className={autoRotate ? btnActive : btnDefault}
+          title="Auto-rotar"
         >
           <RotateCcw
-            size={18}
+            size={14}
             className={autoRotate ? 'animate-spin' : ''}
             style={autoRotate ? { animationDuration: '3s' } : undefined}
           />
         </button>
 
-        {separator}
+        <div className="w-px h-4 bg-white/15" />
 
         {/* Zoom out */}
         <button
-          onClick={handleZoomOut}
-          className={`${btnBase}`}
-          aria-label="Zoom out"
-          title="Zoom out"
+          onClick={() => {
+            const hfov = viewerRef.current?.getHfov() ?? 100
+            viewerRef.current?.lookAt(undefined, undefined, Math.min(150, hfov + 15))
+          }}
+          className={btnDefault}
+          title="Alejar"
         >
-          <ZoomOut size={18} />
+          <ZoomOut size={14} />
         </button>
 
         {/* Zoom in */}
         <button
-          onClick={handleZoomIn}
-          className={`${btnBase}`}
-          aria-label="Zoom in"
-          title="Zoom in"
+          onClick={() => {
+            const hfov = viewerRef.current?.getHfov() ?? 100
+            viewerRef.current?.lookAt(undefined, undefined, Math.max(30, hfov - 15))
+          }}
+          className={btnDefault}
+          title="Acercar"
         >
-          <ZoomIn size={18} />
+          <ZoomIn size={14} />
         </button>
 
-        {separator}
+        <div className="w-px h-4 bg-white/15" />
 
         {/* Floor plan */}
         <button
           onClick={toggleFloorPlan}
-          className={`${btnBase} ${btnActive(showFloorPlan)}`}
-          aria-label="Toggle floor plan"
-          title="Floor plan"
+          className={showFloorPlan ? btnActive : btnDefault}
+          title="Plano"
         >
-          <MapPin size={18} />
+          <MapPin size={14} />
         </button>
-
-        {separator}
 
         {/* Fullscreen */}
         <button
           onClick={toggleFullscreen}
-          className={`${btnBase} ${btnActive(isFullscreen)}`}
-          aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
-          title={isFullscreen ? 'Exit fullscreen' : 'Fullscreen'}
+          className={isFullscreen ? btnActive : btnDefault}
+          title={isFullscreen ? 'Salir pantalla completa' : 'Pantalla completa'}
         >
-          {isFullscreen ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
+          {isFullscreen ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
         </button>
       </div>
-
-      {/* ─── Mobile responsive overrides ─── */}
-
     </div>
   )
 }
