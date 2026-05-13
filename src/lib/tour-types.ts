@@ -1,56 +1,120 @@
-export interface HotspotData {
+// ─── Theme Configuration ──────────────────────────────────────────────
+export interface ThemeConfig {
+  /** Primary accent color (hex) — used for highlights, buttons, active states */
+  primary: string;
+  /** Secondary accent color (hex) */
+  secondary: string;
+  /** Background overlay color for panels */
+  panelBg: string;
+  /** Text color on panels */
+  textPrimary: string;
+  /** Muted text color */
+  textMuted: string;
+  /** Border color for panels */
+  borderColor: string;
+  /** CSS font family string */
+  fontFamily: string;
+}
+
+// ─── Hotspot ──────────────────────────────────────────────────────────
+export interface HotspotConfig {
+  /** Unique ID */
   id: string;
+  /** Vertical angle (-90 to 90) */
   pitch: number;
+  /** Horizontal angle (-180 to 180) */
   yaw: number;
+  /** Hotspot type */
   type: 'scene' | 'info' | 'url';
-  text: string;
-  targetSceneId?: string;
-  url?: string;
-  color?: string;
-  icon?: string;
-}
-
-export interface SceneData {
-  id: string;
-  name: string;
-  panoramaUrl: string;
-  hotspots: HotspotData[];
-  mapPosition: { x: number; y: number };
-  defaultView: { pitch: number; yaw: number; hfov: number };
+  /** Display text / tooltip label */
+  label: string;
+  /** Description (shown in info panel) */
   description?: string;
+  /** Target scene ID (for type="scene") */
+  targetSceneId?: string;
+  /** External URL (for type="url") */
+  url?: string;
 }
 
-export interface FloorPlanRoom {
+// ─── Scene ────────────────────────────────────────────────────────────
+export interface SceneConfig {
+  /** Unique scene ID */
   id: string;
-  sceneId: string;
+  /** Display name */
   name: string;
+  /** Path to equirectangular panorama image */
+  panorama: string;
+  /** Brief description */
+  description: string;
+  /** Thumbnail image path (optional, falls back to panorama) */
+  thumbnail?: string;
+  /** Default camera view */
+  defaultView: {
+    pitch: number;  // -90 to 90
+    yaw: number;    // -180 to 180
+    hfov: number;   // 30 to 120 (field of view)
+  };
+  /** Hotspots in this scene */
+  hotspots: HotspotConfig[];
+}
+
+// ─── Floor Plan Room ─────────────────────────────────────────────────
+export interface FloorPlanRoomConfig {
+  /** Unique room ID */
+  id: string;
+  /** Which scene this room maps to */
+  sceneId: string;
+  /** Label shown on the floor plan */
+  label: string;
+  /** Room rectangle position/size (in SVG units) */
   x: number;
   y: number;
   width: number;
   height: number;
-  fillColor: string;
-  strokeColor: string;
-  labelColor?: string;
+  /** Room fill color (CSS) */
+  fill: string;
+  /** Room stroke/border color (CSS) */
+  stroke: string;
 }
 
-export interface FloorPlanData {
+// ─── Floor Plan ───────────────────────────────────────────────────────
+export interface FloorPlanConfig {
+  /** SVG viewBox width */
   width: number;
+  /** SVG viewBox height */
   height: number;
-  bgColor: string;
-  rooms: FloorPlanRoom[];
-  connections?: { from: string; to: string }[];
+  /** Background color */
+  background: string;
+  /** Rooms to draw */
+  rooms: FloorPlanRoomConfig[];
 }
 
-export interface TourData {
-  id: string;
+// ─── Brand Config ─────────────────────────────────────────────────────
+export interface BrandConfig {
+  /** Brand / company name */
   name: string;
-  description: string;
-  brandLogo?: string;
-  brandName?: string;
-  scenes: SceneData[];
-  floorPlan: FloorPlanData;
-  autoRotate: boolean;
+  /** Tagline shown on welcome screen */
+  tagline: string;
+  /** Logo image path (or empty string for none) */
+  logo: string;
+  /** Primary URL (for links) */
+  website?: string;
+}
+
+// ─── Tour Config (ROOT) ──────────────────────────────────────────────
+export interface TourConfig {
+  /** Brand information */
+  brand: BrandConfig;
+  /** Visual theme */
+  theme: ThemeConfig;
+  /** Ordered list of scenes */
+  scenes: SceneConfig[];
+  /** Floor plan configuration */
+  floorPlan: FloorPlanConfig;
+  /** Auto-rotate speed (0 = off, negative = clockwise) */
   autoRotateSpeed: number;
+  /** Show floor plan by default */
   showFloorPlan: boolean;
-  showControls: boolean;
+  /** Show welcome screen on load */
+  showWelcome: boolean;
 }

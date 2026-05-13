@@ -1,256 +1,337 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { MapPin, Maximize2, Minimize2 } from 'lucide-react';
 import { useTourStore } from '@/lib/tour-store';
-import { FloorPlanRoom } from '@/lib/tour-types';
-import {
-  MapPin,
-  ChevronUp,
-  Maximize2,
-  Minimize2,
-  Eye,
-} from 'lucide-react';
+import type { FloorPlanRoomConfig } from '@/lib/tour-types';
 
-export function FloorPlan() {
-  const {
-    tour,
-    currentSceneId,
-    setCurrentScene,
-    showFloorPlan,
-    toggleFloorPlan,
-    isEditMode,
-    updateFloorPlanRoom,
-  } = useTourStore();
+export default function FloorPlan() {
+  const config = useTourStore((s) => s.config);
+  const currentSceneId = useTourStore((s) => s.currentSceneId);
+  const showFloorPlan = useTourStore((s) => s.showFloorPlan);
+  const toggleFloorPlan = useTourStore((s) => s.toggleFloorPlan);
+  const setCurrentScene = useTourStore((s) => s.setCurrentScene);
 
-  const [isExpanded, setIsExpanded] = useState(false);
-  const [draggingRoom, setDraggingRoom] = useState<string | null>(null);
-  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
-  const svgRef = useRef<SVGSVGElement>(null);
+  const [expanded, setExpanded] = useState(false);
 
-  const currentScene = tour.scenes.find(s => s.id === currentSceneId);
-  const currentRoom = tour.floorPlan.rooms.find(r => r.sceneId === currentSceneId);
+  const primary = config?.theme?.primary ?? '#4f86f7';
+  const floorPlan = config?.floorPlan;
+  const rooms: FloorPlanRoomConfig[] = floorPlan?.rooms ?? [];
+
+  const currentScene = config?.scenes?.find((s) => s.id === currentSceneId);
+  const currentSceneName = currentScene?.name ?? '';
+
+  const handleRoomClick = useCallback(
+    (sceneId: string) => {
+      setCurrentScene(sceneId);
+    },
+    [setCurrentScene],
+  );
+
+  const toggleExpand = useCallback(() => {
+    setExpanded((prev) => !prev);
+  }, []);
+
+  // Close on Escape
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && expanded) {
+        setExpanded(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [expanded]);
 
   if (!showFloorPlan) return null;
 
-  const handleRoomClick = (room: FloorPlanRoom) => {
-    if (!isEditMode) {
-      setCurrentScene(room.sceneId);
+  const svgWidth = expanded ? 900 : 230;
+  const svgHeight = expanded ? 600 : 170;
+
+  // Scale rooms proportionally
+  const planW = floorPlan?.width ?? 900;
+  const planH = floorPlan?.height ?? 600;
+  const scaleX = svgWidth / planW;
+  const scaleY = svgHeight / planH;
+
+  // Build a map of sceneId → room for adjacency lookups
+  const roomMap = new Map<string, FloorPlanRoomConfig>();
+  for (const room of rooms) {
+    roomMap.set(room.sceneId, room);
+  }
+
+  // Collect unique connection pairs (undirected)
+  const connectionPairs = new Set<string>();
+  const connections: [FloorPlanRoomConfig, FloorPlanRoomConfig][] = [];
+
+  for (const room of rooms) {
+    const adjacent = room.adjacentTo ?? [];
+    for (const adjId of adjacent) {
+      const key = [room.sceneId, adjId].sort().join('::');
+      if (!connectionPairs.has(key)) {
+        connectionPairs.add(key);
+        const adjRoom = roomMap.get(adjId);
+        if (adjRoom) {
+          connections.push([room, adjRoom]);
+        }
+      }
     }
-  };
+  }
 
-  const handleMouseDown = (e: React.MouseEvent, roomId: string) => {
-    if (!isEditMode) return;
-    e.stopPropagation();
-    const svg = svgRef.current;
-    if (!svg) return;
+  // Helper: get room center
+  const getCenter = (room: FloorPlanRoomConfig) => ({
+    cx: room.x * scaleX + (room.width * scaleX) / 2,
+    cy: room.y * scaleY + (room.height * scaleY) / 2,
+  });
 
-    const rect = svg.getBoundingClientRect();
-    const room = tour.floorPlan.rooms.find(r => r.id === roomId);
-    if (!room) return;
-
-    setDraggingRoom(roomId);
-    setDragOffset({
-      x: e.clientX - rect.left - room.x,
-      y: e.clientY - rect.top - room.y,
-    });
-  };
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!draggingRoom || !svgRef.current) return;
-    const rect = svgRef.current.getBoundingClientRect();
-    const newX = Math.max(0, Math.min(e.clientX - rect.left - dragOffset.x, 280));
-    const newY = Math.max(0, Math.min(e.clientY - rect.top - dragOffset.y, 240));
-
-    updateFloorPlanRoom(draggingRoom, { x: newX, y: newY });
-
-    // Also update scene map position
-    const room = tour.floorPlan.rooms.find(r => r.id === draggingRoom);
-    if (room) {
-      const { tour: currentTour } = useTourStore.getState();
-      const updatedScenes = currentTour.scenes.map(scene =>
-        scene.id === room.sceneId
-          ? { ...scene, mapPosition: { x: newX + room.width / 2, y: newY + room.height / 2 } }
-          : scene
-      );
-      useTourStore.setState({ tour: { ...currentTour, scenes: updatedScenes } });
-    }
-  };
-
-  const handleMouseUp = () => {
-    setDraggingRoom(null);
-  };
-
-  const roomColor = (roomId: string) => {
-    if (roomId === currentRoom?.id) return 'rgba(16, 185, 129, 0.5)';
-    return 'rgba(255, 255, 255, 0.12)';
-  };
-
-  const roomStroke = (roomId: string) => {
-    if (roomId === currentRoom?.id) return '#10b981';
-    return 'rgba(255, 255, 255, 0.35)';
+  // Helper: clamp text inside room
+  const getFontSize = (room: FloorPlanRoomConfig) => {
+    const roomScaledW = room.width * scaleX;
+    const roomScaledH = room.height * scaleY;
+    const minDim = Math.min(roomScaledW, roomScaledH);
+    // Scale font between 8px and 14px
+    return Math.max(8, Math.min(14, minDim * 0.18));
   };
 
   return (
-    <div className={`fixed z-40 transition-all duration-300 ${isExpanded ? 'inset-4 md:inset-8' : 'bottom-20 right-3 md:bottom-24 md:right-4'}`}>
-      {/* Toggle Button */}
-      {!isExpanded && (
-        <button
-          onClick={() => setIsExpanded(true)}
-          className="absolute -top-10 right-0 bg-black/60 hover:bg-black/80 text-white p-2 rounded-lg backdrop-blur-sm transition-colors"
-          title="Expandir plano"
-        >
-          <Maximize2 size={16} />
-        </button>
+    <>
+      {/* Keyframe styles for pulse animation */}
+      <style>{`
+        @keyframes fp-pulse-ring {
+          0% { r: 4; opacity: 1; }
+          100% { r: 12; opacity: 0; }
+        }
+        @keyframes fp-pulse-dot {
+          0%, 100% { r: 3.5; opacity: 1; }
+          50% { r: 4.5; opacity: 0.85; }
+        }
+        .fp-pulse-ring {
+          animation: fp-pulse-ring 1.8s ease-out infinite;
+        }
+        .fp-pulse-dot {
+          animation: fp-pulse-dot 1.8s ease-in-out infinite;
+        }
+      `}</style>
+
+      {/* Overlay backdrop when expanded */}
+      {expanded && (
+        <div
+          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[9998] transition-opacity duration-300"
+          onClick={toggleExpand}
+          aria-hidden
+        />
       )}
 
-      {isExpanded && (
-        <button
-          onClick={() => setIsExpanded(false)}
-          className="absolute -top-10 right-0 bg-black/60 hover:bg-black/80 text-white p-2 rounded-lg backdrop-blur-sm transition-colors z-50"
-          title="Minimizar plano"
-        >
-          <Minimize2 size={16} />
-        </button>
-      )}
-
+      {/* Floor plan container */}
       <div
-        className={`bg-black/60 backdrop-blur-md rounded-xl border border-white/10 overflow-hidden transition-all duration-300 ${
-          isExpanded ? 'w-full h-full' : 'w-64 h-56 md:w-72 md:h-64'
-        }`}
+        className="fixed z-[9999] flex flex-col items-center justify-end overflow-hidden rounded-2xl border border-white/20 shadow-2xl backdrop-blur-xl transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)]"
+        style={{
+          background: 'rgba(15, 23, 42, 0.72)',
+          ...(expanded
+            ? {
+                bottom: 24,
+                left: '50%',
+                transform: 'translateX(-50%)',
+                width: `min(calc(100vw - 48px), 960px)`,
+                height: `min(calc(100vh - 48px), 720px)`,
+                padding: 20,
+              }
+            : {
+                bottom: 16,
+                right: 16,
+                width: 260,
+                height: 230,
+                padding: 14,
+              }),
+        }}
       >
-        {/* Header */}
-        <div className="flex items-center justify-between px-3 py-2 border-b border-white/10">
-          <div className="flex items-center gap-2">
-            <MapPin size={14} className="text-emerald-400" />
-            <span className="text-white/90 text-xs font-medium">Plano Interactivo</span>
-          </div>
-          {isEditMode && (
-            <span className="text-[10px] text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded-full">
-              EDITANDO
+        {/* Header bar */}
+        <div className="flex w-full items-center justify-between mb-2">
+          <div className="flex items-center gap-1.5">
+            <MapPin size={expanded ? 16 : 13} className="text-white/70" />
+            <span
+              className="font-semibold tracking-wide text-white/80 select-none"
+              style={{ fontSize: expanded ? 13 : 11 }}
+            >
+              Floor Plan
             </span>
-          )}
+          </div>
+          <div className="flex items-center gap-1">
+            {/* Close button */}
+            <button
+              onClick={toggleFloorPlan}
+              className="flex items-center justify-center rounded-lg p-1.5 text-white/60 transition-colors hover:bg-white/10 hover:text-white/90"
+              aria-label="Close floor plan"
+            >
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 14 14"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+              >
+                <line x1="2" y1="2" x2="12" y2="12" />
+                <line x1="12" y1="2" x2="2" y2="12" />
+              </svg>
+            </button>
+            {/* Expand / Collapse */}
+            <button
+              onClick={toggleExpand}
+              className="flex items-center justify-center rounded-lg p-1.5 text-white/60 transition-colors hover:bg-white/10 hover:text-white/90"
+              aria-label={expanded ? 'Collapse floor plan' : 'Expand floor plan'}
+            >
+              {expanded ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
+            </button>
+          </div>
         </div>
 
-        {/* SVG Floor Plan */}
-        <div className="relative p-2 flex items-center justify-center" style={{ height: isExpanded ? 'calc(100% - 36px)' : 'auto' }}>
+        {/* SVG floor plan */}
+        <div className="flex-1 w-full min-h-0">
           <svg
-            ref={svgRef}
-            viewBox={`0 0 ${tour.floorPlan.width} ${tour.floorPlan.height}`}
-            className={`w-full h-full ${isEditMode ? 'cursor-grab' : 'cursor-pointer'}`}
-            onMouseMove={handleMouseMove}
-            onMouseUp={handleMouseUp}
-            onMouseLeave={handleMouseUp}
+            viewBox={`0 0 ${svgWidth} ${svgHeight}`}
+            className="w-full h-full"
+            preserveAspectRatio="xMidYMid meet"
           >
-            {/* Background */}
-            <rect
-              width={tour.floorPlan.width}
-              height={tour.floorPlan.height}
-              fill={tour.floorPlan.bgColor}
-              rx="8"
-            />
+            {/* Defs: glow filter */}
+            <defs>
+              <filter id="fp-glow" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur" />
+                <feMerge>
+                  <feMergeNode in="blur" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+            </defs>
 
-            {/* Connections */}
-            {tour.floorPlan.connections?.map((conn, i) => {
-              const fromRoom = tour.floorPlan.rooms.find(r => r.id === conn.from);
-              const toRoom = tour.floorPlan.rooms.find(r => r.id === conn.to);
-              if (!fromRoom || !toRoom) return null;
+            {/* Background fill for the plan area */}
+            {(floorPlan?.background ?? '') !== '' && (
+              <rect
+                x={0}
+                y={0}
+                width={svgWidth}
+                height={svgHeight}
+                rx={8}
+                fill={floorPlan?.background ?? 'transparent'}
+                opacity={0.4}
+              />
+            )}
+
+            {/* Connection lines (dashed) */}
+            {connections.map(([a, b], idx) => {
+              const aC = getCenter(a);
+              const bC = getCenter(b);
               return (
                 <line
-                  key={i}
-                  x1={fromRoom.x + fromRoom.width / 2}
-                  y1={fromRoom.y + fromRoom.height / 2}
-                  x2={toRoom.x + toRoom.width / 2}
-                  y2={toRoom.y + toRoom.height / 2}
-                  stroke="rgba(255,255,255,0.15)"
-                  strokeWidth="2"
-                  strokeDasharray="4,4"
+                  key={`conn-${idx}`}
+                  x1={aC.cx}
+                  y1={aC.cy}
+                  x2={bC.cx}
+                  y2={bC.cy}
+                  stroke={primary}
+                  strokeWidth={expanded ? 1.5 : 1}
+                  strokeDasharray="6 4"
+                  opacity={0.35}
                 />
               );
             })}
 
             {/* Rooms */}
-            {tour.floorPlan.rooms.map(room => (
-              <g
-                key={room.id}
-                onClick={() => handleRoomClick(room)}
-                onMouseDown={(e) => handleMouseDown(e, room.id)}
-                className="transition-all duration-200"
-              >
-                <rect
-                  x={room.x}
-                  y={room.y}
-                  width={room.width}
-                  height={room.height}
-                  fill={roomColor(room.id)}
-                  stroke={roomStroke(room.id)}
-                  strokeWidth={room.id === currentRoom?.id ? 2 : 1}
-                  rx="4"
-                  className="transition-all duration-200 hover:fill-white/25"
-                />
-                <text
-                  x={room.x + room.width / 2}
-                  y={room.y + room.height / 2 + 1}
-                  textAnchor="middle"
-                  dominantBaseline="middle"
-                  fill={room.id === currentRoom?.id ? '#10b981' : 'rgba(255,255,255,0.7)'}
-                  fontSize="11"
-                  fontWeight={room.id === currentRoom?.id ? 'bold' : 'normal'}
-                  className="pointer-events-none select-none"
-                  style={{ fontFamily: 'inherit' }}
-                >
-                  {room.name}
-                </text>
-              </g>
-            ))}
+            {rooms.map((room) => {
+              const isCurrent = room.sceneId === currentSceneId;
+              const rx = room.x * scaleX;
+              const ry = room.y * scaleY;
+              const rw = room.width * scaleX;
+              const rh = room.height * scaleY;
+              const radius = expanded ? 8 : 5;
+              const center = getCenter(room);
+              const fontSize = getFontSize(room);
 
-            {/* Current Position Indicator */}
-            {currentRoom && (
-              <>
-                <circle
-                  cx={currentRoom.x + currentRoom.width / 2}
-                  cy={currentRoom.y + currentRoom.height / 2}
-                  r="6"
-                  fill="#10b981"
-                  className="animate-pulse"
-                />
-                <circle
-                  cx={currentRoom.x + currentRoom.width / 2}
-                  cy={currentRoom.y + currentRoom.height / 2}
-                  r="10"
-                  fill="none"
-                  stroke="#10b981"
-                  strokeWidth="1.5"
-                  className="animate-ping opacity-50"
-                />
-              </>
-            )}
-
-            {/* Hotspot indicators on floor plan */}
-            {currentScene?.hotspots.map((hs, i) => {
-              if (hs.type !== 'scene') return null;
-              const targetRoom = tour.floorPlan.rooms.find(r => r.sceneId === hs.targetSceneId);
-              if (!targetRoom) return null;
               return (
-                <circle
-                  key={i}
-                  cx={targetRoom.x + targetRoom.width / 2}
-                  cy={targetRoom.y + targetRoom.height / 2}
-                  r="3"
-                  fill="#3b82f6"
-                  opacity="0.7"
-                />
+                <g
+                  key={room.sceneId}
+                  className="cursor-pointer"
+                  onClick={() => handleRoomClick(room.sceneId)}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`Go to ${room.label}`}
+                >
+                  {/* Room rectangle */}
+                  <rect
+                    x={rx}
+                    y={ry}
+                    width={rw}
+                    height={rh}
+                    rx={radius}
+                    ry={radius}
+                    fill={isCurrent ? primary : 'rgba(255,255,255,0.08)'}
+                    stroke={isCurrent ? primary : 'rgba(255,255,255,0.18)'}
+                    strokeWidth={isCurrent ? 2 : 1}
+                    filter={isCurrent ? 'url(#fp-glow)' : undefined}
+                    className="transition-all duration-300"
+                    style={{ opacity: isCurrent ? 0.9 : 0.7 }}
+                  />
+                  {/* Hover overlay */}
+                  <rect
+                    x={rx}
+                    y={ry}
+                    width={rw}
+                    height={rh}
+                    rx={radius}
+                    ry={radius}
+                    fill="rgba(255,255,255,0.06)"
+                    className="opacity-0 hover:opacity-100 transition-opacity duration-200 pointer-events-none"
+                  />
+                  {/* Label text */}
+                  <text
+                    x={center.cx}
+                    y={center.cy - (isCurrent ? 10 : 0)}
+                    textAnchor="middle"
+                    dominantBaseline="central"
+                    fill={isCurrent ? '#ffffff' : 'rgba(255,255,255,0.6)'}
+                    fontSize={fontSize}
+                    fontWeight={isCurrent ? 700 : 500}
+                    className="pointer-events-none select-none"
+                    style={{ letterSpacing: 0.3 }}
+                  >
+                    {room.label}
+                  </text>
+                  {/* Pulsing dot for current room */}
+                  {isCurrent && (
+                    <g className="pointer-events-none">
+                      <circle
+                        cx={center.cx}
+                        cy={center.cy + 10}
+                        fill="none"
+                        stroke={primary}
+                        strokeWidth={1.5}
+                        className="fp-pulse-ring"
+                      />
+                      <circle
+                        cx={center.cx}
+                        cy={center.cy + 10}
+                        fill="#ffffff"
+                        className="fp-pulse-dot"
+                      />
+                    </g>
+                  )}
+                </g>
               );
             })}
           </svg>
         </div>
 
-        {/* Room name bar */}
-        <div className="absolute bottom-2 left-2 right-2 bg-black/70 backdrop-blur-sm rounded-lg px-3 py-1.5 text-center">
-          <span className="text-emerald-400 text-xs font-semibold">
-            {currentScene?.name}
+        {/* Current scene name */}
+        <div className="mt-2 w-full text-center">
+          <span
+            className="block truncate font-medium tracking-wide text-white/50 select-none"
+            style={{ fontSize: expanded ? 12 : 10 }}
+          >
+            {currentSceneName}
           </span>
         </div>
       </div>
-    </div>
+    </>
   );
 }
