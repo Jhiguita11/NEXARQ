@@ -75,6 +75,8 @@ export interface FloorPlanRoomConfig {
   fill: string;
   /** Room stroke/border color (CSS) */
   stroke: string;
+  /** Adjacent room scene IDs for connection lines */
+  adjacentTo?: string[];
 }
 
 // ─── Floor Plan ───────────────────────────────────────────────────────

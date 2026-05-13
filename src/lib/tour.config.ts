@@ -247,12 +247,12 @@ const tourConfig: TourConfig = {
     height: 260,
     background: 'rgba(0, 0, 0, 0.6)',
     rooms: [
-      { id: 'fp-entrada',   sceneId: 'entrada',   label: 'Entrada',   x: 100, y: 100, width: 70,  height: 50, fill: 'rgba(255,255,255,0.08)', stroke: 'rgba(255,255,255,0.2)' },
-      { id: 'fp-sala',      sceneId: 'sala',      label: 'Sala',      x: 90,  y: 30,  width: 90,  height: 65, fill: 'rgba(255,255,255,0.08)', stroke: 'rgba(255,255,255,0.2)' },
-      { id: 'fp-cocina',    sceneId: 'cocina',    label: 'Cocina',    x: 5,   y: 25,  width: 80,  height: 65, fill: 'rgba(255,255,255,0.08)', stroke: 'rgba(255,255,255,0.2)' },
-      { id: 'fp-dormitorio',sceneId: 'dormitorio',label: 'Dorm.',     x: 90,  y: 165, width: 90,  height: 55, fill: 'rgba(255,255,255,0.08)', stroke: 'rgba(255,255,255,0.2)' },
-      { id: 'fp-bano',      sceneId: 'bano',      label: 'Baño',     x: 190, y: 165, width: 70,  height: 55, fill: 'rgba(255,255,255,0.08)', stroke: 'rgba(255,255,255,0.2)' },
-      { id: 'fp-terraza',   sceneId: 'terraza',   label: 'Terraza',  x: 190, y: 30,  width: 75,  height: 65, fill: 'rgba(255,255,255,0.08)', stroke: 'rgba(255,255,255,0.2)' },
+      { id: 'fp-entrada',   sceneId: 'entrada',   label: 'Entrada',   x: 100, y: 100, width: 70,  height: 50, fill: 'rgba(255,255,255,0.08)', stroke: 'rgba(255,255,255,0.2)', adjacentTo: ['sala', 'dormitorio'] },
+      { id: 'fp-sala',      sceneId: 'sala',      label: 'Sala',      x: 90,  y: 30,  width: 90,  height: 65, fill: 'rgba(255,255,255,0.08)', stroke: 'rgba(255,255,255,0.2)', adjacentTo: ['entrada', 'cocina', 'terraza'] },
+      { id: 'fp-cocina',    sceneId: 'cocina',    label: 'Cocina',    x: 5,   y: 25,  width: 80,  height: 65, fill: 'rgba(255,255,255,0.08)', stroke: 'rgba(255,255,255,0.2)', adjacentTo: ['sala'] },
+      { id: 'fp-dormitorio',sceneId: 'dormitorio',label: 'Dorm.',     x: 90,  y: 165, width: 90,  height: 55, fill: 'rgba(255,255,255,0.08)', stroke: 'rgba(255,255,255,0.2)', adjacentTo: ['entrada', 'bano'] },
+      { id: 'fp-bano',      sceneId: 'bano',      label: 'Baño',     x: 190, y: 165, width: 70,  height: 55, fill: 'rgba(255,255,255,0.08)', stroke: 'rgba(255,255,255,0.2)', adjacentTo: ['dormitorio'] },
+      { id: 'fp-terraza',   sceneId: 'terraza',   label: 'Terraza',  x: 190, y: 30,  width: 75,  height: 65, fill: 'rgba(255,255,255,0.08)', stroke: 'rgba(255,255,255,0.2)', adjacentTo: ['sala'] },
     ],
   },
 
