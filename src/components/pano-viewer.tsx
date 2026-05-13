@@ -55,8 +55,8 @@ const HOTSPOT_CSS = `
   justify-content: center;
   font-size: 16px;
   font-weight: 700;
-  color: #fff;
-  border: 2px solid rgba(255,255,255,.35);
+  color: #000;
+  border: 2px solid rgba(255,255,255,.5);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   position: relative;
@@ -64,34 +64,34 @@ const HOTSPOT_CSS = `
               box-shadow .25s cubic-bezier(.4,0,.2,1);
 }
 
-/* Type: scene – green */
+/* Type: scene – white */
 .pano-hotspot--scene {
-  background: rgba(34,197,94,.65);
-  box-shadow: 0 0 12px rgba(34,197,94,.35);
+  background: rgba(255,255,255,.7);
+  box-shadow: 0 0 12px rgba(255,255,255,.25);
 }
 .pano-hotspot--scene:hover {
   transform: scale(1.15);
-  box-shadow: 0 0 24px rgba(34,197,94,.55);
+  box-shadow: 0 0 24px rgba(255,255,255,.45);
 }
 
-/* Type: info – blue */
+/* Type: info – white */
 .pano-hotspot--info {
-  background: rgba(59,130,246,.65);
-  box-shadow: 0 0 12px rgba(59,130,246,.35);
+  background: rgba(255,255,255,.45);
+  box-shadow: 0 0 12px rgba(255,255,255,.2);
 }
 .pano-hotspot--info:hover {
   transform: scale(1.15);
-  box-shadow: 0 0 24px rgba(59,130,246,.55);
+  box-shadow: 0 0 24px rgba(255,255,255,.4);
 }
 
-/* Type: url – purple */
+/* Type: url – white */
 .pano-hotspot--url {
-  background: rgba(168,85,247,.65);
-  box-shadow: 0 0 12px rgba(168,85,247,.35);
+  background: rgba(255,255,255,.45);
+  box-shadow: 0 0 12px rgba(255,255,255,.2);
 }
 .pano-hotspot--url:hover {
   transform: scale(1.15);
-  box-shadow: 0 0 24px rgba(168,85,247,.55);
+  box-shadow: 0 0 24px rgba(255,255,255,.4);
 }
 
 /* ── Pulse ring (scene hotspots only) ──────────────────────────── */
@@ -100,7 +100,7 @@ const HOTSPOT_CSS = `
   position: absolute;
   inset: -6px;
   border-radius: 50%;
-  border: 2px solid rgba(34,197,94,.6);
+  border: 2px solid rgba(255,255,255,.5);
   animation: pano-pulse 2s ease-out infinite;
 }
 
@@ -230,7 +230,8 @@ const PanoViewer = forwardRef<PanoViewerHandle, PanoViewerProps>(
     const transitionLock = useRef(false);
 
     /* ── Store ─────────────────────────────────────────────────── */
-    const scenes = useTourStore((s) => s.config.scenes);
+    const selectedApartment = useTourStore((s) => s.selectedApartment);
+    const scenes = selectedApartment?.scenes ?? [];
     const currentSceneId = useTourStore((s) => s.currentSceneId);
     const autoRotate = useTourStore((s) => s.autoRotate);
     const autoRotateSpeed = useTourStore((s) => s.config.autoRotateSpeed);

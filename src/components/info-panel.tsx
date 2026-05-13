@@ -52,7 +52,7 @@ export default function InfoPanel() {
           {/* Icon circle */}
           <div
             className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
-            style={{ backgroundColor: primary }}
+            style={{ backgroundColor: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.2)' }}
           >
             <Info className="w-5 h-5 text-white" />
           </div>

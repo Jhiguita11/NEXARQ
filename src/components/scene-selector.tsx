@@ -7,13 +7,15 @@ import { useCallback, useEffect, useRef } from 'react';
 export default function SceneSelector() {
   const {
     config,
+    selectedApartment,
     currentSceneId,
     showSceneList,
     toggleSceneList,
     setCurrentScene,
   } = useTourStore();
 
-  const { scenes, brand, theme } = config;
+  const scenes = selectedApartment?.scenes ?? [];
+  const { brand, theme } = config;
   const primary = theme.primary;
   const panelRef = useRef<HTMLDivElement>(null);
 

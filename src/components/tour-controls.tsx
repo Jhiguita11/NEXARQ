@@ -28,9 +28,8 @@ interface TourControlsProps {
 }
 
 export default function TourControls({ viewerRef }: TourControlsProps) {
-  const scenes = useTourStore((s) => s.config.scenes)
+  const selectedApartment = useTourStore((s) => s.selectedApartment)
   const primary = useTourStore((s) => s.config.theme.primary)
-  const secondary = useTourStore((s) => s.config.theme.secondary)
   const currentSceneIndex = useTourStore((s) => s.currentSceneIndex)
   const isFullscreen = useTourStore((s) => s.isFullscreen)
   const showFloorPlan = useTourStore((s) => s.showFloorPlan)
@@ -44,6 +43,7 @@ export default function TourControls({ viewerRef }: TourControlsProps) {
   const prevScene = useTourStore((s) => s.prevScene)
   const setCurrentScene = useTourStore((s) => s.setCurrentScene)
 
+  const scenes = selectedApartment?.scenes ?? []
   const currentScene = scenes[currentSceneIndex]
   const totalScenes = scenes.length
 

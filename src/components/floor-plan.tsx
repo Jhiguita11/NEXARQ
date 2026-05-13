@@ -7,18 +7,20 @@ import type { FloorPlanRoomConfig } from '@/lib/tour-types';
 
 export default function FloorPlan() {
   const config = useTourStore((s) => s.config);
+  const selectedApartment = useTourStore((s) => s.selectedApartment);
   const currentSceneId = useTourStore((s) => s.currentSceneId);
   const showFloorPlan = useTourStore((s) => s.showFloorPlan);
   const toggleFloorPlan = useTourStore((s) => s.toggleFloorPlan);
   const setCurrentScene = useTourStore((s) => s.setCurrentScene);
 
-  const [expanded, setExpanded] = useState(false);
-
-  const primary = config?.theme?.primary ?? '#4f86f7';
-  const floorPlan = config?.floorPlan;
+  const floorPlan = selectedApartment?.floorPlan;
   const rooms: FloorPlanRoomConfig[] = floorPlan?.rooms ?? [];
 
-  const currentScene = config?.scenes?.find((s) => s.id === currentSceneId);
+  const [expanded, setExpanded] = useState(false);
+
+  const primary = '#ffffff';
+
+  const currentScene = selectedApartment?.scenes?.find((s) => s.id === currentSceneId);
   const currentSceneName = currentScene?.name ?? '';
 
   const handleRoomClick = useCallback(
