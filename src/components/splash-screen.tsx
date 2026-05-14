@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { assetPath } from '@/lib/asset-path';
 
 interface SplashScreenProps {
   onComplete: () => void;
@@ -27,13 +28,13 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
         position: 'fixed',
         inset: 0,
         zIndex: 9999,
-        background: '#fff',
+        background: '#000',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
         opacity: phase === 'exit' ? 0 : 1,
-        transition: phase === 'exit' ? 'opacity 0.7s ease' : 'none',
+        transition: phase === 'exit' ? 'opacity 0.9s cubic-bezier(0.4,0,0.2,1)' : 'none',
         pointerEvents: phase === 'exit' ? 'none' : 'all',
       }}
     >
@@ -82,7 +83,7 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
         }}
       >
         <img
-          src="/logo-transparent.png"
+          src={assetPath('/logo-transparent.png')}
           alt="NEXARQ 360"
           style={{
             width: 240,
@@ -90,6 +91,7 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
             position: 'relative',
             zIndex: 1,
             display: 'block',
+            filter: 'brightness(0) invert(1)',
           }}
           draggable={false}
         />
@@ -124,7 +126,7 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
       <p
         style={{
           marginTop: 20,
-          color: 'rgba(180,145,20,0.8)',
+          color: 'rgba(212,175,55,0.85)',
           fontSize: 11,
           letterSpacing: '0.25em',
           textTransform: 'uppercase',

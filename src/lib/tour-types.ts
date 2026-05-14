@@ -84,6 +84,9 @@ export interface ApartmentConfig {
   bathrooms: number;
   /** Area in m² */
   area: number;
+  /** Optional hotspot position override (% of building image) */
+  hotspotX?: number;
+  hotspotY?: number;
   /** Scenes for this apartment */
   scenes: SceneConfig[];
   /** Floor plan for this apartment */

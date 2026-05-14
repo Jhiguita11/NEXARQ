@@ -51,6 +51,11 @@
 
 .pnlm-container {
   font-family: var(--font-inter), system-ui, sans-serif !important;
+  background: #000 !important;
+}
+
+.pnlm-render-container canvas {
+  background: #000 !important;
 }
 
 .pnlm-controls-container,
@@ -191,13 +196,20 @@
    SCENE TRANSITION OVERLAY
    ═══════════════════════════════════════════════════════════════════ */
 
+@keyframes selectorFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
 .scene-transition-overlay {
   position: absolute;
   inset: 0;
-  background: #000;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
   z-index: 20;
   pointer-events: none;
-  transition: opacity 0.45s ease;
+  transition: opacity 0.55s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* ═══════════════════════════════════════════════════════════════════

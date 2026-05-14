@@ -10,6 +10,7 @@ import {
 } from 'react';
 import type { HotspotConfig } from '@/lib/tour-types';
 import { useTourStore } from '@/lib/tour-store';
+import { assetPath } from '@/lib/asset-path';
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -37,81 +38,125 @@ interface PanoViewerProps {
 /* ------------------------------------------------------------------ */
 
 const HOTSPOT_CSS = `
-.pnlm-hotspot-base { cursor: pointer; z-index: 10; }
+/* Neutralize Pannellum's default 26×26 dark hotspot circle */
+.pnlm-hotspot-base {
+  background: transparent !important;
+  border: none !important;
+  width: auto !important;
+  height: auto !important;
+  overflow: visible !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  cursor: pointer;
+  z-index: 10;
+}
+.pnlm-hotspot-base::before,
+.pnlm-hotspot-base::after {
+  display: none !important;
+}
 
 /* ── Bubble wrapper ───────────────────────────────────────────── */
 .pano-bubble {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 7px;
+  gap: 10px;
   cursor: pointer;
   user-select: none;
+  animation: bubble-float 3.2s ease-in-out infinite;
+  transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1);
+}
+
+.pano-bubble:hover {
+  transform: scale(1.15) translateY(-4px);
+  animation-play-state: paused;
+}
+
+/* ── Pulse rings (behind circle) ─────────────────────────────── */
+.pano-bubble-rings {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  pointer-events: none;
+}
+.pano-bubble-rings::before,
+.pano-bubble-rings::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  border: 2px solid rgba(212,175,55,0.45);
+  animation: bubble-pulse 2.8s ease-out infinite;
+}
+.pano-bubble-rings::before {
+  inset: -10px;
+}
+.pano-bubble-rings::after {
+  inset: -20px;
+  border-color: rgba(212,175,55,0.22);
+  animation-delay: 0.5s;
 }
 
 /* ── Icon circle ─────────────────────────────────────────────── */
 .pano-bubble-circle {
-  width: 50px;
-  height: 50px;
+  width: 68px;
+  height: 68px;
   border-radius: 50%;
-  background: rgba(255,255,255,0.18);
-  border: 1.5px solid rgba(255,255,255,0.6);
+  background: radial-gradient(135deg at 35% 35%, rgba(240,208,80,0.95), rgba(180,138,20,0.92));
+  border: 2px solid rgba(255,220,80,0.7);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #fff;
+  color: rgba(0,0,0,0.75);
   position: relative;
-  animation: bubble-float 3s ease-in-out infinite;
-  box-shadow: 0 6px 24px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.25);
-  transition: transform .2s ease, background .2s ease;
-}
-
-.pano-bubble-circle::before {
-  content: '';
-  position: absolute;
-  inset: -9px;
-  border-radius: 50%;
-  border: 1.5px solid rgba(255,255,255,0.22);
-  animation: bubble-pulse 2.6s ease-out infinite;
+  box-shadow:
+    0 0 0 1px rgba(212,175,55,0.3),
+    0 8px 32px rgba(212,175,55,0.45),
+    0 2px 8px rgba(0,0,0,0.5),
+    inset 0 1px 0 rgba(255,255,255,0.4);
+  transition: box-shadow 0.25s ease, background 0.25s ease;
 }
 
 .pano-bubble:hover .pano-bubble-circle {
-  transform: scale(1.12) translateY(-2px);
-  background: rgba(255,255,255,0.28);
-}
-
-/* ── Info variant — gold ─────────────────────────────────────── */
-.pano-bubble-info .pano-bubble-circle {
-  background: rgba(212,175,55,0.22);
-  border-color: rgba(212,175,55,0.7);
-  animation-delay: 1.3s;
-}
-.pano-bubble-info .pano-bubble-circle::before {
-  border-color: rgba(212,175,55,0.28);
+  box-shadow:
+    0 0 0 2px rgba(212,175,55,0.6),
+    0 12px 48px rgba(212,175,55,0.65),
+    0 4px 16px rgba(0,0,0,0.5),
+    inset 0 1px 0 rgba(255,255,255,0.5);
+  background: radial-gradient(135deg at 35% 35%, rgba(255,225,100,1), rgba(200,158,30,0.98));
 }
 
 /* ── Room name pill ──────────────────────────────────────────── */
 .pano-bubble-label {
-  background: rgba(0,0,0,0.62);
-  border: 1px solid rgba(255,255,255,0.18);
-  border-radius: 20px;
-  padding: 3px 12px;
-  font-size: 11px;
-  font-weight: 600;
+  background: rgba(0,0,0,0.72);
+  border: 1px solid rgba(212,175,55,0.35);
+  border-radius: 24px;
+  padding: 5px 16px;
+  font-size: 12px;
+  font-weight: 700;
   color: rgba(255,255,255,0.95);
   white-space: nowrap;
-  letter-spacing: 0.04em;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.45), 0 0 0 1px rgba(212,175,55,0.1);
+  backdrop-filter: blur(8px);
+}
+
+/* ── Info variant ────────────────────────────────────────────── */
+.pano-bubble-info .pano-bubble-circle {
+  background: radial-gradient(135deg at 35% 35%, rgba(212,175,55,0.3), rgba(140,110,20,0.25));
+  border-color: rgba(212,175,55,0.6);
+  color: rgba(212,175,55,0.9);
+  animation-delay: 1.3s;
 }
 
 /* ── Animations ──────────────────────────────────────────────── */
 @keyframes bubble-float {
-  0%,100% { transform: translateY(0px); }
-  50%      { transform: translateY(-8px); }
+  0%,100% { transform: translateY(0px);  }
+  50%      { transform: translateY(-9px); }
 }
 @keyframes bubble-pulse {
-  0%   { transform: scale(1);   opacity: 0.75; }
-  100% { transform: scale(1.75); opacity: 0; }
+  0%   { transform: scale(1);    opacity: 0.7; }
+  100% { transform: scale(1.85); opacity: 0;   }
 }
 
 /* ── Fade overlay for scene transitions ──────────────────────── */
@@ -176,11 +221,22 @@ function buildHotspotDiv(hs: HotspotConfig): HTMLDivElement {
 
   const circle = document.createElement('div');
   circle.className = 'pano-bubble-circle';
-  circle.innerHTML = roomIcon(hs.label ?? '', hs.type);
+
+  // Pulse rings behind the circle
+  const rings = document.createElement('div');
+  rings.className = 'pano-bubble-rings';
+  circle.appendChild(rings);
+
+  // Icon (bigger: 26px)
+  const iconWrapper = document.createElement('div');
+  iconWrapper.style.cssText = 'position:relative;z-index:1;display:flex;align-items:center;justify-content:center;';
+  iconWrapper.innerHTML = roomIcon(hs.label ?? '', hs.type).replace(/width="20" height="20"/, 'width="26" height="26"');
+  circle.appendChild(iconWrapper);
+
   wrapper.appendChild(circle);
 
-  // Show room name pill only for navigation hotspots
-  if (hs.type === 'scene' && hs.label) {
+  // Label pill for all hotspot types
+  if (hs.label) {
     const pill = document.createElement('div');
     pill.className = 'pano-bubble-label';
     pill.textContent = hs.label;
@@ -296,7 +352,10 @@ const PanoViewer = forwardRef<PanoViewerHandle, PanoViewerProps>(
             pitch: hs.pitch,
             yaw: hs.yaw,
             type: 'custom' as const,
-            createTooltipFunc: () => buildHotspotDiv(hs),
+            createTooltipFunc: (hotSpotDiv: HTMLElement) => {
+              hotSpotDiv.style.cssText = 'cursor:pointer;';
+              hotSpotDiv.appendChild(buildHotspotDiv(hs));
+            },
             clickHandlerFunc: () => {
               onHotspotClick?.(hs);
             },
@@ -306,19 +365,16 @@ const PanoViewer = forwardRef<PanoViewerHandle, PanoViewerProps>(
         return {
           type: 'equirectangular',
           panorama: scene.panorama,
-          default: {
-            ...scene.defaultView,
-            autoRotate: autoRotate ? autoRotateSpeed : 0,
-            autoRotateInactivityDelay: autoRotate ? 2000 : 0,
-            compass: false,
-            showZoomCtrl: false,
-            showFullscreenCtrl: false,
-            mouseZoom: true,
-            hfov: scene.defaultView?.hfov ?? 120,
-            pitch: scene.defaultView?.pitch ?? 0,
-            yaw: scene.defaultView?.yaw ?? 0,
-          },
-          hotspots,
+          pitch: scene.defaultView?.pitch ?? 0,
+          yaw: scene.defaultView?.yaw ?? 0,
+          hfov: scene.defaultView?.hfov ?? 100,
+          autoRotate: autoRotate ? autoRotateSpeed : 0,
+          autoRotateInactivityDelay: autoRotate ? 2000 : 0,
+          compass: false,
+          showZoomCtrl: false,
+          showFullscreenCtrl: false,
+          mouseZoom: true,
+          hotSpots: hotspots,
           autoLoad: true,
           showControls: false,
           draggable: true,
@@ -380,22 +436,35 @@ const PanoViewer = forwardRef<PanoViewerHandle, PanoViewerProps>(
         return;
       }
 
-      // Fade out → switch → fade in
+      // Fade out → switch → wait for Pannellum load → fade in
       transitionLock.current = true;
       setTransitioning(true);
       requestAnimationFrame(() => setFadeOpacity(1));
 
-      const FADE_DURATION = 450; // match CSS transition
+      const FADE_DURATION = 550;
 
       setTimeout(() => {
         initViewer(currentSceneId);
 
-        // Allow render, then fade in
-        requestAnimationFrame(() => {
-          setFadeOpacity(0);
-          setTransitioning(false);
-          transitionLock.current = false;
-        });
+        const doFadeIn = () => {
+          requestAnimationFrame(() => {
+            setFadeOpacity(0);
+            setTransitioning(false);
+            transitionLock.current = false;
+          });
+        };
+
+        const viewer = viewerRef.current;
+        if (viewer) {
+          // Safety fallback in case the load event never fires
+          const fallback = setTimeout(doFadeIn, 5000);
+          viewer.on('load', () => {
+            clearTimeout(fallback);
+            doFadeIn();
+          });
+        } else {
+          doFadeIn();
+        }
       }, FADE_DURATION);
     }, [scriptReady, currentSceneId, initViewer, setTransitioning]);
 
@@ -442,6 +511,25 @@ const PanoViewer = forwardRef<PanoViewerHandle, PanoViewerProps>(
       },
     }));
 
+    /* ── Debug overlay state ───────────────────────────────────── */
+    const [debugCoords, setDebugCoords] = useState<{ yaw: number; pitch: number } | null>(null);
+    const debugEnabled = typeof window !== 'undefined' && window.location.search.includes('debug=1');
+
+    useEffect(() => {
+      if (!debugEnabled) return;
+      const interval = setInterval(() => {
+        if (viewerRef.current) {
+          try {
+            setDebugCoords({
+              yaw: Math.round(viewerRef.current.getYaw() * 10) / 10,
+              pitch: Math.round(viewerRef.current.getPitch() * 10) / 10,
+            });
+          } catch { /* ignore */ }
+        }
+      }, 200);
+      return () => clearInterval(interval);
+    }, [debugEnabled]);
+
     /* ── Render ────────────────────────────────────────────────── */
     return (
       <div
@@ -473,41 +561,35 @@ const PanoViewer = forwardRef<PanoViewerHandle, PanoViewerProps>(
           aria-hidden
         />
 
+        {/* Debug coordinates overlay */}
+        {debugEnabled && debugCoords && (
+          <div style={{
+            position: 'absolute', bottom: 80, left: '50%', transform: 'translateX(-50%)',
+            background: 'rgba(0,0,0,0.8)', border: '1px solid rgba(212,175,55,0.4)',
+            borderRadius: 8, padding: '6px 14px', zIndex: 200, pointerEvents: 'none',
+            fontFamily: 'monospace', fontSize: 13, color: '#D4AF37', whiteSpace: 'nowrap',
+          }}>
+            yaw: <b>{debugCoords.yaw}</b> &nbsp;·&nbsp; pitch: <b>{debugCoords.pitch}</b>
+          </div>
+        )}
+
         {/* Loading state */}
         {!scriptReady && (
-          <div
-            style={{
-              position: 'absolute',
-              inset: 0,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 16,
-              zIndex: 100,
-              background: '#0a0a0a',
-            }}
-          >
-            <div
-              style={{
-                width: 48,
-                height: 48,
-                border: `3px solid rgba(${hexToRgb(themePrimary ?? '#3b82f6')}, .2)`,
-                borderTopColor: themePrimary ?? '#3b82f6',
-                borderRadius: '50%',
-                animation: 'pano-spin 1s linear infinite',
-              }}
-            />
-            <span
-              style={{
-                color: '#94a3b8',
-                fontSize: 14,
-                fontWeight: 500,
-              }}
-            >
-              Loading viewer…
-            </span>
-            <style>{`@keyframes pano-spin { to { transform: rotate(360deg) } }`}</style>
+          <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 0, zIndex: 100, background: '#000' }}>
+            <img src={assetPath('/logo-transparent.png')} alt="NEXARQ 360" style={{ width: 180, height: 'auto', filter: 'brightness(0) invert(1)', display: 'block' }} draggable={false} />
+            <div style={{ position: 'relative', width: 36, height: 36, marginTop: 28, marginBottom: 20 }}>
+              <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', border: '2px solid transparent', borderTopColor: '#D4AF37', animation: 'pano-spin 1.2s linear infinite' }} />
+              <div style={{ position: 'absolute', inset: 4, borderRadius: '50%', border: '2px solid transparent', borderTopColor: 'rgba(212,175,55,0.3)', animation: 'pano-spin 1.8s linear infinite reverse' }} />
+            </div>
+            <div style={{ display: 'flex', gap: 6 }}>
+              {[0,1,2].map(i => (
+                <div key={i} style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: '#D4AF37', animation: `pano-pulse 1.4s ease-in-out ${i*0.2}s infinite` }} />
+              ))}
+            </div>
+            <style>{`
+              @keyframes pano-spin { to { transform: rotate(360deg) } }
+              @keyframes pano-pulse { 0%,100%{opacity:0.4} 50%{opacity:1} }
+            `}</style>
           </div>
         )}
       </div>

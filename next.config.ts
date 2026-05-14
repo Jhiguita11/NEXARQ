@@ -1,15 +1,21 @@
 import type { NextConfig } from "next";
 
+const isProd = process.env.NODE_ENV === "production";
+const repoName = "NEXARQ";
+
 const nextConfig: NextConfig = {
-  output: "standalone",
+  output: "export",
+  basePath: isProd ? `/${repoName}` : "",
+  assetPrefix: isProd ? `/${repoName}/` : "",
+  trailingSlash: true,
   typescript: {
     ignoreBuildErrors: true,
   },
   reactStrictMode: false,
   devIndicators: false,
-  allowedDevOrigins: [
-    "preview-chat-f8a73ff9-3482-4619-8282-f00f87dc885f.space-z.ai",
-  ],
+  images: {
+    unoptimized: true,
+  },
 };
 
 export default nextConfig;

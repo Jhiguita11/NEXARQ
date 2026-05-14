@@ -11,6 +11,7 @@ import SceneSelector from '@/components/scene-selector';
 import SplashScreen from '@/components/splash-screen';
 import { useTourStore } from '@/lib/tour-store';
 import type { HotspotConfig } from '@/lib/tour-types';
+import { assetPath } from '@/lib/asset-path';
 import {
   Eye,
   ArrowLeft,
@@ -33,7 +34,7 @@ function LoadingScreen() {
     <div className="absolute inset-0 z-[100] flex flex-col items-center justify-center bg-black gap-0">
       {/* Logo centrado */}
       <img
-        src="/logo-transparent.png"
+        src={assetPath('/logo-transparent.png')}
         alt="NEXARQ 360"
         style={{ width: 200, height: 'auto', filter: 'brightness(0) invert(1)', display: 'block' }}
         draggable={false}
@@ -82,7 +83,7 @@ function TourWelcome({ onStart }: { onStart: () => void }) {
         className="absolute bottom-6 left-6"
         style={{ animation: 'welcome-fade-in 0.6s ease 0.2s both' }}
       >
-        <img src="/logo-transparent.png" alt="NEXARQ 360" style={{ height: 56, width: 'auto', filter: 'brightness(0) invert(1)' }} draggable={false} />
+        <img src={assetPath('/logo-transparent.png')} alt="NEXARQ 360" style={{ height: 56, width: 'auto', filter: 'brightness(0) invert(1)' }} draggable={false} />
       </div>
 
       <div
@@ -127,20 +128,22 @@ function TourWelcome({ onStart }: { onStart: () => void }) {
 //  Brand Badge
 // ═══════════════════════════════════════════════════════════════════
 function BrandBadge() {
-  const { config, selectedApartment, clearApartment } = useTourStore();
+  const { config, selectedApartment, clearApartment, currentSceneId } = useTourStore();
+  const isZonaPet = currentSceneId === 'zona-pet-a';
 
   return (
     <div
-      className="fixed top-4 right-4 z-[60] flex items-center gap-2.5 px-4 py-2.5 rounded-xl backdrop-blur-xl border cursor-default select-none"
+      className="fixed top-3 right-3 md:top-4 md:right-4 z-[60] flex items-center gap-2 md:gap-2.5 px-3 md:px-4 py-2 md:py-2.5 rounded-xl backdrop-blur-xl border cursor-default select-none"
       style={{
         background: 'rgba(0,0,0,0.5)',
         borderColor: 'rgba(212,175,55,0.12)',
       }}
     >
       <img
-        src="/logo-transparent.png"
+        src={assetPath('/logo-transparent.png')}
         alt="NEXARQ 360"
-        style={{ height: 28, width: 'auto', filter: 'brightness(0) invert(1)' }}
+        style={{ height: 22, width: 'auto', filter: 'brightness(0) invert(1)' }}
+        className="md:!h-7"
         draggable={false}
       />
       <div
@@ -149,10 +152,10 @@ function BrandBadge() {
       />
       <div>
         <p className="text-xs font-bold tracking-wide" style={{ color: '#D4AF37' }}>
-          {selectedApartment ? selectedApartment.name : config.brand.name}
+          {isZonaPet ? 'Zona Mascotas' : selectedApartment ? selectedApartment.name : config.brand.name}
         </p>
-        <p className="text-[10px] text-white/30">
-          {selectedApartment ? config.brand.tagline : 'Recorrido Virtual'}
+        <p className="hidden sm:block text-[10px] text-white/30">
+          {isZonaPet ? 'Área Común' : selectedApartment ? config.brand.tagline : 'Recorrido Virtual'}
         </p>
       </div>
     </div>
@@ -165,7 +168,7 @@ function BrandBadge() {
 function HelpHint() {
   return (
     <div
-      className="fixed bottom-28 left-1/2 -translate-x-1/2 z-20 px-4 py-2 rounded-full backdrop-blur-md border text-center pointer-events-none animate-fade-in"
+      className="fixed bottom-44 left-1/2 -translate-x-1/2 z-20 px-4 py-2 rounded-full backdrop-blur-md border text-center pointer-events-none animate-fade-in"
       style={{
         background: 'rgba(0,0,0,0.4)',
         borderColor: 'rgba(212,175,55,0.1)',
@@ -187,6 +190,7 @@ export default function Home() {
     selectedApartment,
     config,
     setCurrentScene,
+    currentSceneId,
     showInfo,
     autoRotate,
     isTransitioning,
@@ -290,7 +294,7 @@ export default function Home() {
           <SceneSelector />
           <BrandBadge />
           {showHelp && <HelpHint />}
-          <FloorPlan />
+          <div className="hidden md:block">{currentSceneId !== 'zona-pet-a' && <FloorPlan />}</div>
           <InfoPanel />
           <TourControls viewerRef={viewerRef} />
         </>

@@ -81,15 +81,15 @@ export default function TourControls({ viewerRef }: TourControlsProps) {
     [scenes, setCurrentScene],
   )
 
-  const btnBase = 'w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 cursor-pointer select-none'
+  const btnBase = 'w-11 h-11 rounded-full flex items-center justify-center transition-all duration-200 cursor-pointer select-none'
   const btnDefault = `${btnBase} bg-black/50 backdrop-blur-md border border-[rgba(212,175,55,0.12)] text-[rgba(212,175,55,0.55)] hover:text-[#D4AF37] hover:bg-black/70 hover:border-[rgba(212,175,55,0.25)] hover:scale-105 active:scale-95`
   const btnActive = `${btnBase} bg-[#D4AF37] text-black shadow-md shadow-[rgba(212,175,55,0.25)]`
 
   return (
-    <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center gap-2">
+    <div className="fixed bottom-4 md:bottom-5 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center gap-2 md:gap-2.5">
       {/* ─── Scene Dots Strip ─── */}
       <div
-        className="flex items-center gap-2 px-4 py-2 rounded-full
+        className="flex items-center gap-1.5 md:gap-2.5 px-3 md:px-5 py-2 md:py-2.5 rounded-full
           bg-black/40 backdrop-blur-md border border-[rgba(212,175,55,0.1)]"
       >
         {/* Prev arrow */}
@@ -100,11 +100,11 @@ export default function TourControls({ viewerRef }: TourControlsProps) {
           aria-label="Anterior"
           title="Anterior"
         >
-          <ChevronLeft size={14} />
+          <ChevronLeft size={18} />
         </button>
 
         {/* Dots */}
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1.5">
           {scenes.map((scene, i) => {
             const isActive = i === currentSceneIndex
             return (
@@ -114,8 +114,8 @@ export default function TourControls({ viewerRef }: TourControlsProps) {
                 title={scene.name}
                 className="rounded-full transition-all duration-300 cursor-pointer outline-none border-0 p-0"
                 style={{
-                  width: isActive ? 22 : 7,
-                  height: 7,
+                  width: isActive ? 26 : 8,
+                  height: 8,
                   backgroundColor: isActive ? GOLD : 'rgba(212, 175, 55, 0.3)',
                   boxShadow: isActive ? `0 0 8px ${GOLD}44` : 'none',
                 }}
@@ -132,21 +132,21 @@ export default function TourControls({ viewerRef }: TourControlsProps) {
           aria-label="Siguiente"
           title="Siguiente"
         >
-          <ChevronRight size={14} />
+          <ChevronRight size={18} />
         </button>
 
         {/* Divider */}
-        <div className="w-px h-4 bg-[rgba(212,175,55,0.15)] mx-0.5" />
+        <div className="hidden sm:block w-px h-5 bg-[rgba(212,175,55,0.15)] mx-1" />
 
         {/* Scene label */}
-        <span className="text-[11px] text-[rgba(212,175,55,0.6)] font-medium tracking-wide whitespace-nowrap tabular-nums">
+        <span className="hidden sm:inline text-[12px] text-[rgba(212,175,55,0.6)] font-medium tracking-wide whitespace-nowrap tabular-nums">
           {currentScene?.name ?? ''}&nbsp;&middot;&nbsp;{currentSceneIndex + 1}/{totalScenes}
         </span>
       </div>
 
       {/* ─── Controls Strip ─── */}
       <div
-        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full
+        className="flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 rounded-full
           bg-black/40 backdrop-blur-md border border-[rgba(212,175,55,0.1)]"
       >
         {/* Home */}
@@ -159,7 +159,7 @@ export default function TourControls({ viewerRef }: TourControlsProps) {
           className={btnDefault}
           title="Restablecer vista"
         >
-          <Home size={14} />
+          <Home size={18} />
         </button>
 
         {/* Auto-rotate */}
@@ -169,13 +169,13 @@ export default function TourControls({ viewerRef }: TourControlsProps) {
           title="Auto-rotar"
         >
           <RotateCcw
-            size={14}
+            size={18}
             className={autoRotate ? 'animate-spin' : ''}
             style={autoRotate ? { animationDuration: '3s' } : undefined}
           />
         </button>
 
-        <div className="w-px h-4 bg-[rgba(212,175,55,0.15)]" />
+        <div className="w-px h-5 bg-[rgba(212,175,55,0.15)]" />
 
         {/* Zoom out */}
         <button
@@ -186,7 +186,7 @@ export default function TourControls({ viewerRef }: TourControlsProps) {
           className={btnDefault}
           title="Alejar"
         >
-          <ZoomOut size={14} />
+          <ZoomOut size={18} />
         </button>
 
         {/* Zoom in */}
@@ -198,10 +198,10 @@ export default function TourControls({ viewerRef }: TourControlsProps) {
           className={btnDefault}
           title="Acercar"
         >
-          <ZoomIn size={14} />
+          <ZoomIn size={18} />
         </button>
 
-        <div className="w-px h-4 bg-[rgba(212,175,55,0.15)]" />
+        <div className="w-px h-5 bg-[rgba(212,175,55,0.15)]" />
 
         {/* Floor plan */}
         <button
@@ -209,7 +209,7 @@ export default function TourControls({ viewerRef }: TourControlsProps) {
           className={showFloorPlan ? btnActive : btnDefault}
           title="Plano"
         >
-          <MapPin size={14} />
+          <MapPin size={18} />
         </button>
 
         {/* Fullscreen */}
@@ -218,7 +218,7 @@ export default function TourControls({ viewerRef }: TourControlsProps) {
           className={isFullscreen ? btnActive : btnDefault}
           title={isFullscreen ? 'Salir pantalla completa' : 'Pantalla completa'}
         >
-          {isFullscreen ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
+          {isFullscreen ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
         </button>
       </div>
     </div>

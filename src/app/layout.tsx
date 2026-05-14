@@ -10,22 +10,22 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "MIES 360 | Recorrido Virtual Arquitectónico",
+  title: "GUAYACANES | Recorrido Virtual 360°",
   description:
-    "Explore cada espacio del proyecto arquitectónico MIES 360 con tecnología panorámica interactiva 360°.",
+    "Explore cada espacio del proyecto Guayacanes con tecnología panorámica interactiva 360°.",
   keywords: [
-    "MIES 360",
+    "Guayacanes",
     "recorrido 360",
     "tour virtual",
     "arquitectura",
     "panorámica",
     "inmobiliaria",
   ],
-  authors: [{ name: "MIES 360" }],
+  authors: [{ name: "NEXARQ 360" }],
   openGraph: {
-    title: "MIES 360 | Recorrido Virtual Arquitectónico",
+    title: "GUAYACANES | Recorrido Virtual 360°",
     description:
-      "Explore cada espacio del proyecto arquitectónico MIES 360 con tecnología panorámica interactiva 360°.",
+      "Explore cada espacio del proyecto Guayacanes con tecnología panorámica interactiva 360°.",
     type: "website",
   },
 };

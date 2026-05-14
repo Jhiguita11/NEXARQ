@@ -2,13 +2,14 @@
 
 import { useState } from 'react';
 import { useTourStore } from '@/lib/tour-store';
-import { Bed, Bath, Maximize2, Eye, ArrowRight } from 'lucide-react';
+import { Bed, Bath, Maximize2, Eye, ArrowRight, PawPrint } from 'lucide-react';
 import type { BuildingConfig, ApartmentConfig } from '@/lib/tour-types';
+import { assetPath } from '@/lib/asset-path';
 
 const GOLD = '#D4AF37';
 
 export default function BuildingSelector() {
-  const { config, setApartment } = useTourStore();
+  const { config, setApartment, setApartmentAtScene } = useTourStore();
   const [selectedBuilding, setSelectedBuilding] = useState<BuildingConfig | null>(config.buildings[0] ?? null);
   const [hoveredApt, setHoveredApt] = useState<string | null>(null);
 
@@ -18,11 +19,11 @@ export default function BuildingSelector() {
   const currentBuilding = selectedBuilding ?? buildings[0];
 
   return (
-    <div className="fixed inset-0 z-[200] bg-black overflow-hidden">
+    <div className="fixed inset-0 z-[200] bg-black overflow-hidden" style={{ animation: 'selectorFadeIn 0.9s cubic-bezier(0.4,0,0.2,1) both' }}>
       {/* ── Background building image ── */}
       <div className="absolute inset-0">
         <img
-          src="/building.png"
+          src={assetPath('/building.png')}
           alt="Edificio"
           className="w-full h-full object-cover"
         />
@@ -31,10 +32,10 @@ export default function BuildingSelector() {
       </div>
 
       {/* ── Top header bar ── */}
-      <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-6 py-4">
+      <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-4 md:px-6 py-3 md:py-4">
         <div className="flex items-center">
           <img
-            src="/logo-transparent.png"
+            src={assetPath('/logo-transparent.png')}
             alt={config.brand.name}
             style={{ height: 44, width: 'auto', filter: 'brightness(0) invert(1)' }}
             draggable={false}
@@ -83,7 +84,7 @@ export default function BuildingSelector() {
       {/* ── Bottom panel: apartment list ── */}
       <div className="absolute bottom-0 left-0 right-0 z-10">
         <div className="bg-gradient-to-t from-black/90 via-black/70 to-transparent pt-16 pb-6 px-6">
-          <div className="max-w-5xl mx-auto">
+          <div className="max-w-5xl mx-auto px-0 md:px-2">
             {/* Section title */}
             <div className="flex items-center justify-between mb-4">
               <p className="text-xs font-bold uppercase tracking-widest" style={{ color: `${GOLD}99` }}>
@@ -106,6 +107,31 @@ export default function BuildingSelector() {
                   onSelect={() => setApartment(apt)}
                 />
               ))}
+
+              {/* Zona Mascotas — common area button */}
+              {currentBuilding.apartments.map((apt) => {
+                const zonaPet = apt.scenes.find(s => s.id === 'zona-pet-a');
+                if (!zonaPet) return null;
+                return (
+                  <button
+                    key="zona-mascotas"
+                    onClick={() => setApartmentAtScene(apt, 'zona-pet-a')}
+                    className="relative flex-shrink-0 w-56 backdrop-blur-xl border rounded-2xl p-4 text-left transition-all duration-300 cursor-pointer hover:-translate-y-0.5"
+                    style={{
+                      background: 'rgba(212,175,55,0.06)',
+                      borderColor: 'rgba(212,175,55,0.25)',
+                    }}
+                  >
+                    <h4 className="text-sm font-bold text-white mb-0.5">Zona Mascotas</h4>
+                    <p className="text-[11px] text-white/35 mb-3">Área recreativa para mascotas</p>
+                    <div className="mt-3 flex items-center gap-1.5 text-[11px] font-semibold" style={{ color: GOLD }}>
+                      <PawPrint size={13} />
+                      Ver Zona Mascotas
+                      <ArrowRight size={13} className="ml-auto" />
+                    </div>
+                  </button>
+                );
+              })}
             </div>
           </div>
         </div>
@@ -136,8 +162,8 @@ function BuildingHotspot({
   const floors = building.floors;
   const aptPerFloor = building.apartmentsPerFloor;
 
-  const baseX = aptPerFloor === 1 ? 50 : apt.position === 0 ? 38 : 62;
-  const baseY = 65 - (apt.floor / (floors - 1 || 1)) * 35;
+  const baseX = apt.hotspotX ?? (aptPerFloor === 1 ? 50 : apt.position === 0 ? 38 : 62);
+  const baseY = apt.hotspotY ?? (65 - (apt.floor / (floors - 1 || 1)) * 35);
   const isPH = apt.name.toLowerCase().includes('ph');
 
   return (

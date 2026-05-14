@@ -9,6 +9,7 @@ interface TourState {
   // Building selection
   selectedApartment: ApartmentConfig | null;
   setApartment: (apt: ApartmentConfig) => void;
+  setApartmentAtScene: (apt: ApartmentConfig, sceneId: string) => void;
   clearApartment: () => void;
   // Scene navigation (within selected apartment)
   currentSceneId: string;
@@ -51,6 +52,16 @@ export const useTourStore = create<TourState>((set, get) => ({
     currentSceneIndex: 0,
     showInfoPanel: false,
   }),
+
+  setApartmentAtScene: (apt, sceneId) => {
+    const idx = apt.scenes.findIndex(s => s.id === sceneId);
+    set({
+      selectedApartment: apt,
+      currentSceneId: idx !== -1 ? sceneId : (apt.scenes[0]?.id ?? ''),
+      currentSceneIndex: idx !== -1 ? idx : 0,
+      showInfoPanel: false,
+    });
+  },
 
   clearApartment: () => set({
     selectedApartment: null,
