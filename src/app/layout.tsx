@@ -22,6 +22,11 @@ export const metadata: Metadata = {
     "inmobiliaria",
   ],
   authors: [{ name: "NEXARQ 360" }],
+  icons: {
+    icon: [
+      { url: "/favicon.svg", type: "image/svg+xml" },
+    ],
+  },
   openGraph: {
     title: "GUAYACANES | Recorrido Virtual 360°",
     description:
