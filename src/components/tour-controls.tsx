@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useCallback } from 'react'
+import React, { useCallback, useEffect } from 'react'
 import {
   ChevronLeft,
   ChevronRight,
@@ -48,6 +48,30 @@ export default function TourControls({ viewerRef }: TourControlsProps) {
 
   const handlePrev = useCallback(() => prevScene(), [prevScene])
   const handleNext = useCallback(() => nextScene(), [nextScene])
+
+  // ── Fullscreen: sincroniza el estado del store con la API real del navegador
+  const handleFullscreen = useCallback(() => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(() => {
+        // El navegador puede rechazar la solicitud (p.ej. sin gesto de usuario)
+      })
+    } else {
+      document.exitFullscreen().catch(() => {})
+    }
+  }, [])
+
+  // Mantener el store sincronizado con el estado real del fullscreen del navegador
+  useEffect(() => {
+    const onFullscreenChange = () => {
+      const isNowFullscreen = !!document.fullscreenElement
+      // Solo actualiza el store si hay desincronía para evitar re-renders innecesarios
+      if (isNowFullscreen !== isFullscreen) {
+        toggleFullscreen()
+      }
+    }
+    document.addEventListener('fullscreenchange', onFullscreenChange)
+    return () => document.removeEventListener('fullscreenchange', onFullscreenChange)
+  }, [isFullscreen, toggleFullscreen])
 
   const handleSceneDot = useCallback(
     (index: number) => {
@@ -190,7 +214,7 @@ export default function TourControls({ viewerRef }: TourControlsProps) {
 
         {/* Fullscreen */}
         <button
-          onClick={toggleFullscreen}
+          onClick={handleFullscreen}
           className={isFullscreen ? btnActive : btnDefault}
           title={isFullscreen ? 'Salir pantalla completa' : 'Pantalla completa'}
         >

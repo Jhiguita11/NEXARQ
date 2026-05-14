@@ -733,12 +733,139 @@ const tourConfig: TourConfig = {
         },
       ],
     },
+
+    // ═══════════════════════════════════════════════════════════════
+    //  EDIFICIO: TIPO A — Renders reales del proyecto
+    // ═══════════════════════════════════════════════════════════════
+    {
+      id: 'tipo-a',
+      name: 'Tipo A',
+      floors: 1,
+      apartmentsPerFloor: 1,
+      apartments: [
+        {
+          id: 'apto-a',
+          name: 'Apartamento A',
+          description: '2 Hab · 2 Baños · Balcón · Vista Ciudad',
+          floor: 0,
+          position: 0,
+          bedrooms: 2,
+          bathrooms: 2,
+          area: 75,
+          scenes: [
+            // ── 1. Sala ──────────────────────────────────────────
+            {
+              id: 'sala-a',
+              name: 'Sala',
+              description: 'Sala con acceso al balcón y vista a la ciudad',
+              panorama: '/panoramas/apto-a/sala.png',
+              defaultView: { pitch: 0, yaw: 10, hfov: 120 },
+              hotspots: [
+                { id: 'sa-balcon',    pitch: 5,   yaw: 10,   type: 'scene', label: 'Balcón',          description: 'Ir al balcón',            targetSceneId: 'balcon-a' },
+                { id: 'sa-cocina',    pitch: 0,   yaw: -100, type: 'scene', label: 'Cocina',           description: 'Ir a la cocina',           targetSceneId: 'cocina-a' },
+                { id: 'sa-alc-aux',   pitch: 0,   yaw: 105,  type: 'scene', label: 'Alcoba Auxiliar',  description: 'Ir a la alcoba auxiliar',  targetSceneId: 'alcoba-aux-a' },
+                { id: 'sa-alc-ppl',   pitch: 0,   yaw: 155,  type: 'scene', label: 'Alcoba Principal', description: 'Ir a la alcoba principal', targetSceneId: 'alcoba-ppl-a' },
+                { id: 'sa-info',      pitch: -15, yaw: -30,  type: 'info',  label: 'Sala',             description: 'Sala integrada con comedor. Ventanales de piso a techo con vista panorámica a la ciudad.' },
+              ],
+            },
+            // ── 2. Cocina ─────────────────────────────────────────
+            {
+              id: 'cocina-a',
+              name: 'Cocina',
+              description: 'Cocina italiana con mesón en mármol',
+              panorama: '/panoramas/apto-a/cocina.png',
+              defaultView: { pitch: 0, yaw: 30, hfov: 120 },
+              hotspots: [
+                { id: 'co-sala',      pitch: 0,   yaw: -65,  type: 'scene', label: 'Sala',        description: 'Ir a la sala',        targetSceneId: 'sala-a' },
+                { id: 'co-bano-soc',  pitch: 0,   yaw: -150, type: 'scene', label: 'Baño Social',  description: 'Ir al baño social',   targetSceneId: 'bano-social-a' },
+                { id: 'co-info',      pitch: -10, yaw: 40,   type: 'info',  label: 'Cocina',       description: 'Cocina italiana con mesón en mármol blanco, poceta negra y estufa empotrada. Acabados de alto estándar.' },
+              ],
+            },
+            // ── 3. Baño Social ────────────────────────────────────
+            {
+              id: 'bano-social-a',
+              name: 'Baño Social',
+              description: 'Baño social con acabados de lujo',
+              panorama: '/panoramas/apto-a/bano-social.png',
+              defaultView: { pitch: 0, yaw: 0, hfov: 120 },
+              hotspots: [
+                { id: 'bs-cocina',    pitch: 0,   yaw: -155, type: 'scene', label: 'Cocina', description: 'Volver a la cocina', targetSceneId: 'cocina-a' },
+                { id: 'bs-info',      pitch: -10, yaw: 0,    type: 'info',  label: 'Baño Social', description: 'Baño social con ducha en vidrio, sanitario japonés y poceta flotante. Iluminación led perimetral.' },
+              ],
+            },
+            // ── 4. Alcoba Auxiliar ────────────────────────────────
+            {
+              id: 'alcoba-aux-a',
+              name: 'Alcoba Auxiliar',
+              description: 'Alcoba secundaria con vista a la ciudad',
+              panorama: '/panoramas/apto-a/alcoba-aux.png',
+              defaultView: { pitch: 0, yaw: 0, hfov: 120 },
+              hotspots: [
+                { id: 'aa-sala',      pitch: 0,   yaw: 125,  type: 'scene', label: 'Sala', description: 'Volver a la sala', targetSceneId: 'sala-a' },
+                { id: 'aa-info',      pitch: -10, yaw: -20,  type: 'info',  label: 'Alcoba Auxiliar', description: 'Alcoba con amplio closet, ventanales con vista a la ciudad y pisos en madera de ingeniería.' },
+              ],
+            },
+            // ── 5. Balcón ─────────────────────────────────────────
+            {
+              id: 'balcon-a',
+              name: 'Balcón',
+              description: 'Balcón con vista panorámica a Medellín',
+              panorama: '/panoramas/apto-a/balcon.png',
+              defaultView: { pitch: 5, yaw: 0, hfov: 90 },
+              hotspots: [
+                { id: 'ba-sala',      pitch: 0,   yaw: -150, type: 'scene', label: 'Sala', description: 'Volver a la sala', targetSceneId: 'sala-a' },
+                { id: 'ba-info',      pitch: 10,  yaw: 0,    type: 'info',  label: 'Vista Panorámica', description: 'Balcón con vista de 180° al Valle de Aburrá. Piso en concreto pulido y barandas en vidrio templado.' },
+              ],
+            },
+            // ── 6. Alcoba Principal ───────────────────────────────
+            {
+              id: 'alcoba-ppl-a',
+              name: 'Alcoba Principal',
+              description: 'Suite master con baño privado y vista ciudad',
+              panorama: '/panoramas/apto-a/alcoba-ppl.png',
+              defaultView: { pitch: 0, yaw: 0, hfov: 120 },
+              hotspots: [
+                { id: 'ap-bano',      pitch: 0,   yaw: -90,  type: 'scene', label: 'Baño Principal', description: 'Ir al baño principal', targetSceneId: 'bano-ppl-a' },
+                { id: 'ap-sala',      pitch: 0,   yaw: 160,  type: 'scene', label: 'Sala',           description: 'Volver a la sala',     targetSceneId: 'sala-a' },
+                { id: 'ap-info',      pitch: -10, yaw: 20,   type: 'info',  label: 'Alcoba Principal', description: 'Suite master con cabecera en madera de nogal, ventanales de piso a techo y baño privado en suite.' },
+              ],
+            },
+            // ── 7. Baño Principal ─────────────────────────────────
+            {
+              id: 'bano-ppl-a',
+              name: 'Baño Principal',
+              description: 'Baño en suite con ducha y bañera',
+              panorama: '/panoramas/apto-a/bano-ppl.png',
+              defaultView: { pitch: 0, yaw: 0, hfov: 120 },
+              hotspots: [
+                { id: 'bp-alcoba',    pitch: 0,   yaw: 130,  type: 'scene', label: 'Alcoba Principal', description: 'Volver a la alcoba', targetSceneId: 'alcoba-ppl-a' },
+                { id: 'bp-info',      pitch: -10, yaw: -30,  type: 'info',  label: 'Baño Principal', description: 'Baño en suite con ducha italiana, porcelana decorativa, espejo oval retroiluminado y sanitario inteligente.' },
+              ],
+            },
+          ],
+          floorPlan: {
+            width: 300,
+            height: 260,
+            background: 'rgba(0, 0, 0, 0.6)',
+            rooms: [
+              { id: 'fp-balcon-a',    sceneId: 'balcon-a',     label: 'Balcón',      x: 95,  y: 5,   width: 110, height: 40, fill: 'rgba(255,255,255,0.08)', stroke: 'rgba(255,255,255,0.2)', adjacentTo: ['sala-a'] },
+              { id: 'fp-cocina-a',    sceneId: 'cocina-a',     label: 'Cocina',      x: 5,   y: 50,  width: 85,  height: 85, fill: 'rgba(255,255,255,0.08)', stroke: 'rgba(255,255,255,0.2)', adjacentTo: ['sala-a', 'bano-social-a'] },
+              { id: 'fp-sala-a',      sceneId: 'sala-a',       label: 'Sala',        x: 95,  y: 50,  width: 110, height: 110, fill: 'rgba(255,255,255,0.08)', stroke: 'rgba(255,255,255,0.2)', adjacentTo: ['balcon-a', 'cocina-a', 'alcoba-aux-a', 'alcoba-ppl-a'] },
+              { id: 'fp-alc-aux-a',   sceneId: 'alcoba-aux-a', label: 'Alc. Aux',   x: 210, y: 50,  width: 85,  height: 85, fill: 'rgba(255,255,255,0.08)', stroke: 'rgba(255,255,255,0.2)', adjacentTo: ['sala-a'] },
+              { id: 'fp-bano-soc-a',  sceneId: 'bano-social-a',label: 'Baño Social', x: 5,   y: 140, width: 85,  height: 55, fill: 'rgba(255,255,255,0.08)', stroke: 'rgba(255,255,255,0.2)', adjacentTo: ['cocina-a'] },
+              { id: 'fp-alc-ppl-a',   sceneId: 'alcoba-ppl-a', label: 'Alc. Ppal',  x: 210, y: 140, width: 85,  height: 70, fill: 'rgba(255,255,255,0.08)', stroke: 'rgba(255,255,255,0.2)', adjacentTo: ['sala-a', 'bano-ppl-a'] },
+              { id: 'fp-bano-ppl-a',  sceneId: 'bano-ppl-a',   label: 'Baño Ppal',  x: 210, y: 215, width: 85,  height: 40, fill: 'rgba(255,255,255,0.08)', stroke: 'rgba(255,255,255,0.2)', adjacentTo: ['alcoba-ppl-a'] },
+            ],
+          },
+        },
+      ],
+    },
   ],
 
   // ─────────────────────────────────────────────────────────────────
   //  CONFIGURACIÓN GENERAL
   // ─────────────────────────────────────────────────────────────────
-  autoRotateSpeed: -2,
+  autoRotateSpeed: -0.5,
   showFloorPlan: true,
   showWelcome: true,
 };

@@ -37,115 +37,84 @@ interface PanoViewerProps {
 /* ------------------------------------------------------------------ */
 
 const HOTSPOT_CSS = `
-/* ── Glassmorphism bubble base ─────────────────────────────────── */
-.pnlm-hotspot-base {
-  transition: transform .25s cubic-bezier(.4,0,.2,1),
-              box-shadow .25s cubic-bezier(.4,0,.2,1);
+.pnlm-hotspot-base { cursor: pointer; z-index: 10; }
+
+/* ── Bubble wrapper ───────────────────────────────────────────── */
+.pano-bubble {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
   cursor: pointer;
-  z-index: 10;
+  user-select: none;
 }
 
-/* ── Hotspot icon circles ──────────────────────────────────────── */
-.pano-hotspot {
-  width: 38px;
-  height: 38px;
+/* ── Icon circle ─────────────────────────────────────────────── */
+.pano-bubble-circle {
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
+  background: rgba(255,255,255,0.18);
+  border: 1.5px solid rgba(255,255,255,0.6);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 16px;
-  font-weight: 700;
-  color: #000;
-  border: 2px solid rgba(255,255,255,.5);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  color: #fff;
   position: relative;
-  transition: transform .25s cubic-bezier(.4,0,.2,1),
-              box-shadow .25s cubic-bezier(.4,0,.2,1);
+  animation: bubble-float 3s ease-in-out infinite;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.25);
+  transition: transform .2s ease, background .2s ease;
 }
 
-/* Type: scene – white */
-.pano-hotspot--scene {
-  background: rgba(255,255,255,.7);
-  box-shadow: 0 0 12px rgba(255,255,255,.25);
-}
-.pano-hotspot--scene:hover {
-  transform: scale(1.15);
-  box-shadow: 0 0 24px rgba(255,255,255,.45);
-}
-
-/* Type: info – white */
-.pano-hotspot--info {
-  background: rgba(255,255,255,.45);
-  box-shadow: 0 0 12px rgba(255,255,255,.2);
-}
-.pano-hotspot--info:hover {
-  transform: scale(1.15);
-  box-shadow: 0 0 24px rgba(255,255,255,.4);
-}
-
-/* Type: url – white */
-.pano-hotspot--url {
-  background: rgba(255,255,255,.45);
-  box-shadow: 0 0 12px rgba(255,255,255,.2);
-}
-.pano-hotspot--url:hover {
-  transform: scale(1.15);
-  box-shadow: 0 0 24px rgba(255,255,255,.4);
-}
-
-/* ── Pulse ring (scene hotspots only) ──────────────────────────── */
-.pano-hotspot--scene::after {
+.pano-bubble-circle::before {
   content: '';
   position: absolute;
-  inset: -6px;
+  inset: -9px;
   border-radius: 50%;
-  border: 2px solid rgba(255,255,255,.5);
-  animation: pano-pulse 2s ease-out infinite;
+  border: 1.5px solid rgba(255,255,255,0.22);
+  animation: bubble-pulse 2.6s ease-out infinite;
 }
 
-@keyframes pano-pulse {
-  0%   { transform: scale(1);   opacity: 1; }
-  100% { transform: scale(1.6); opacity: 0; }
+.pano-bubble:hover .pano-bubble-circle {
+  transform: scale(1.12) translateY(-2px);
+  background: rgba(255,255,255,0.28);
 }
 
-/* ── Tooltip glass bubble ──────────────────────────────────────── */
-.pano-tooltip {
-  position: absolute;
-  bottom: calc(100% + 10px);
-  left: 50%;
-  transform: translateX(-50%) translateY(6px);
-  padding: 6px 14px;
-  border-radius: 10px;
-  background: rgba(15,15,20,.55);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border: 1px solid rgba(255,255,255,.15);
-  color: #f1f5f9;
-  font-size: 13px;
-  font-weight: 500;
+/* ── Info variant — gold ─────────────────────────────────────── */
+.pano-bubble-info .pano-bubble-circle {
+  background: rgba(212,175,55,0.22);
+  border-color: rgba(212,175,55,0.7);
+  animation-delay: 1.3s;
+}
+.pano-bubble-info .pano-bubble-circle::before {
+  border-color: rgba(212,175,55,0.28);
+}
+
+/* ── Room name pill ──────────────────────────────────────────── */
+.pano-bubble-label {
+  background: rgba(0,0,0,0.62);
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 20px;
+  padding: 3px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.95);
   white-space: nowrap;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity .2s ease, transform .2s ease;
-  box-shadow: 0 4px 20px rgba(0,0,0,.25);
-}
-.pano-tooltip::after {
-  content: '';
-  position: absolute;
-  top: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  border: 5px solid transparent;
-  border-top-color: rgba(15,15,20,.55);
+  letter-spacing: 0.04em;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
 }
 
-.pano-hotspot:hover .pano-tooltip {
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
+/* ── Animations ──────────────────────────────────────────────── */
+@keyframes bubble-float {
+  0%,100% { transform: translateY(0px); }
+  50%      { transform: translateY(-8px); }
+}
+@keyframes bubble-pulse {
+  0%   { transform: scale(1);   opacity: 0.75; }
+  100% { transform: scale(1.75); opacity: 0; }
 }
 
-/* ── Fade overlay for scene transitions ────────────────────────── */
+/* ── Fade overlay for scene transitions ──────────────────────── */
 .pano-fade-overlay {
   position: absolute;
   inset: 0;
@@ -157,41 +126,66 @@ const HOTSPOT_CSS = `
 `;
 
 /* ------------------------------------------------------------------ */
-/*  SVG icon helpers                                                  */
+/*  Room-aware SVG icons                                              */
 /* ------------------------------------------------------------------ */
 
-const ICON_ARROW = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>`;
+function roomIcon(label: string, type: HotspotConfig['type']): string {
+  const S = 'stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"';
+  if (type === 'info')
+    return `<svg viewBox="0 0 24 24" fill="none" ${S} width="20" height="20"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>`;
+  if (type === 'url')
+    return `<svg viewBox="0 0 24 24" fill="none" ${S} width="20" height="20"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>`;
 
-const ICON_INFO = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>`;
+  const l = label.toLowerCase();
 
-const ICON_LINK = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>`;
+  // Balcón / Terraza — sun
+  if (l.includes('balc') || l.includes('terraz') || l.includes('exterior'))
+    return `<svg viewBox="0 0 24 24" fill="none" ${S} width="20" height="20"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>`;
 
-function hotspotIcon(type: HotspotConfig['type']): string {
-  switch (type) {
-    case 'scene':
-      return ICON_ARROW;
-    case 'info':
-      return ICON_INFO;
-    case 'url':
-      return ICON_LINK;
-    default:
-      return ICON_INFO;
-  }
+  // Cocina — chef hat
+  if (l.includes('cocina') || l.includes('kitchen'))
+    return `<svg viewBox="0 0 24 24" fill="none" ${S} width="20" height="20"><path d="M6 13.87A4 4 0 0 1 7.41 6a5.11 5.11 0 0 1 1.05-1.54 5 5 0 0 1 7.08 0A5.11 5.11 0 0 1 16.59 6 4 4 0 0 1 18 13.87V21H6Z"/><line x1="6" y1="17" x2="18" y2="17"/></svg>`;
+
+  // Baño / Bath
+  if (l.includes('baño') || l.includes('bano') || l.includes('bath'))
+    return `<svg viewBox="0 0 24 24" fill="none" ${S} width="20" height="20"><path d="M9 6 6.5 3.5a1.5 1.5 0 0 0-1-.5C4.683 3 4 3.683 4 4.5V17a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-5"/><line x1="10" y1="5" x2="8" y2="7"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="7" y1="19" x2="7" y2="21"/><line x1="17" y1="19" x2="17" y2="21"/></svg>`;
+
+  // Alcoba / Dormitorio / Bedroom — bed
+  if (l.includes('alcoba') || l.includes('dorm') || l.includes('bedroom') || l.includes('habitac') || l.includes('suite'))
+    return `<svg viewBox="0 0 24 24" fill="none" ${S} width="20" height="20"><path d="M2 4v16"/><path d="M2 8h18a2 2 0 0 1 2 2v10"/><path d="M2 17h20"/><path d="M6 8v9"/></svg>`;
+
+  // Sala / Living — sofa
+  if (l.includes('sala') || l.includes('estar') || l.includes('living') || l.includes('comedor'))
+    return `<svg viewBox="0 0 24 24" fill="none" ${S} width="20" height="20"><path d="M20 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v3"/><path d="M2 11v5a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-5a2 2 0 0 0-4 0v2H6v-2a2 2 0 0 0-4 0Z"/><path d="M4 18v2"/><path d="M20 18v2"/><path d="M12 4v9"/></svg>`;
+
+  // Entrada / Hall — door
+  if (l.includes('entrada') || l.includes('hall') || l.includes('acceso'))
+    return `<svg viewBox="0 0 24 24" fill="none" ${S} width="20" height="20"><path d="M13 4h3a2 2 0 0 1 2 2v14"/><path d="M2 20h3"/><path d="M13 20h9"/><path d="M10 12v.01"/><path d="M13 4.562v16.157a1 1 0 0 1-1.267.962L4 20V5.562a2 2 0 0 1 1.533-1.94l6-1.5a2 2 0 0 1 2.467 1.94Z"/></svg>`;
+
+  // Default — arrow
+  return `<svg viewBox="0 0 24 24" fill="none" ${S} width="20" height="20"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>`;
 }
 
 /* ------------------------------------------------------------------ */
-/*  Build hotspot div HTML for Pannellum                              */
+/*  Build floating bubble for Pannellum                               */
 /* ------------------------------------------------------------------ */
 
 function buildHotspotDiv(hs: HotspotConfig): HTMLDivElement {
   const wrapper = document.createElement('div');
-  wrapper.className = `pano-hotspot pano-hotspot--${hs.type}`;
-  wrapper.style.position = 'relative';
+  wrapper.className = `pano-bubble${hs.type === 'info' ? ' pano-bubble-info' : ''}`;
 
-  wrapper.innerHTML = `
-    ${hotspotIcon(hs.type)}
-    <span class="pano-tooltip">${hs.label ?? hs.type}</span>
-  `;
+  const circle = document.createElement('div');
+  circle.className = 'pano-bubble-circle';
+  circle.innerHTML = roomIcon(hs.label ?? '', hs.type);
+  wrapper.appendChild(circle);
+
+  // Show room name pill only for navigation hotspots
+  if (hs.type === 'scene' && hs.label) {
+    const pill = document.createElement('div');
+    pill.className = 'pano-bubble-label';
+    pill.textContent = hs.label;
+    wrapper.appendChild(pill);
+  }
 
   return wrapper;
 }
@@ -314,12 +308,13 @@ const PanoViewer = forwardRef<PanoViewerHandle, PanoViewerProps>(
           panorama: scene.panorama,
           default: {
             ...scene.defaultView,
-            autoRotate: autoRotate ? autoRotateSpeed : -1,
+            autoRotate: autoRotate ? autoRotateSpeed : 0,
+            autoRotateInactivityDelay: autoRotate ? 2000 : 0,
             compass: false,
             showZoomCtrl: false,
             showFullscreenCtrl: false,
             mouseZoom: true,
-            hfov: scene.defaultView?.hfov ?? 100,
+            hfov: scene.defaultView?.hfov ?? 120,
             pitch: scene.defaultView?.pitch ?? 0,
             yaw: scene.defaultView?.yaw ?? 0,
           },

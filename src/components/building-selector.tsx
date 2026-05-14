@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useTourStore } from '@/lib/tour-store';
-import { Building2, Bed, Bath, Maximize2, Eye, ArrowRight } from 'lucide-react';
+import { Bed, Bath, Maximize2, Eye, ArrowRight } from 'lucide-react';
 import type { BuildingConfig, ApartmentConfig } from '@/lib/tour-types';
 
 const GOLD = '#D4AF37';
@@ -32,21 +32,13 @@ export default function BuildingSelector() {
 
       {/* ── Top header bar ── */}
       <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-6 py-4">
-        <div className="flex items-center gap-3">
-          <div
-            className="w-10 h-10 rounded-xl backdrop-blur-xl border flex items-center justify-center"
-            style={{ background: `${GOLD}15`, borderColor: `${GOLD}30` }}
-          >
-            <Building2 size={20} style={{ color: GOLD }} />
-          </div>
-          <div>
-            <h1 className="text-xl font-extrabold tracking-tight" style={{ color: GOLD }}>
-              {config.brand.name}
-            </h1>
-            <p className="text-[11px] text-white/50 font-medium">
-              {config.brand.tagline}
-            </p>
-          </div>
+        <div className="flex items-center">
+          <img
+            src="/logo-transparent.png"
+            alt={config.brand.name}
+            style={{ height: 44, width: 'auto', filter: 'brightness(0) invert(1)' }}
+            draggable={false}
+          />
         </div>
 
         {/* Building selector tabs */}

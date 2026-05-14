@@ -7,11 +7,12 @@ import TourControls from '@/components/tour-controls';
 import InfoPanel from '@/components/info-panel';
 import LeftSidebar from '@/components/left-sidebar';
 import BuildingSelector from '@/components/building-selector';
+import SceneSelector from '@/components/scene-selector';
+import SplashScreen from '@/components/splash-screen';
 import { useTourStore } from '@/lib/tour-store';
 import type { HotspotConfig } from '@/lib/tour-types';
 import {
   Eye,
-  Building2,
   ArrowLeft,
 } from 'lucide-react';
 
@@ -29,32 +30,28 @@ interface PanoViewerHandle {
 function LoadingScreen() {
   const { config } = useTourStore();
   return (
-    <div className="absolute inset-0 z-[100] flex flex-col items-center justify-center bg-black">
-      <div className="relative w-20 h-20 mb-10">
+    <div className="absolute inset-0 z-[100] flex flex-col items-center justify-center bg-black gap-0">
+      {/* Logo centrado */}
+      <img
+        src="/logo-transparent.png"
+        alt="NEXARQ 360"
+        style={{ width: 200, height: 'auto', filter: 'brightness(0) invert(1)', display: 'block' }}
+        draggable={false}
+      />
+
+      {/* Spinner */}
+      <div className="relative w-10 h-10 mt-8 mb-6">
         <div
           className="absolute inset-0 rounded-full border-2 border-transparent"
-          style={{
-            borderTopColor: '#D4AF37',
-            animation: 'loading-ring-spin 1.2s linear infinite',
-          }}
+          style={{ borderTopColor: '#D4AF37', animation: 'loading-ring-spin 1.2s linear infinite' }}
         />
         <div
-          className="absolute inset-2 rounded-full border-2 border-transparent"
-          style={{
-            borderTopColor: 'rgba(212,175,55,0.3)',
-            animation: 'loading-ring-spin 1.8s linear infinite reverse',
-          }}
+          className="absolute inset-1 rounded-full border-2 border-transparent"
+          style={{ borderTopColor: 'rgba(212,175,55,0.3)', animation: 'loading-ring-spin 1.8s linear infinite reverse' }}
         />
-        <div className="absolute inset-0 flex items-center justify-center">
-          <Building2 size={24} style={{ color: '#D4AF37' }} />
-        </div>
       </div>
-      <h1 className="text-2xl font-bold mb-1 tracking-wider" style={{ color: '#D4AF37' }}>
-        {config.brand.name}
-      </h1>
-      <p className="text-sm mb-6 text-white/30">
-        {config.brand.tagline}
-      </p>
+
+      {/* Dots */}
       <div className="flex gap-1.5">
         {[0, 1, 2].map(i => (
           <div
@@ -80,22 +77,18 @@ function TourWelcome({ onStart }: { onStart: () => void }) {
       style={{ background: 'radial-gradient(ellipse at center, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.92) 100%)' }}
       onClick={onStart}
     >
+      {/* Logo anclado en esquina inferior izquierda */}
+      <div
+        className="absolute bottom-6 left-6"
+        style={{ animation: 'welcome-fade-in 0.6s ease 0.2s both' }}
+      >
+        <img src="/logo-transparent.png" alt="NEXARQ 360" style={{ height: 56, width: 'auto', filter: 'brightness(0) invert(1)' }} draggable={false} />
+      </div>
+
       <div
         className="text-center max-w-md px-8"
         style={{ animation: 'welcome-scale-in 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)' }}
       >
-        <div
-          className="w-24 h-24 mx-auto mb-8 rounded-2xl flex items-center justify-center border"
-          style={{
-            background: 'rgba(212,175,55,0.08)',
-            borderColor: 'rgba(212,175,55,0.15)',
-            boxShadow: '0 16px 48px rgba(212,175,55,0.1)',
-            animation: 'welcome-fade-in 0.6s ease 0.2s both',
-          }}
-        >
-          <Building2 size={44} style={{ color: '#D4AF37' }} />
-        </div>
-
         <h1
           className="text-3xl font-extrabold tracking-tight mb-2"
           style={{ color: '#D4AF37', animation: 'welcome-fade-up 0.6s ease 0.3s both' }}
@@ -144,9 +137,16 @@ function BrandBadge() {
         borderColor: 'rgba(212,175,55,0.12)',
       }}
     >
-      <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: 'rgba(212,175,55,0.12)' }}>
-        <Building2 size={14} style={{ color: '#D4AF37' }} />
-      </div>
+      <img
+        src="/logo-transparent.png"
+        alt="NEXARQ 360"
+        style={{ height: 28, width: 'auto', filter: 'brightness(0) invert(1)' }}
+        draggable={false}
+      />
+      <div
+        className="w-px self-stretch"
+        style={{ background: 'rgba(212,175,55,0.2)' }}
+      />
       <div>
         <p className="text-xs font-bold tracking-wide" style={{ color: '#D4AF37' }}>
           {selectedApartment ? selectedApartment.name : config.brand.name}
@@ -193,6 +193,7 @@ export default function Home() {
     setTransitioning,
   } = useTourStore();
 
+  const [showSplash, setShowSplash] = useState(true);
   const [scriptLoaded, setScriptLoaded] = useState(false);
   const [showWelcome, setShowWelcome] = useState(() => config.showWelcome);
   const [showHelp, setShowHelp] = useState(true);
@@ -254,7 +255,12 @@ export default function Home() {
 
   // ── Building Selection Screen ──
   if (!selectedApartment) {
-    return <BuildingSelector />;
+    return (
+      <>
+        {showSplash && <SplashScreen onComplete={() => setShowSplash(false)} />}
+        <BuildingSelector />
+      </>
+    );
   }
 
   // ── Tour View ──
@@ -281,6 +287,7 @@ export default function Home() {
       {!showWelcome && isReady && (
         <>
           <LeftSidebar />
+          <SceneSelector />
           <BrandBadge />
           {showHelp && <HelpHint />}
           <FloorPlan />
