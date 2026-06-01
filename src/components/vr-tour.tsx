@@ -15,6 +15,11 @@ const HOTSPOT_RADIUS = 6;    // distancia de los hotspots a la cámara (metros)
 const AFRAME_VERSION = '1.7.0';
 const BRAND = '#E8D9B0';
 
+/** Ruta de la versión VR (4096x2048) del panorama: inserta /vr/ antes del archivo. */
+function vrPanoUrl(panorama: string) {
+  return panorama.replace(/\/([^/]+)$/, '/vr/$1');
+}
+
 /** Convierte pitch/yaw (grados, convención Pannellum) a posición XYZ en A-Frame. */
 function yawPitchToXYZ(yawDeg: number, pitchDeg: number, r: number) {
   const yaw = ((yawDeg + YAW_OFFSET) * Math.PI) / 180;
@@ -101,26 +106,25 @@ export default function VrTour() {
 
     const scene = document.createElement('a-scene');
     scene.setAttribute('vr-mode-ui', 'enabled: true');
-    scene.setAttribute('background', 'color: #000');
     scene.setAttribute('renderer', 'colorManagement: true; antialias: true');
     scene.setAttribute('loading-screen', 'dotsColor: #E8D9B0; backgroundColor: #0a0a0a');
 
-    // Assets — precarga de panoramas
+    // Assets — precarga de panoramas (versión VR 4096x2048)
     const assets = document.createElement('a-assets');
     scenes.forEach((s) => {
       const img = document.createElement('img');
       img.id = `pano-${s.id}`;
       img.setAttribute('crossorigin', 'anonymous');
-      // Versión reducida (4096x2048) desde la subcarpeta /vr/ — el Quest no
-      // renderiza texturas de 8000x4000 en WebXR estéreo (se ven negras).
-      img.src = s.panorama.replace(/\/([^/]+)$/, '/vr/$1');
+      img.src = vrPanoUrl(s.panorama);
       assets.appendChild(img);
     });
     scene.appendChild(assets);
 
-    // Cielo (panorama)
+    // Cielo (panorama) — URL directa (no #asset) para que la textura
+    // se aplique de forma fiable también en WebXR estéreo (Quest).
     const sky = document.createElement('a-sky');
-    sky.setAttribute('src', `#pano-${scenes[0].id}`);
+    sky.setAttribute('src', vrPanoUrl(scenes[0].panorama));
+    sky.setAttribute('material', `shader: flat; src: ${vrPanoUrl(scenes[0].panorama)}`);
     if (SKY_MIRRORED) sky.setAttribute('scale', '-1 1 1');
     scene.appendChild(sky);
     skyRef.current = sky;
@@ -179,8 +183,10 @@ export default function VrTour() {
     currentSceneRef.current = sceneId;
     setSceneName(scene.name);
 
-    // Cambiar panorama
-    skyRef.current.setAttribute('src', `#pano-${sceneId}`);
+    // Cambiar panorama — URL directa (fiable en WebXR)
+    const url = vrPanoUrl(scene.panorama);
+    skyRef.current.setAttribute('src', url);
+    skyRef.current.setAttribute('material', `shader: flat; src: ${url}`);
 
     // Limpiar hotspots anteriores
     const hs = hotspotsRef.current;
