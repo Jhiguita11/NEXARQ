@@ -111,7 +111,9 @@ export default function VrTour() {
       const img = document.createElement('img');
       img.id = `pano-${s.id}`;
       img.setAttribute('crossorigin', 'anonymous');
-      img.src = s.panorama;
+      // Versión reducida (4096x2048) desde la subcarpeta /vr/ — el Quest no
+      // renderiza texturas de 8000x4000 en WebXR estéreo (se ven negras).
+      img.src = s.panorama.replace(/\/([^/]+)$/, '/vr/$1');
       assets.appendChild(img);
     });
     scene.appendChild(assets);
