@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Glasses } from 'lucide-react';
 import tourConfig from '@/projects/melendez/valle-alto/tour.config';
 import type { SceneConfig, ApartmentConfig } from '@/lib/tour-types';
 
@@ -34,6 +34,34 @@ export default function VrTour() {
 
   const [ready, setReady] = useState(false);
   const [sceneName, setSceneName] = useState('');
+  const [vrSupported, setVrSupported] = useState(false);
+  const [inVr, setInVr] = useState(false);
+  const [vrError, setVrError] = useState('');
+
+  // Detectar soporte WebXR inmersivo
+  useEffect(() => {
+    const xr = (navigator as any).xr;
+    if (xr?.isSessionSupported) {
+      xr.isSessionSupported('immersive-vr').then((ok: boolean) => setVrSupported(ok)).catch(() => {});
+    }
+  }, []);
+
+  // Entrar al modo VR llamando directamente a A-Frame (no depende del botón nativo)
+  const handleEnterVR = () => {
+    const sceneEl = containerRef.current?.querySelector('a-scene') as any;
+    if (!sceneEl) { setVrError('La escena aún no está lista, espera un momento.'); return; }
+    try {
+      const p = sceneEl.enterVR();
+      if (p?.then) {
+        p.then(() => { setInVr(true); setVrError(''); })
+         .catch((e: any) => setVrError('No se pudo entrar a VR: ' + (e?.message || 'revisa permisos del navegador')));
+      } else {
+        setInVr(true);
+      }
+    } catch (e: any) {
+      setVrError('No se pudo entrar a VR: ' + (e?.message || 'error desconocido'));
+    }
+  };
 
   // Apartamento a mostrar: ?apt=<id> o el primero del config
   const apartment: ApartmentConfig | undefined = (() => {
@@ -123,6 +151,10 @@ export default function VrTour() {
       ctrl.setAttribute('raycaster', 'objects: .clickable; lineColor: #E8D9B0; lineOpacity: 0.85');
       scene.appendChild(ctrl);
     });
+
+    // Sincronizar estado al entrar/salir del modo VR (botón del Quest, etc.)
+    scene.addEventListener('enter-vr', () => setInVr(true));
+    scene.addEventListener('exit-vr', () => setInVr(false));
 
     container.appendChild(scene);
 
@@ -249,6 +281,35 @@ export default function VrTour() {
       >
         {sceneName || apartment?.name || 'Recorrido VR'}
       </div>
+
+      {/* Botón propio "Entrar en Modo VR" — no depende del botón nativo de A-Frame */}
+      {ready && !inVr && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] flex flex-col items-center gap-2">
+          <button
+            onClick={handleEnterVR}
+            className="flex items-center gap-2.5 rounded-2xl font-bold transition-transform duration-200 hover:scale-105 active:scale-95"
+            style={{
+              padding: '14px 28px',
+              background: '#E8D9B0',
+              color: '#1a1512',
+              fontSize: 16,
+              boxShadow: '0 6px 28px rgba(232,217,176,0.4), 0 2px 10px rgba(0,0,0,0.5)',
+              letterSpacing: '0.02em',
+            }}
+          >
+            <Glasses size={20} strokeWidth={2.5} />
+            Entrar en Modo VR
+          </button>
+          <span style={{ fontSize: 11, color: 'rgba(232,217,176,0.55)' }}>
+            {vrSupported ? 'Ponte el visor y toca el botón' : 'Abre esta página en el navegador del Meta Quest'}
+          </span>
+          {vrError && (
+            <span style={{ fontSize: 11, color: '#ff9b9b', maxWidth: 320, textAlign: 'center' }}>
+              {vrError}
+            </span>
+          )}
+        </div>
+      )}
 
       {!ready && (
         <div className="fixed inset-0 z-[90] flex items-center justify-center bg-black">
