@@ -141,7 +141,12 @@
         var el = document.createElement('a-entity');
         el.setAttribute('position', p[0] + ' ' + p[1] + ' ' + p[2]);
         el.setAttribute('look-center', '');
+        // Área de clic: geometría circular transparente para que el raycaster
+        // del mando (objects: .clickable) detecte el hotspot. Sin un mesh propio
+        // el raycaster no intersecta (los visuales son hijos aparte).
         el.classList.add('clickable');
+        el.setAttribute('geometry', 'primitive: circle; radius: 0.7');
+        el.setAttribute('material', 'opacity: 0; transparent: true; side: double');
 
         var disc = document.createElement('a-circle');
         disc.setAttribute('radius', '0.55');
