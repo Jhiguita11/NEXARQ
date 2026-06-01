@@ -52,4 +52,10 @@ prompt
 server.log
 # Skills directory
 /skills/upload/
+
+# Assets fuente de alta resolución (TIFF originales) — no van al build ni al repo
+/_source-assets/
+# Archivos pesados sueltos
+*.tiff
+*.tif
 upload/

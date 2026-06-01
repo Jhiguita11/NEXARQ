@@ -10,11 +10,12 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "GUAYACANES | Recorrido Virtual 360°",
+  title: "VALLE ALTO | Recorrido Virtual 360°",
   description:
-    "Explore cada espacio del proyecto Guayacanes con tecnología panorámica interactiva 360°.",
+    "Explore cada espacio de Valle Alto — Constructora Meléndez con tecnología panorámica interactiva 360°.",
   keywords: [
-    "Guayacanes",
+    "Valle Alto",
+    "Constructora Meléndez",
     "recorrido 360",
     "tour virtual",
     "arquitectura",
@@ -23,15 +24,27 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: "NEXARQ 360" }],
   icons: {
-    icon: [
-      { url: "/favicon.svg", type: "image/svg+xml" },
-    ],
+    icon: [{ url: "/favicon.svg", type: "image/svg+xml" }],
   },
   openGraph: {
-    title: "GUAYACANES | Recorrido Virtual 360°",
+    title: "VALLE ALTO | Recorrido Virtual 360°",
     description:
-      "Explore cada espacio del proyecto Guayacanes con tecnología panorámica interactiva 360°.",
+      "Explore cada espacio de Valle Alto — Constructora Meléndez con tecnología panorámica interactiva 360°.",
     type: "website",
+    images: [
+      {
+        url: "/projects/melendez/valle-alto/panoramas/tipo-b/sala.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Sala Comedor — Apartamento Tipo B, Valle Alto",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "VALLE ALTO | Recorrido Virtual 360°",
+    description: "Explore cada espacio de Valle Alto con tecnología panorámica interactiva 360°.",
+    images: ["/projects/melendez/valle-alto/panoramas/tipo-b/sala.jpg"],
   },
 };
 

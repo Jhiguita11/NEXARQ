@@ -2,6 +2,15 @@
 
 import { useEffect, useState } from 'react';
 import { assetPath } from '@/lib/asset-path';
+import BrandLogo from '@/components/brand-logo';
+
+const BRAND = (path: string) => assetPath(`/projects/melendez/branding/${path}`);
+
+// Valle Alto palette — fondo sage oscuro profundo
+const BG    = '#1A2420'; // sage oscuro profundo
+const BEIGE = '#E8D9B0'; // arena/crema (logo natural)
+const SAGE  = '#8FA89A'; // sage claro (anillos)
+const LIMA  = '#C8CF6A'; // verde-lima (acento)
 
 interface SplashScreenProps {
   onComplete: () => void;
@@ -12,8 +21,8 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
 
   useEffect(() => {
     const holdTimer = setTimeout(() => setPhase('hold'), 100);
-    const exitTimer = setTimeout(() => setPhase('exit'), 2400);
-    const doneTimer = setTimeout(() => onComplete(), 3100);
+    const exitTimer = setTimeout(() => setPhase('exit'), 2800);
+    const doneTimer = setTimeout(() => onComplete(), 3600);
     return () => {
       clearTimeout(holdTimer);
       clearTimeout(exitTimer);
@@ -21,127 +30,143 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
     };
   }, [onComplete]);
 
+  const visible = phase !== 'enter';
+
   return (
     <div
-      className="splash-root"
       style={{
         position: 'fixed',
         inset: 0,
         zIndex: 9999,
-        background: '#000',
+        background: BG,
         display: 'flex',
-        flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
         opacity: phase === 'exit' ? 0 : 1,
-        transition: phase === 'exit' ? 'opacity 0.9s cubic-bezier(0.4,0,0.2,1)' : 'none',
+        transition: phase === 'exit' ? 'opacity 1s cubic-bezier(0.4,0,0.2,1)' : 'none',
         pointerEvents: phase === 'exit' ? 'none' : 'all',
       }}
     >
-      {/* Subtle gold ambient glow */}
+      {/* Ambient glow */}
       <div style={{
         position: 'absolute',
         inset: 0,
-        background: 'radial-gradient(ellipse at 50% 48%, rgba(212,175,55,0.12) 0%, transparent 65%)',
+        background: `radial-gradient(ellipse at 50% 50%, ${SAGE}18 0%, transparent 60%)`,
         pointerEvents: 'none',
       }} />
 
-      {/* Orbit ring — purely decorative, animates around logo */}
-      <div
-        style={{
-          position: 'absolute',
-          width: 320,
-          height: 320,
-          borderRadius: '50%',
-          border: '1px solid rgba(212,175,55,0.35)',
-          animation: 'splash-orbit-ring 3s linear infinite',
-          opacity: phase === 'hold' || phase === 'exit' ? 1 : 0,
-          transition: 'opacity 0.8s ease 0.6s',
-        }}
-      />
-      <div
-        style={{
-          position: 'absolute',
-          width: 260,
-          height: 260,
-          borderRadius: '50%',
-          border: '1px solid rgba(212,175,55,0.20)',
-          animation: 'splash-orbit-ring 4.5s linear infinite reverse',
-          opacity: phase === 'hold' || phase === 'exit' ? 1 : 0,
-          transition: 'opacity 0.8s ease 0.8s',
-        }}
-      />
+      {/* Orbit rings */}
+      <div style={{
+        position: 'absolute',
+        width: 310,
+        height: 310,
+        borderRadius: '50%',
+        border: `1px solid ${SAGE}60`,
+        animation: 'splash-orbit 4s linear infinite',
+        opacity: visible ? 1 : 0,
+        transition: 'opacity 0.8s ease 0.5s',
+      }} />
+      <div style={{
+        position: 'absolute',
+        width: 245,
+        height: 245,
+        borderRadius: '50%',
+        border: `1px solid ${SAGE}35`,
+        animation: 'splash-orbit 6s linear infinite reverse',
+        opacity: visible ? 1 : 0,
+        transition: 'opacity 0.8s ease 0.7s',
+      }} />
 
-      {/* Logo wrapper */}
-      <div
-        style={{
-          position: 'relative',
-          zIndex: 2,
-          transform: phase === 'enter' ? 'scale(0.72) translateY(12px)' : 'scale(1) translateY(0)',
-          opacity: phase === 'enter' ? 0 : 1,
-          transition: 'transform 0.9s cubic-bezier(0.34,1.56,0.64,1), opacity 0.7s ease',
-        }}
-      >
-        <img
-          src={assetPath('/logo-transparent.png')}
-          alt="NEXARQ 360"
+      {/* Logo — centrado exacto */}
+      <div style={{
+        position: 'relative',
+        zIndex: 2,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        transform: visible ? 'scale(1) translateY(0)' : 'scale(0.75) translateY(14px)',
+        opacity: visible ? 1 : 0,
+        transition: 'transform 0.9s cubic-bezier(0.34,1.56,0.64,1), opacity 0.7s ease',
+      }}>
+        <BrandLogo
           style={{
-            width: 240,
-            height: 'auto',
-            position: 'relative',
-            zIndex: 1,
-            display: 'block',
-            filter: 'brightness(0) invert(1)',
+            width: 160,
+            filter: `drop-shadow(0 0 14px ${BEIGE}28)`,
           }}
+        />
+      </div>
+
+      {/* Tagline + progress — absoluto debajo del logo, no afecta centrado */}
+      <div style={{
+        position: 'absolute',
+        top: 'calc(50% + 172px)',
+        left: 0,
+        right: 0,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: 10,
+        zIndex: 2,
+        opacity: visible ? 1 : 0,
+        transition: 'opacity 0.6s ease 0.9s',
+      }}>
+        <div style={{
+          width: 130,
+          height: 1.5,
+          background: `${LIMA}25`,
+          borderRadius: 2,
+          overflow: 'hidden',
+        }}>
+          <div style={{
+            height: '100%',
+            background: `linear-gradient(90deg, transparent, ${LIMA}, transparent)`,
+            transformOrigin: 'left center',
+            animation: visible ? 'splash-progress 2.4s ease-out 0.3s both' : 'none',
+          }} />
+        </div>
+        <p style={{
+          margin: 0,
+          color: `${LIMA}AA`,
+          fontSize: 9,
+          letterSpacing: '0.30em',
+          textTransform: 'uppercase',
+          fontWeight: 500,
+        }}>
+          Recorrido Virtual 360°
+        </p>
+      </div>
+
+      {/* Co-branding footer */}
+      <div style={{
+        position: 'absolute',
+        bottom: 30,
+        left: 0,
+        right: 0,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 20,
+        zIndex: 2,
+        opacity: visible ? 1 : 0,
+        transition: 'opacity 0.7s ease 1.1s',
+      }}>
+        <img
+          src={BRAND('LogoMelendezHorizontal.png')}
+          alt="Constructora Meléndez"
+          style={{ height: 24, width: 'auto', objectFit: 'contain' }}
+          draggable={false}
+        />
+        <div style={{ width: 1, height: 18, background: `${BEIGE}25` }} />
+        <img
+          src={BRAND('MIES LOGO_Horizontal Blanco.png')}
+          alt="MIESGROUP"
+          style={{ height: 20, width: 'auto', objectFit: 'contain' }}
           draggable={false}
         />
       </div>
 
-      {/* Progress bar */}
-      <div
-        style={{
-          marginTop: 48,
-          position: 'relative',
-          zIndex: 2,
-          width: 180,
-          height: 2,
-          background: 'rgba(212,175,55,0.25)',
-          borderRadius: 2,
-          overflow: 'hidden',
-          opacity: phase === 'enter' ? 0 : 1,
-          transition: 'opacity 0.5s ease 0.4s',
-        }}
-      >
-        <div style={{
-          position: 'absolute',
-          inset: 0,
-          background: 'linear-gradient(90deg, #D4AF37, #f0d060, #D4AF37)',
-          borderRadius: 2,
-          transformOrigin: 'left center',
-          animation: phase !== 'enter' ? 'splash-progress 2s ease-out 0.3s both' : 'none',
-        }} />
-      </div>
-
-      {/* Tagline */}
-      <p
-        style={{
-          marginTop: 20,
-          color: 'rgba(212,175,55,0.85)',
-          fontSize: 11,
-          letterSpacing: '0.25em',
-          textTransform: 'uppercase',
-          fontWeight: 500,
-          zIndex: 2,
-          position: 'relative',
-          opacity: phase === 'enter' ? 0 : 1,
-          transition: 'opacity 0.6s ease 0.7s',
-        }}
-      >
-        Recorrido Virtual 360°
-      </p>
-
       <style>{`
-        @keyframes splash-orbit-ring {
+        @keyframes splash-orbit {
           from { transform: rotate(0deg); }
           to   { transform: rotate(360deg); }
         }

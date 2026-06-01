@@ -1,8 +1,8 @@
 'use client';
 
 import { create } from 'zustand';
-import tourConfig from './tour.config';
-import type { SceneConfig, HotspotConfig, FloorPlanRoomConfig, ApartmentConfig } from './tour-types';
+import tourConfig from '@/projects/melendez/valle-alto/tour.config';
+import type { ApartmentConfig } from './tour-types';
 
 interface TourState {
   config: typeof tourConfig;
@@ -17,6 +17,22 @@ interface TourState {
   setCurrentScene: (id: string) => void;
   nextScene: () => void;
   prevScene: () => void;
+  // Viewer orientation
+  viewerYaw: number;
+  setViewerYaw: (yaw: number) => void;
+  // Scene variants (mismo cuarto, distinto amueblado)
+  selectedVariants: Record<string, string>;  // sceneId -> variantId
+  setSceneVariant: (sceneId: string, variantId: string) => void;
+  // Galeria / Plantas viewer
+  galleryOpen: 'gallery' | 'plantas' | null;
+  openGallery: (kind: 'gallery' | 'plantas') => void;
+  closeGallery: () => void;
+  // Playback mode
+  isPlaybackMode: boolean;
+  /** true si el playback se activó automáticamente por inactividad */
+  playbackAuto: boolean;
+  startPlayback: (auto?: boolean) => void;
+  stopPlayback: () => void;
   // UI
   isFullscreen: boolean;
   showFloorPlan: boolean;
@@ -37,9 +53,6 @@ interface TourState {
   setTransitioning: (v: boolean) => void;
   showInfo: (title: string, description: string) => void;
   hideInfo: () => void;
-  // Helpers
-  scenes: SceneConfig[];
-  floorPlanRooms: FloorPlanRoomConfig[];
 }
 
 export const useTourStore = create<TourState>((set, get) => ({
@@ -71,10 +84,22 @@ export const useTourStore = create<TourState>((set, get) => ({
 
   currentSceneId: '',
   currentSceneIndex: 0,
+  viewerYaw: 0,
+  setViewerYaw: (yaw) => set({ viewerYaw: yaw }),
+  selectedVariants: {},
+  setSceneVariant: (sceneId, variantId) =>
+    set((s) => ({ selectedVariants: { ...s.selectedVariants, [sceneId]: variantId } })),
+  galleryOpen: null,
+  openGallery: (kind) => set({ galleryOpen: kind }),
+  closeGallery: () => set({ galleryOpen: null }),
+  isPlaybackMode: false,
+  playbackAuto: false,
+  startPlayback: (auto = false) => set({ isPlaybackMode: true, playbackAuto: auto }),
+  stopPlayback: () => set({ isPlaybackMode: false, playbackAuto: false }),
   isFullscreen: false,
   showFloorPlan: tourConfig.showFloorPlan,
   showSceneList: false,
-  showLeftSidebar: true,
+  showLeftSidebar: false,
   autoRotate: tourConfig.autoRotateSpeed !== 0,
   isLoading: true,
   isTransitioning: false,
@@ -85,7 +110,11 @@ export const useTourStore = create<TourState>((set, get) => ({
     const { selectedApartment } = get();
     const scenes = selectedApartment?.scenes ?? [];
     const idx = scenes.findIndex(s => s.id === id);
-    if (idx !== -1) set({ currentSceneId: id, currentSceneIndex: idx, showInfoPanel: false });
+    if (idx !== -1) {
+      // NO reseteamos viewerYaw — la direccion se preserva al cambiar de escena.
+      // El polling del pano-viewer actualizara el yaw real cuando el nuevo viewer cargue.
+      set({ currentSceneId: id, currentSceneIndex: idx, showInfoPanel: false });
+    }
   },
 
   nextScene: () => {
@@ -113,7 +142,4 @@ export const useTourStore = create<TourState>((set, get) => ({
   setTransitioning: (v) => set({ isTransitioning: v }),
   showInfo: (title, description) => set({ showInfoPanel: true, infoPanelData: { title, description } }),
   hideInfo: () => set({ showInfoPanel: false, infoPanelData: null }),
-
-  scenes: [],
-  floorPlanRooms: [],
 }));

@@ -15,8 +15,8 @@ export default function SceneSelector() {
   } = useTourStore();
 
   const scenes = selectedApartment?.scenes ?? [];
-  const { brand, theme } = config;
-  const primary = theme.primary;
+  const { brand } = config;
+  const primary = '#E8D9B0';
   const panelRef = useRef<HTMLDivElement>(null);
 
   // Close on Escape

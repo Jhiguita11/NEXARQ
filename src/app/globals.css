@@ -30,13 +30,13 @@
   --radius: 0.625rem;
   --background: #000000;
   --foreground: #ffffff;
-  --primary: #D4AF37;
-  --ring: #D4AF37;
-  --border: rgba(212, 175, 55, 0.15);
-  --input: rgba(212, 175, 55, 0.12);
-  --muted: rgba(212, 175, 55, 0.08);
+  --primary: #E8D9B0;
+  --ring: #E8D9B0;
+  --border: rgba(232, 217, 176, 0.15);
+  --input: rgba(232, 217, 176, 0.12);
+  --muted: rgba(232, 217, 176, 0.08);
   --muted-foreground: rgba(255, 255, 255, 0.5);
-  --accent: rgba(212, 175, 55, 0.12);
+  --accent: rgba(232, 217, 176, 0.12);
   --accent-foreground: #ffffff;
   --destructive: #ef4444;
   --card: rgba(255, 255, 255, 0.04);
@@ -204,12 +204,12 @@
 .scene-transition-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.55);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  background: linear-gradient(135deg, rgba(232,217,176,0.10) 0%, rgba(255,255,255,0.05) 50%, rgba(232,217,176,0.10) 100%);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
   z-index: 20;
   pointer-events: none;
-  transition: opacity 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: opacity 0.45s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* ═══════════════════════════════════════════════════════════════════

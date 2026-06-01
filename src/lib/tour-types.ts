@@ -22,6 +22,35 @@ export interface HotspotConfig {
 }
 
 // ─── Scene ────────────────────────────────────────────────────────────
+// Variante visual de una escena (mismo cuarto, distinto amueblado/uso).
+// Ej: "Espacio Multiple" puede verse como alcoba o como estudio.
+// Si la escena tiene variants[], se muestra un boton flotante para alternar.
+export interface SceneVariantConfig {
+  id: string;
+  label: string;
+  /** Panorama de la variante (opcional si linkSceneId esta presente). */
+  panorama?: string;
+  thumbnail?: string;
+  defaultView?: {
+    pitch: number;
+    yaw: number;
+    hfov: number;
+  };
+  /** Si esta presente, al activar esta variante se NAVEGA a esa escena
+   * en lugar de cambiar la variante localmente. Util cuando el "render
+   * alternativo" en realidad corresponde fisicamente a otro cuarto. */
+  linkSceneId?: string;
+  /** Variante a activar automaticamente en la escena destino (opcional). */
+  linkVariantId?: string;
+}
+
+// Animación de cámara para el modo reproducción.
+// La cámara arranca en `from` y viaja suavemente hasta `to` en 6.5s.
+export interface PlaybackAnimation {
+  from: { pitch: number; yaw: number };
+  to:   { pitch: number; yaw: number };
+}
+
 export interface SceneConfig {
   id: string;
   name: string;
@@ -34,6 +63,13 @@ export interface SceneConfig {
     hfov: number;
   };
   hotspots: HotspotConfig[];
+  /** Variantes opcionales para alternar el render del cuarto (ej. alcoba vs estudio) */
+  variants?: SceneVariantConfig[];
+  /** Posicion del boton de cambio de variante DENTRO del panorama (pitch/yaw).
+   * Solo se renderiza si la escena tiene variants[]. */
+  variantButton?: { pitch: number; yaw: number };
+  /** Animaciones para el modo reproducción. Se elige una aleatoriamente. */
+  playbackAnimations?: PlaybackAnimation[];
 }
 
 // ─── Floor Plan Room ─────────────────────────────────────────────────
@@ -45,8 +81,12 @@ export interface FloorPlanRoomConfig {
   y: number;
   width: number;
   height: number;
-  fill: string;
-  stroke: string;
+  fill?: string;
+  stroke?: string;
+  /** Posicion % horizontal del radar sobre imagen real (0-100) */
+  dotX?: number;
+  /** Posicion % vertical del radar sobre imagen real (0-100) */
+  dotY?: number;
   adjacentTo?: string[];
 }
 
@@ -55,6 +95,8 @@ export interface FloorPlanConfig {
   width: number;
   height: number;
   background: string;
+  /** URL de imagen real de planta (activa el modo imagen de fondo) */
+  backgroundImage?: string;
   rooms: FloorPlanRoomConfig[];
 }
 
@@ -108,6 +150,14 @@ export interface BuildingConfig {
 }
 
 // ─── Tour Config (ROOT) ──────────────────────────────────────────────
+// ─── Galeria / Plantas ────────────────────────────────────────────────
+export interface GalleryImageConfig {
+  id: string;
+  src: string;
+  title?: string;
+  caption?: string;
+}
+
 export interface TourConfig {
   brand: BrandConfig;
   theme: ThemeConfig;
@@ -119,4 +169,8 @@ export interface TourConfig {
   showFloorPlan: boolean;
   /** Show welcome screen on load */
   showWelcome: boolean;
+  /** Renders del proyecto (gimnasio, piscina, fachada, etc) */
+  gallery?: GalleryImageConfig[];
+  /** Plantas arquitectonicas del proyecto (sin burbujas) */
+  plantas?: GalleryImageConfig[];
 }
