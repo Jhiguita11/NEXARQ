@@ -887,41 +887,13 @@ const PanoViewer = forwardRef<PanoViewerHandle, PanoViewerProps>(
       };
     }, [isPlaybackMode, currentSceneId, scriptReady]); // eslint-disable-line react-hooks/exhaustive-deps
 
-    /* ── Swipe para navegar entre escenas (móvil) ──────────────── */
-    const touchStartRef = useRef<{ x: number; y: number; t: number } | null>(null);
-
-    const handleTouchStart = useCallback((e: React.TouchEvent) => {
-      const touch = e.touches[0];
-      touchStartRef.current = { x: touch.clientX, y: touch.clientY, t: Date.now() };
-    }, []);
-
-    const handleTouchEnd = useCallback((e: React.TouchEvent) => {
-      if (!touchStartRef.current) return;
-      const touch = e.changedTouches[0];
-      const dx = touch.clientX - touchStartRef.current.x;
-      const dy = touch.clientY - touchStartRef.current.y;
-      const dt = Date.now() - touchStartRef.current.t;
-      touchStartRef.current = null;
-
-      // Solo navegar si es un swipe horizontal claro, rápido y largo
-      const isHorizontal = Math.abs(dx) > Math.abs(dy) * 1.5;
-      const isLong = Math.abs(dx) > 80;
-      const isFast = dt < 400;
-      if (!isHorizontal || !isLong || !isFast) return;
-
-      if (dx > 0) {
-        useTourStore.getState().prevScene();
-      } else {
-        useTourStore.getState().nextScene();
-      }
-    }, []);
-
     /* ── Render ────────────────────────────────────────────────── */
+    // Nota: el arrastre horizontal en móvil rota la vista 360 (manejado por
+    // Pannellum). NO se usa swipe para cambiar de escena — generaba cambios
+    // accidentales al mirar alrededor. La navegación es por hotspots y controles.
     return (
       <div
         className={className}
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
         style={{
           position: 'relative',
           width: '100%',
