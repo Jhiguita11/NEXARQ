@@ -122,7 +122,12 @@ export default function VrTour() {
 
     // Cielo (panorama) — URL directa (no #asset) para que la textura
     // se aplique de forma fiable también en WebXR estéreo (Quest).
+    // radius reducido (default 500): en VR el far plane lo controla el runtime
+    // del Quest y recorta la esfera grande → se ve negra. Con radius 50 queda
+    // siempre dentro del far plane. La cámara está en el centro, así que no
+    // cambia la apariencia. Los hotspots están a radius 6 (dentro de la esfera).
     const sky = document.createElement('a-sky');
+    sky.setAttribute('radius', '50');
     sky.setAttribute('src', vrPanoUrl(scenes[0].panorama));
     sky.setAttribute('material', `shader: flat; src: ${vrPanoUrl(scenes[0].panorama)}`);
     if (SKY_MIRRORED) sky.setAttribute('scale', '-1 1 1');
