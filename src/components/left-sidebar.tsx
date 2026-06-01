@@ -367,9 +367,9 @@ export default function LeftSidebar() {
             {/* Separador */}
             <div style={{ height: 1, background: 'rgba(232,217,176,0.08)', margin: '2px 0' }} />
 
-            {/* REALIDAD VIRTUAL — abre el recorrido en modo VR (Oculus Quest) */}
+            {/* REALIDAD VIRTUAL — página A-Frame estática (Oculus Quest) */}
             <a
-              href={`${assetPath('/vr/')}${selectedApartment ? `?apt=${selectedApartment.id}` : ''}`}
+              href={assetPath('/vr.html')}
               className="flex items-center gap-3 px-5 py-3 w-full text-left transition-all duration-150"
               style={{ color: 'rgba(232,217,176,0.65)', textDecoration: 'none' }}
               onMouseEnter={(e) => {

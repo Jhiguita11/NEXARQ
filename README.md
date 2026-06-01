@@ -140,24 +140,28 @@ Para rebrandear a un proyecto totalmente distinto, cambia:
 
 ## 🥽 Modo Realidad Virtual (Oculus / Meta Quest)
 
-Además del visor Pannellum (desktop/móvil), hay un **modo VR paralelo con A-Frame + WebXR**
-que reutiliza el mismo `tour.config` sin tocar el visor principal.
+Además del visor Pannellum (desktop/móvil), hay un **modo VR con A-Frame + WebXR**
+implementado como **página HTML estática independiente** (`public/vr.html`). Se hizo así
+a propósito: A-Frame es frágil cuando se monta dinámicamente dentro de React, y la página
+declarativa estática inicializa correctamente las texturas para el contexto inmersivo WebXR.
 
-- **Acceso:** botón "Realidad Virtual" en el menú lateral, o la ruta `/vr/`
-  (acepta `?apt=<id>` para elegir la tipología; por defecto usa la primera).
-- **En el Quest:** abre la URL en el navegador de Meta Quest y pulsa el botón **"Enter VR"**
-  (lo añade A-Frame automáticamente). Mira alrededor con la cabeza y usa los **mandos**
-  (láser apuntador) para hacer clic en los hotspots y cambiar de escena. También hay
-  retícula de mirada como respaldo.
-- **Archivos:** `src/components/vr-tour.tsx` (escena A-Frame) y `src/app/vr/page.tsx` (ruta).
+- **Acceso:** botón "Realidad Virtual" en el menú lateral, o la ruta `/vr.html`
+  (acepta `?scene=<id>` para abrir en una escena concreta; por defecto `acceso`).
+- **En el Quest:** abre la URL (HTTPS) en el navegador de Meta Quest y pulsa el botón
+  **"Entrar en Modo VR"**. Mira con la cabeza y usa los **mandos** (láser apuntador) para
+  hacer clic en los hotspots; también hay retícula de mirada como respaldo.
+- **Panoramas VR:** el Quest no renderiza texturas de 8000×4000 en WebXR estéreo. El script
+  `scripts/generate-vr-panoramas.mjs` genera versiones 4096×2048 en `panoramas/<tipo>/vr/`.
+- **Datos:** los hotspots/escenas están incrustados en `vr.html` (objeto `SCENES`). Para un
+  proyecto nuevo, edita ese objeto con tus escenas y rutas de panorama.
 
-> ⚙️ **Calibración:** como la conversión de coordenadas pitch/yaw entre Pannellum y A-Frame
-> puede variar, en `vr-tour.tsx` hay constantes para ajustar al probar en el dispositivo:
-> `YAW_OFFSET` (rota los hotspots), `SKY_MIRRORED` (espeja el panorama) y `HOTSPOT_RADIUS`.
+> ⚙️ **Calibración:** al inicio del `<script>` en `public/vr.html` hay constantes para ajustar
+> en el dispositivo: `YAW_OFFSET` (rota los hotspots), `SKY_MIRRORED` (espeja el panorama),
+> `SKY_RADIUS` (mantener pequeño: en VR el far plane lo fija el runtime del Quest) y `HOTSPOT_R`.
 > A-Frame se carga desde CDN (no pesa en el bundle principal).
 
 ---
 
 ## 🧱 Stack
 
-Next.js 16 · React 19 · TypeScript · Tailwind 4 · Zustand · Pannellum (CDN, visor 2D) · A-Frame + WebXR (CDN, modo VR) · Framer Motion · lucide-react
+Next.js 16 · React 19 · TypeScript · Tailwind 4 · Zustand · Pannellum (CDN, visor 2D) · A-Frame + WebXR (página estática `vr.html`, modo VR) · Framer Motion · lucide-react
