@@ -20,9 +20,6 @@ interface TourState {
   // Viewer orientation
   viewerYaw: number;
   setViewerYaw: (yaw: number) => void;
-  // Giroscopio (device orientation) — mover el telefono mueve el 360
-  gyroEnabled: boolean;
-  setGyroEnabled: (v: boolean) => void;
   // Scene variants (mismo cuarto, distinto amueblado)
   selectedVariants: Record<string, string>;  // sceneId -> variantId
   setSceneVariant: (sceneId: string, variantId: string) => void;
@@ -89,8 +86,6 @@ export const useTourStore = create<TourState>((set, get) => ({
   currentSceneIndex: 0,
   viewerYaw: 0,
   setViewerYaw: (yaw) => set({ viewerYaw: yaw }),
-  gyroEnabled: false,
-  setGyroEnabled: (v) => set({ gyroEnabled: v }),
   selectedVariants: {},
   setSceneVariant: (sceneId, variantId) =>
     set((s) => ({ selectedVariants: { ...s.selectedVariants, [sceneId]: variantId } })),
