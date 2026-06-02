@@ -36,12 +36,22 @@ export default function TourControls({ viewerRef }: TourControlsProps) {
   const prevScene = useTourStore((s) => s.prevScene);
   const setCurrentScene = useTourStore((s) => s.setCurrentScene);
   const startPlayback   = useTourStore((s) => s.startPlayback);
+  const gyroEnabled = useTourStore((s) => s.gyroEnabled);
+  const setGyroEnabled = useTourStore((s) => s.setGyroEnabled);
 
   const scenes = selectedApartment?.scenes ?? [];
   const currentScene = scenes[currentSceneIndex];
   const totalScenes = scenes.length;
 
-  const [isGyroActive, setIsGyroActive] = useState(false);
+  // El boton de giroscopio solo se muestra en dispositivos con sensor de orientacion
+  const [gyroSupported, setGyroSupported] = useState(false);
+  useEffect(() => {
+    setGyroSupported(
+      typeof window !== 'undefined' &&
+      typeof DeviceOrientationEvent !== 'undefined' &&
+      ('ontouchstart' in window || (navigator.maxTouchPoints ?? 0) > 0),
+    );
+  }, []);
 
   const handlePrev = useCallback(() => prevScene(), [prevScene]);
   const handleNext = useCallback(() => nextScene(), [nextScene]);
@@ -72,17 +82,26 @@ export default function TourControls({ viewerRef }: TourControlsProps) {
     [scenes, setCurrentScene],
   );
 
-  const handleGyroscope = useCallback(() => {
-    const viewer = viewerRef.current;
-    if (!viewer) return;
-    if (isGyroActive) {
-      viewer.stopOrientation();
-      setIsGyroActive(false);
-    } else {
-      viewer.startOrientation();
-      setIsGyroActive(true);
+  const handleGyroscope = useCallback(async () => {
+    // Apagar: simplemente desactivar el flag (PanoViewer detiene la orientacion)
+    if (gyroEnabled) {
+      setGyroEnabled(false);
+      return;
     }
-  }, [viewerRef, isGyroActive]);
+    // Encender: en iOS 13+ hay que pedir permiso explicito desde un gesto del usuario
+    const DOE = typeof DeviceOrientationEvent !== 'undefined'
+      ? (DeviceOrientationEvent as unknown as { requestPermission?: () => Promise<'granted' | 'denied'> })
+      : null;
+    if (DOE && typeof DOE.requestPermission === 'function') {
+      try {
+        const res = await DOE.requestPermission();
+        if (res !== 'granted') return;
+      } catch {
+        return; // permiso denegado o no disponible
+      }
+    }
+    setGyroEnabled(true);
+  }, [gyroEnabled, setGyroEnabled]);
 
   const btnBase = 'w-10 h-10 md:w-11 md:h-11 rounded-full flex items-center justify-center transition-all duration-200 cursor-pointer select-none';
   const btnDefault = `${btnBase} bg-black/50 backdrop-blur-md border border-[rgba(232,217,176,0.12)] text-[rgba(232,217,176,0.55)] hover:text-[#E8D9B0] hover:bg-black/70 hover:border-[rgba(232,217,176,0.25)] hover:scale-105 active:scale-95`;
@@ -203,15 +222,17 @@ export default function TourControls({ viewerRef }: TourControlsProps) {
 
         <div className="hidden sm:block w-px h-5 bg-[rgba(232,217,176,0.15)]" />
 
-        {/* Giroscopio — solo en móvil */}
-        <button
-          onClick={handleGyroscope}
-          className={`${isGyroActive ? btnActive : btnDefault} md:hidden`}
-          title="Giroscopio"
-          aria-label={isGyroActive ? 'Desactivar giroscopio' : 'Activar giroscopio'}
-        >
-          <Navigation size={18} />
-        </button>
+        {/* Giroscopio — solo en móvil con sensor de orientación */}
+        {gyroSupported && (
+          <button
+            onClick={handleGyroscope}
+            className={`${gyroEnabled ? btnActive : btnDefault} md:hidden`}
+            title="Mover el teléfono para mirar alrededor"
+            aria-label={gyroEnabled ? 'Desactivar giroscopio' : 'Activar giroscopio'}
+          >
+            <Navigation size={18} />
+          </button>
+        )}
 
         {/* Floor plan */}
         <button

@@ -411,6 +411,16 @@ const PanoViewer = forwardRef<PanoViewerHandle, PanoViewerProps>(
     const selectedVariants = useTourStore((s) => s.selectedVariants);
     const setSceneVariant = useTourStore((s) => s.setSceneVariant);
     const setCurrentScene = useTourStore((s) => s.setCurrentScene);
+    const gyroEnabled = useTourStore((s) => s.gyroEnabled);
+
+    /* Aplica/retira el control por giroscopio en un viewer concreto. */
+    const applyOrientation = useCallback((viewer: PannellumViewer | null, on: boolean) => {
+      if (!viewer) return;
+      try {
+        if (on) viewer.startOrientation?.();
+        else viewer.stopOrientation?.();
+      } catch { /* ignore */ }
+    }, []);
 
     /* ── Current scene memo ────────────────────────────────────── */
     const currentScene = scenes.find((s) => s.id === currentSceneId);
@@ -688,6 +698,11 @@ const PanoViewer = forwardRef<PanoViewerHandle, PanoViewerProps>(
         viewerRef.current = inactive === 'A' ? viewerARef.current : viewerBRef.current;
         containerRef.current = inactive === 'A' ? containerARef.current : containerBRef.current;
 
+        // El giroscopio se reinicia con cada viewer nuevo: re-aplicarlo si estaba activo
+        if (useTourStore.getState().gyroEnabled) {
+          applyOrientation(viewerRef.current, true);
+        }
+
         // Despues del crossfade, destruir el viewer viejo para liberar memoria
         const CROSSFADE_MS = mode === 'variant' ? 280 : 360;
         setTimeout(() => {
@@ -778,6 +793,11 @@ const PanoViewer = forwardRef<PanoViewerHandle, PanoViewerProps>(
         try { viewerRef.current?.stopOrientation?.(); } catch { /* ignore */ }
       },
     }));
+
+    /* ── Giroscopio: activar/desactivar en el viewer activo ─────── */
+    useEffect(() => {
+      applyOrientation(viewerRef.current, gyroEnabled);
+    }, [gyroEnabled, applyOrientation]);
 
     /* ── Yaw polling → floor plan radar ───────────────────────── */
     useEffect(() => {
