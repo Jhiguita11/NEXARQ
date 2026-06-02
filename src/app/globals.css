@@ -308,6 +308,29 @@
   background: rgba(212, 175, 55, 0.5);
 }
 
+/* Scrollbar de la barra lateral — usa el beige del propio sidebar */
+.sidebar-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(232, 217, 176, 0.3) transparent;
+}
+
+.sidebar-scrollbar::-webkit-scrollbar {
+  width: 5px;
+}
+
+.sidebar-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(232, 217, 176, 0.3);
+  border-radius: 3px;
+}
+
+.sidebar-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(232, 217, 176, 0.55);
+}
+
 /* ═══════════════════════════════════════════════════════════════════
    FULLSCREEN
    ═══════════════════════════════════════════════════════════════════ */

@@ -2,10 +2,30 @@
 
 import { useState } from 'react';
 import { useTourStore } from '@/lib/tour-store';
-import { Bed, Bath, Maximize2, Eye, ArrowRight } from 'lucide-react';
+import { Bed, Bath, Maximize2, Eye, ArrowRight, Clock } from 'lucide-react';
 import type { BuildingConfig, ApartmentConfig } from '@/lib/tour-types';
 import { assetPath } from '@/lib/asset-path';
 import BrandLogo from '@/components/brand-logo';
+
+/**
+ * Un apartamento se considera "disponible" si:
+ * 1. Su campo `available` es explicitamente true (o no esta definido), Y
+ * 2. Tiene al menos una escena cuya ruta de panorama no sea un placeholder.
+ *
+ * Si `available === false` en el config, siempre se oculta sin importar las escenas.
+ * Los apartamentos con panoramas pendientes se muestran como "Proxim." en el selector.
+ */
+function isApartmentAvailable(apt: ApartmentConfig): boolean {
+  // Campo explicit: false siempre oculta
+  if (apt.available === false) return false;
+  // Campo explicit: true siempre muestra (el dev confirma que tiene panoramas)
+  if (apt.available === true) return true;
+  // Auto-detect: tiene al menos una escena con ruta de panorama no-placeholder
+  return apt.scenes.length > 0 && apt.scenes.some((s) => {
+    const pano = s.panorama ?? '';
+    return pano.length > 0 && !pano.includes('_placeholder_') && !pano.includes('placeholder.jpg');
+  });
+}
 
 const BEIGE = '#E8D9B0';
 
@@ -35,7 +55,7 @@ export default function BuildingSelector() {
 
       {/* ── Top header ── */}
       <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-5 md:px-8 py-4 md:py-5">
-        <BrandLogo className="h-[58px] md:h-[72px]" />
+        <BrandLogo className="h-[76px] md:h-[96px]" />
 
         {/* Branding Constructora Meléndez */}
         <div className="flex flex-col items-end gap-1.5">
@@ -53,7 +73,7 @@ export default function BuildingSelector() {
           <img
             src={assetPath('/projects/melendez/branding/LogoMelendezHorizontal.png')}
             alt="Constructora Meléndez"
-            className="h-[26px] md:h-[34px]"
+            className="h-[46px] md:h-[60px]"
             style={{ width: 'auto', filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.45))' }}
             draggable={false}
           />
@@ -62,17 +82,21 @@ export default function BuildingSelector() {
 
       {/* ── Hotspots con card en hover ── */}
       <div className="absolute inset-0 z-[5]">
-        {currentBuilding.apartments.map((apt) => (
-          <BuildingHotspot
-            key={apt.id}
-            apt={apt}
-            building={currentBuilding}
-            isHovered={hoveredApt === apt.id}
-            onHover={() => setHoveredApt(apt.id)}
-            onLeave={() => setHoveredApt(null)}
-            onClick={() => setApartment(apt)}
-          />
-        ))}
+        {currentBuilding.apartments.map((apt) => {
+          const available = isApartmentAvailable(apt);
+          return (
+            <BuildingHotspot
+              key={apt.id}
+              apt={apt}
+              building={currentBuilding}
+              available={available}
+              isHovered={hoveredApt === apt.id}
+              onHover={() => setHoveredApt(apt.id)}
+              onLeave={() => setHoveredApt(null)}
+              onClick={() => available && setApartment(apt)}
+            />
+          );
+        })}
       </div>
 
       <style>{`
@@ -89,10 +113,11 @@ export default function BuildingSelector() {
 //  Building Hotspot — esfera + card en hover
 // ═══════════════════════════════════════════════════════════════════
 function BuildingHotspot({
-  apt, building, isHovered, onHover, onLeave, onClick,
+  apt, building, available, isHovered, onHover, onLeave, onClick,
 }: {
   apt: ApartmentConfig;
   building: BuildingConfig;
+  available: boolean;
   isHovered: boolean;
   onHover: () => void;
   onLeave: () => void;
@@ -150,15 +175,25 @@ function BuildingHotspot({
           </div>
 
           {/* CTA */}
-          <button
-            className="w-full flex items-center justify-center gap-2 py-2 rounded-xl text-[11px] font-semibold transition-all duration-200 cursor-pointer hover:brightness-110"
-            style={{ background: `${BEIGE}18`, color: BEIGE, border: `1px solid ${BEIGE}30` }}
-            onClick={onClick}
-          >
-            <Eye size={13} />
-            Iniciar Recorrido
-            <ArrowRight size={13} className="ml-auto" />
-          </button>
+          {available ? (
+            <button
+              className="w-full flex items-center justify-center gap-2 py-2 rounded-xl text-[11px] font-semibold transition-all duration-200 cursor-pointer hover:brightness-110"
+              style={{ background: `${BEIGE}18`, color: BEIGE, border: `1px solid ${BEIGE}30` }}
+              onClick={onClick}
+            >
+              <Eye size={13} />
+              Iniciar Recorrido
+              <ArrowRight size={13} className="ml-auto" />
+            </button>
+          ) : (
+            <div
+              className="w-full flex items-center justify-center gap-2 py-2 rounded-xl text-[11px] font-semibold select-none"
+              style={{ background: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.35)', border: '1px solid rgba(255,255,255,0.10)' }}
+            >
+              <Clock size={13} />
+              Próximamente
+            </div>
+          )}
         </div>
 
         {/* Conector triangular hacia el hotspot */}
@@ -177,31 +212,42 @@ function BuildingHotspot({
 
       {/* ── Esfera principal ── */}
       <button
-        className="relative cursor-pointer z-10"
+        className="relative z-10"
+        style={{ cursor: available ? 'pointer' : 'default' }}
         onClick={onClick}
         tabIndex={-1}
+        aria-disabled={!available}
       >
-        {/* Pulse ring */}
-        <div
-          className="absolute -inset-3 rounded-full border-2"
-          style={{
-            borderColor: `${BEIGE}60`,
-            animation: 'building-pulse 2.5s ease-out infinite',
-          }}
-        />
+        {/* Pulse ring — solo si disponible */}
+        {available && (
+          <div
+            className="absolute -inset-3 rounded-full border-2"
+            style={{
+              borderColor: `${BEIGE}60`,
+              animation: 'building-pulse 2.5s ease-out infinite',
+            }}
+          />
+        )}
 
         {/* Círculo */}
         <div
           className="relative w-11 h-11 rounded-full flex items-center justify-center transition-all duration-300"
           style={{
-            background: isHovered ? BEIGE : `${BEIGE}C0`,
-            transform: isHovered ? 'scale(1.2)' : 'scale(1)',
-            boxShadow: isHovered
+            background: available
+              ? (isHovered ? BEIGE : `${BEIGE}C0`)
+              : 'rgba(255,255,255,0.12)',
+            transform: available && isHovered ? 'scale(1.2)' : 'scale(1)',
+            boxShadow: available && isHovered
               ? `0 0 32px ${BEIGE}80, 0 0 0 3px ${BEIGE}30`
-              : `0 0 14px ${BEIGE}40`,
+              : available
+                ? `0 0 14px ${BEIGE}40`
+                : 'none',
           }}
         >
-          <Eye size={18} className="text-black" />
+          {available
+            ? <Eye size={18} className="text-black" />
+            : <Clock size={16} style={{ color: 'rgba(255,255,255,0.5)' }} />
+          }
         </div>
 
         {/* Nombre debajo siempre visible */}
@@ -222,9 +268,9 @@ function BuildingHotspot({
             style={{
               display: 'block',
               background: 'rgba(0,0,0,0.65)',
-              color: BEIGE,
+              color: available ? BEIGE : 'rgba(255,255,255,0.45)',
               backdropFilter: 'blur(8px)',
-              border: `1px solid ${BEIGE}18`,
+              border: `1px solid ${available ? `${BEIGE}18` : 'rgba(255,255,255,0.10)'}`,
             }}
           >
             {apt.name}

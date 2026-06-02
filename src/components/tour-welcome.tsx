@@ -21,7 +21,7 @@ export default function TourWelcome({ onStart }: Props) {
         className="absolute bottom-6 left-6"
         style={{ animation: 'welcome-fade-in 0.6s ease 0.2s both' }}
       >
-        <BrandLogo style={{ height: 56 }} />
+        <BrandLogo style={{ height: 76 }} />
       </div>
 
       <div

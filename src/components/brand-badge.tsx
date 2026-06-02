@@ -14,7 +14,7 @@ export default function BrandBadge() {
         borderColor: 'rgba(232,217,176,0.12)',
       }}
     >
-      <BrandLogo className="h-[22px] md:h-7" />
+      <BrandLogo className="h-[30px] md:h-[38px]" />
       <div className="w-px self-stretch" style={{ background: 'rgba(232,217,176,0.2)' }} />
       <div>
         <p className="text-xs font-bold tracking-wide max-w-[120px] sm:max-w-none truncate" style={{ color: '#E8D9B0' }}>

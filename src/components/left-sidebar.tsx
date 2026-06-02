@@ -16,10 +16,22 @@ import {
   Sparkles,
   Images,
   Glasses,
+  Clock,
 } from 'lucide-react';
 import { useTourStore } from '@/lib/tour-store';
 import { assetPath } from '@/lib/asset-path';
 import BrandLogo from '@/components/brand-logo';
+import type { ApartmentConfig } from '@/lib/tour-types';
+
+/** Misma logica que building-selector: respeta apt.available si esta definido. */
+function isApartmentAvailable(apt: ApartmentConfig): boolean {
+  if (apt.available === false) return false;
+  if (apt.available === true) return true;
+  return apt.scenes.length > 0 && apt.scenes.some((s) => {
+    const pano = s.panorama ?? '';
+    return pano.length > 0 && !pano.includes('_placeholder_') && !pano.includes('placeholder.jpg');
+  });
+}
 
 // Icono por tipo de habitacion (reutiliza la logica del sidebar anterior)
 function getRoomIcon(name: string) {
@@ -48,10 +60,40 @@ export default function LeftSidebar() {
     openGallery,
   } = useTourStore();
 
+  // Mapeo de scene ID del tour (Tipo B) → clave usada en vr.html
+  // vr.html usa claves cortas ('acceso', 'sala', etc.) en lugar de los IDs completos.
+  // Solo las escenas Tipo B tienen VR; si la escena activa no está en el mapa, se usa 'acceso'.
+  const VR_SCENE_MAP: Record<string, string> = {
+    'va-tb-acceso': 'acceso',
+    'va-tb-sala': 'sala',
+    'va-tb-estudio': 'estudio',
+    'va-tb-alcoba-principal': 'principal',
+    'va-tb-alcoba-auxiliar': 'aux',
+    'va-tb-alcoba-opcion-2': 'op2',
+    'va-tb-bano': 'bano',
+  };
+  const vrScene = VR_SCENE_MAP[currentSceneId] ?? 'acceso';
+  const vrHref = assetPath(`/vr.html?scene=${vrScene}`);
+
   // ID del apartamento expandido en el panel (puede ser distinto al selectedApartment)
   const [expandedAptId, setExpandedAptId] = useState<string | null>(
     selectedApartment?.id ?? null,
   );
+
+  // Modal de aviso cuando se intenta entrar a VR desde un dispositivo no compatible
+  const [showVrModal, setShowVrModal] = useState(false);
+
+  // El modo VR (A-Frame/WebXR) solo es compatible con visores Meta Quest.
+  // El navegador de Quest reporta "OculusBrowser"/"Quest" en el user agent.
+  const handleVrClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    const ua = typeof navigator !== 'undefined' ? navigator.userAgent : '';
+    const isQuest = /OculusBrowser|Quest/i.test(ua);
+    if (!isQuest) {
+      e.preventDefault();
+      setShowVrModal(true);
+    }
+    // En Quest: se permite la navegación normal del enlace hacia vr.html
+  };
 
   const apartments = config.buildings.flatMap((b) => b.apartments);
 
@@ -138,7 +180,7 @@ export default function LeftSidebar() {
             className="flex flex-col items-center px-5 pt-6 pb-5"
             style={{ borderBottom: '1px solid rgba(232,217,176,0.08)' }}
           >
-            <BrandLogo style={{ width: 120 }} />
+            <BrandLogo style={{ width: 160 }} />
             <span
               className="mt-2 text-[10px] tracking-widest uppercase select-none"
               style={{ color: 'rgba(232,217,176,0.35)' }}
@@ -148,7 +190,7 @@ export default function LeftSidebar() {
           </div>
 
           {/* ── Navegacion ── */}
-          <nav className="flex-1 flex flex-col overflow-y-auto overflow-x-hidden py-2">
+          <nav className="flex-1 flex flex-col overflow-y-auto overflow-x-hidden py-2 sidebar-scrollbar">
 
             {/* INICIO */}
             <button
@@ -177,50 +219,66 @@ export default function LeftSidebar() {
             {apartments.map((apt) => {
               const isExpanded = expandedAptId === apt.id;
               const isActive = selectedApartment?.id === apt.id;
+              const available = isApartmentAvailable(apt);
 
               return (
                 <div key={apt.id}>
                   {/* Cabecera del apartamento */}
                   <button
-                    onClick={() => handleSelectApartment(apt.id)}
+                    onClick={() => available && handleSelectApartment(apt.id)}
+                    disabled={!available}
                     className="flex items-center gap-3 px-5 py-3 w-full text-left transition-all duration-150"
                     style={{
-                      color: isActive ? '#E8D9B0' : 'rgba(232,217,176,0.65)',
+                      color: !available
+                        ? 'rgba(232,217,176,0.35)'
+                        : isActive ? '#E8D9B0' : 'rgba(232,217,176,0.65)',
                       background: isActive ? 'rgba(232,217,176,0.08)' : 'transparent',
+                      cursor: available ? 'pointer' : 'default',
                     }}
                     onMouseEnter={(e) => {
-                      if (!isActive) {
+                      if (!isActive && available) {
                         (e.currentTarget as HTMLButtonElement).style.color = '#E8D9B0';
                         (e.currentTarget as HTMLButtonElement).style.background = 'rgba(232,217,176,0.05)';
                       }
                     }}
                     onMouseLeave={(e) => {
-                      if (!isActive) {
+                      if (!isActive && available) {
                         (e.currentTarget as HTMLButtonElement).style.color = 'rgba(232,217,176,0.65)';
                         (e.currentTarget as HTMLButtonElement).style.background = 'transparent';
                       }
                     }}
                   >
-                    <Home
-                      size={14}
-                      className="shrink-0"
-                      style={{ opacity: isActive ? 1 : 0.6 }}
-                    />
+                    {available
+                      ? <Home size={14} className="shrink-0" style={{ opacity: isActive ? 1 : 0.6 }} />
+                      : <Clock size={14} className="shrink-0" style={{ opacity: 0.5 }} />
+                    }
                     <span className="flex-1 text-[12px] font-semibold tracking-widest uppercase truncate">
                       {apt.name}
                     </span>
-                    <ChevronRight
-                      size={14}
-                      className="shrink-0 transition-transform duration-200"
-                      style={{
-                        transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)',
-                        opacity: 0.5,
-                      }}
-                    />
+                    {available ? (
+                      <ChevronRight
+                        size={14}
+                        className="shrink-0 transition-transform duration-200"
+                        style={{
+                          transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)',
+                          opacity: 0.5,
+                        }}
+                      />
+                    ) : (
+                      <span
+                        className="shrink-0 text-[9px] tracking-wider uppercase px-1.5 py-0.5 rounded"
+                        style={{
+                          background: 'rgba(232,217,176,0.06)',
+                          color: 'rgba(232,217,176,0.35)',
+                        }}
+                      >
+                        Próx.
+                      </span>
+                    )}
                   </button>
 
-                  {/* Escenas del apartamento (submenu) */}
-                  {isExpanded && (
+                  {/* Escenas del apartamento (submenu) — solo si disponible */}
+                  {available && isExpanded && (
                     <div
                       className="flex flex-col"
                       style={{ background: 'rgba(0,0,0,0.2)' }}
@@ -369,7 +427,8 @@ export default function LeftSidebar() {
 
             {/* REALIDAD VIRTUAL — página A-Frame estática (Oculus Quest) */}
             <a
-              href={assetPath('/vr.html')}
+              href={vrHref}
+              onClick={handleVrClick}
               className="flex items-center gap-3 px-5 py-3 w-full text-left transition-all duration-150"
               style={{ color: 'rgba(232,217,176,0.65)', textDecoration: 'none' }}
               onMouseEnter={(e) => {
@@ -395,7 +454,7 @@ export default function LeftSidebar() {
             style={{ borderTop: '1px solid rgba(232,217,176,0.08)' }}
           >
             <p
-              className="overflow-y-auto pr-1 text-justify"
+              className="overflow-y-auto pr-1 text-justify sidebar-scrollbar"
               style={{
                 maxHeight: 96,
                 fontSize: 9,
@@ -438,7 +497,7 @@ export default function LeftSidebar() {
             <img
               src={assetPath('/projects/melendez/branding/LogoMelendezHorizontal.png')}
               alt="Constructora Meléndez"
-              style={{ height: 30, width: 'auto', opacity: 0.92 }}
+              style={{ height: 40, width: 'auto', opacity: 0.92 }}
               draggable={false}
             />
 
@@ -512,6 +571,98 @@ export default function LeftSidebar() {
           className="fixed top-0 left-0 h-full z-[69]"
           style={{ width: 12, background: 'transparent', cursor: 'pointer' }}
         />
+      )}
+
+      {/* ── Modal: VR solo disponible en visores Meta Quest ── */}
+      {showVrModal && (
+        <div
+          onClick={() => setShowVrModal(false)}
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-[120] flex items-center justify-center p-6"
+          style={{
+            background: 'rgba(10,8,6,0.75)',
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)',
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="flex flex-col items-center text-center"
+            style={{
+              maxWidth: 380,
+              width: '100%',
+              padding: '32px 28px',
+              background: 'rgba(18,14,10,0.98)',
+              border: '1px solid rgba(232,217,176,0.18)',
+              borderRadius: 14,
+              boxShadow: '0 20px 60px rgba(0,0,0,0.6)',
+            }}
+          >
+            <div
+              className="flex items-center justify-center"
+              style={{
+                width: 56,
+                height: 56,
+                borderRadius: '50%',
+                background: 'rgba(232,217,176,0.08)',
+                border: '1px solid rgba(232,217,176,0.18)',
+                marginBottom: 18,
+              }}
+            >
+              <Glasses size={26} style={{ color: '#E8D9B0' }} />
+            </div>
+            <h3
+              className="uppercase"
+              style={{
+                fontSize: 14,
+                fontWeight: 700,
+                letterSpacing: '0.18em',
+                color: '#E8D9B0',
+                marginBottom: 12,
+              }}
+            >
+              Modo Realidad Virtual
+            </h3>
+            <p
+              style={{
+                fontSize: 13,
+                lineHeight: 1.6,
+                color: 'rgba(232,217,176,0.7)',
+                marginBottom: 24,
+              }}
+            >
+              El recorrido inmersivo en realidad virtual requiere unas gafas{' '}
+              <strong style={{ color: '#E8D9B0' }}>Meta Quest (Oculus)</strong>.
+              Ábrelo desde el navegador de tus gafas para vivir la experiencia 360°
+              completa. En PC y móvil puedes continuar con el tour interactivo normal.
+            </p>
+            <button
+              type="button"
+              onClick={() => setShowVrModal(false)}
+              className="uppercase transition-all duration-150"
+              style={{
+                padding: '10px 28px',
+                fontSize: 11,
+                fontWeight: 700,
+                letterSpacing: '0.18em',
+                color: '#0A0806',
+                background: '#E8D9B0',
+                border: 'none',
+                borderRadius: 8,
+                cursor: 'pointer',
+              }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLButtonElement).style.background = '#f2e6c4';
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLButtonElement).style.background = '#E8D9B0';
+              }}
+            >
+              Entendido
+            </button>
+          </div>
+        </div>
       )}
     </>
   );

@@ -51,7 +51,7 @@ export default function PlaybackOverlay() {
         >
           <BrandLogo
             style={{
-              width: 220,
+              width: 300,
               animation: 'playback-intro-logo 2.6s cubic-bezier(0.22,1,0.36,1) forwards',
             }}
           />

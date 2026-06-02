@@ -90,7 +90,7 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
       }}>
         <BrandLogo
           style={{
-            width: 160,
+            width: 220,
             filter: `drop-shadow(0 0 14px ${BEIGE}28)`,
           }}
         />
@@ -99,7 +99,7 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
       {/* Tagline + progress — absoluto debajo del logo, no afecta centrado */}
       <div style={{
         position: 'absolute',
-        top: 'calc(50% + 172px)',
+        top: 'calc(50% + 210px)',
         left: 0,
         right: 0,
         display: 'flex',
@@ -153,14 +153,14 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
         <img
           src={BRAND('LogoMelendezHorizontal.png')}
           alt="Constructora Meléndez"
-          style={{ height: 24, width: 'auto', objectFit: 'contain' }}
+          style={{ height: 32, width: 'auto', objectFit: 'contain' }}
           draggable={false}
         />
-        <div style={{ width: 1, height: 18, background: `${BEIGE}25` }} />
+        <div style={{ width: 1, height: 22, background: `${BEIGE}25` }} />
         <img
           src={BRAND('MIES LOGO_Horizontal Blanco.png')}
           alt="MIESGROUP"
-          style={{ height: 20, width: 'auto', objectFit: 'contain' }}
+          style={{ height: 18, width: 'auto', objectFit: 'contain' }}
           draggable={false}
         />
       </div>
