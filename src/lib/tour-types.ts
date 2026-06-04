@@ -42,6 +42,13 @@ export interface SceneVariantConfig {
   linkSceneId?: string;
   /** Variante a activar automaticamente en la escena destino (opcional). */
   linkVariantId?: string;
+  /**
+   * Offset de yaw (grados) que se SUMA a la direccion de mirada al navegar por
+   * este enlace. Compensa que los dos renders del mismo cuarto no esten
+   * alineados al mismo "norte", para que al alternar la variante el usuario
+   * siga mirando al mismo punto fisico. Calibrar por prueba (puede ser negativo).
+   */
+  linkYawOffset?: number;
 }
 
 // Animación de cámara para el modo reproducción.
@@ -87,6 +94,12 @@ export interface FloorPlanRoomConfig {
   dotX?: number;
   /** Posicion % vertical del radar sobre imagen real (0-100) */
   dotY?: number;
+  /**
+   * Offset de yaw (grados) que se SUMA a la rotacion del cono del radar para
+   * esta habitacion. Compensa que el "norte" del render no coincida con el
+   * del plano, para que el cono apunte en la direccion correcta.
+   */
+  radarYawOffset?: number;
   adjacentTo?: string[];
 }
 

@@ -1,12 +1,12 @@
 import type { NextConfig } from "next";
 
-const isProd = process.env.NODE_ENV === "production";
-const repoName = "NEXARQ";
-
+// Despliegue en la RAIZ del dominio (sin subcarpeta).
+// Si en el futuro se publica bajo una subcarpeta, definir basePath/assetPrefix
+// con el nombre de esa carpeta (ej. basePath: "/valle-alto").
 const nextConfig: NextConfig = {
   output: "export",
-  basePath: isProd ? `/${repoName}` : "",
-  assetPrefix: isProd ? `/${repoName}/` : "",
+  basePath: "",
+  assetPrefix: "",
   trailingSlash: true,
   typescript: {
     ignoreBuildErrors: true,

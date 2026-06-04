@@ -544,6 +544,8 @@ export const valleAltoTipoB: TourConfig = {
                   label: 'Como alcoba',
                   linkSceneId: 'va-tb-alcoba-opcion-2',
                   linkVariantId: 'alcoba',
+                  // Estudio -> Espacio Multiple 2: alinea el norte de ambos renders
+                  linkYawOffset: -166.5,
                 },
               ],
               variantButton: { pitch: 3.4, yaw: -146.6 },
@@ -659,9 +661,11 @@ export const valleAltoTipoB: TourConfig = {
                   label: 'Como espacio multiple',
                   linkSceneId: 'va-tb-estudio',
                   linkVariantId: 'estudio',
+                  // Espacio Multiple 2 -> Estudio: alinea el norte de ambos renders
+                  linkYawOffset: 166.5,
                 },
               ],
-              variantButton: { pitch: 0.8, yaw: 140.1 },
+              variantButton: { pitch: -2.2, yaw: -33.8 },
               playbackAnimations: [
                 { from: { pitch: -13, yaw: 139.8 }, to: { pitch: -13, yaw: 85.4 } },
               ],
@@ -669,7 +673,7 @@ export const valleAltoTipoB: TourConfig = {
               hotspots: [
                 {
                   id: 'va-tb-op2-to-aux',
-                  pitch: -1, yaw: 1,
+                  pitch: -3.1, yaw: -178.2,
                   type: 'scene',
                   label: 'Alcoba Auxiliar',
                   description: 'Ir a la alcoba auxiliar',
@@ -765,6 +769,8 @@ export const valleAltoTipoB: TourConfig = {
                 label: 'Espacio Multiple 2',
                 x: 170, y: 410, width: 40, height: 40,
                 dotX: 18.6, dotY: 53.2,
+                // El render nuevo de op2 quedo girado respecto al plano
+                radarYawOffset: -153.5,
                 adjacentTo: ['va-tb-alcoba-auxiliar'],
               },
               // Bano Alcoba Principal — zona central

@@ -391,6 +391,9 @@ const PanoViewer = forwardRef<PanoViewerHandle, PanoViewerProps>(
     const activeLayerRef = useRef<'A' | 'B'>('A');
     const cssInjected = useRef(false);
     const transitionLock = useRef(false);
+    // Offset de yaw pendiente para la proxima transicion por enlace de variante
+    // (compensa la desalineacion de "norte" entre los dos renders del cuarto).
+    const pendingYawOffsetRef = useRef(0);
     // Animaciones de playback — handles del rAF activo y del timeout de arranque
     const playbackRafRef = useRef<number | null>(null);
     const playbackTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -524,6 +527,9 @@ const PanoViewer = forwardRef<PanoViewerHandle, PanoViewerProps>(
                 if (nextVariant.linkVariantId) {
                   setSceneVariant(nextVariant.linkSceneId, nextVariant.linkVariantId);
                 }
+                // Compensa la desalineacion de norte entre los dos renders:
+                // la transicion sumara este offset al yaw preservado.
+                pendingYawOffsetRef.current = nextVariant.linkYawOffset ?? 0;
                 setCurrentScene(nextVariant.linkSceneId);
               } else {
                 setSceneVariant(sceneId, nextVariant.id);
@@ -654,12 +660,14 @@ const PanoViewer = forwardRef<PanoViewerHandle, PanoViewerProps>(
           if (activeViewer) {
             preservedView = {
               pitch: activeViewer.getPitch(),
-              yaw: activeViewer.getYaw(),
+              yaw: activeViewer.getYaw() + pendingYawOffsetRef.current,
               hfov: activeViewer.getHfov(),
             };
           }
         } catch { /* ignore */ }
       }
+      // El offset se consume una sola vez por transicion.
+      pendingYawOffsetRef.current = 0;
 
       const isVariantOnly = lastSceneRef.current === currentSceneId;
       const mode: 'scene' | 'variant' = isVariantOnly ? 'variant' : 'scene';

@@ -435,7 +435,7 @@ export default function FloorPlan() {
                           {/* Cono de vision grande (rota con el yaw) */}
                           <g
                             className="pointer-events-none fp-radar-cone"
-                            transform={`rotate(${viewerYaw}, ${dot.cx}, ${dot.cy})`}
+                            transform={`rotate(${viewerYaw + (room.radarYawOffset ?? 0)}, ${dot.cx}, ${dot.cy})`}
                           >
                             <path
                               d={`M ${dot.cx} ${dot.cy} L ${lx} ${ly} A ${coneR} ${coneR} 0 0 1 ${rx2} ${ry2} Z`}
@@ -630,7 +630,7 @@ export default function FloorPlan() {
                         return (
                           <g
                             className="pointer-events-none fp-radar-cone"
-                            transform={`rotate(${viewerYaw}, ${center.cx}, ${center.cy})`}
+                            transform={`rotate(${viewerYaw + (room.radarYawOffset ?? 0)}, ${center.cx}, ${center.cy})`}
                           >
                             <path
                               d={`M ${center.cx} ${center.cy} L ${lx} ${ly} A ${coneR} ${coneR} 0 0 1 ${rx2} ${ry2} Z`}
