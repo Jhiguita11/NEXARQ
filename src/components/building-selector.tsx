@@ -181,9 +181,8 @@ function BuildingHotspot({
               style={{ background: `${BEIGE}18`, color: BEIGE, border: `1px solid ${BEIGE}30` }}
               onClick={onClick}
             >
-              <Eye size={13} />
               Iniciar Recorrido
-              <ArrowRight size={13} className="ml-auto" />
+              <ArrowRight size={13} />
             </button>
           ) : (
             <div
@@ -231,12 +230,17 @@ function BuildingHotspot({
 
         {/* Círculo */}
         <div
-          className="relative w-11 h-11 rounded-full flex items-center justify-center transition-all duration-300"
+          className="relative w-16 h-16 rounded-full flex items-center justify-center transition-all duration-300"
           style={{
             background: available
-              ? (isHovered ? BEIGE : `${BEIGE}C0`)
+              ? (isHovered
+                  ? 'radial-gradient(circle, rgba(48,41,34,0.92) 0%, rgba(30,26,22,0.65) 70%, rgba(30,26,22,0.25) 100%)'
+                  : 'radial-gradient(circle, rgba(34,29,24,0.80) 0%, rgba(25,21,18,0.50) 70%, rgba(25,21,18,0.15) 100%)')
               : 'rgba(255,255,255,0.12)',
+            backdropFilter: 'blur(7px)',
+            WebkitBackdropFilter: 'blur(7px)',
             transform: available && isHovered ? 'scale(1.2)' : 'scale(1)',
+            border: available ? '3px solid #FFFFFF' : '3px solid rgba(255,255,255,0.35)',
             boxShadow: available && isHovered
               ? `0 0 32px ${BEIGE}80, 0 0 0 3px ${BEIGE}30`
               : available
@@ -245,8 +249,8 @@ function BuildingHotspot({
           }}
         >
           {available
-            ? <Eye size={18} className="text-black" />
-            : <Clock size={16} style={{ color: 'rgba(255,255,255,0.5)' }} />
+            ? <Eye size={26} style={{ color: BEIGE }} />
+            : <Clock size={22} style={{ color: 'rgba(255,255,255,0.5)' }} />
           }
         </div>
 
@@ -254,17 +258,17 @@ function BuildingHotspot({
         <div
           style={{
             position: 'absolute',
-            top: 'calc(100% + 8px)',
+            top: 'calc(100% + 10px)',
             left: '50%',
             transform: 'translateX(-50%)',
-            width: 96,
+            width: 150,
             textAlign: 'center',
             opacity: isHovered ? 0 : 0.85,
             transition: 'opacity 0.2s ease',
           }}
         >
           <span
-            className="text-[11px] font-semibold px-2 py-1 rounded-xl leading-snug"
+            className="text-[12.5px] font-semibold px-3 py-1.5 rounded-xl leading-snug"
             style={{
               display: 'block',
               background: 'rgba(0,0,0,0.65)',
