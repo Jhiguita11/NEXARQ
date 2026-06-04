@@ -1,12 +1,14 @@
 import type { NextConfig } from "next";
 
-// Despliegue en la RAIZ del dominio (sin subcarpeta).
-// Si en el futuro se publica bajo una subcarpeta, definir basePath/assetPrefix
-// con el nombre de esa carpeta (ej. basePath: "/valle-alto").
+// Subcarpeta de despliegue, controlada por variable de entorno:
+//   • GitHub Pages  -> NEXT_PUBLIC_BASE_PATH="/NEXARQ" (lo pone el workflow)
+//   • Raiz dominio  -> sin variable (build local para la constructora)
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+
 const nextConfig: NextConfig = {
   output: "export",
-  basePath: "",
-  assetPrefix: "",
+  basePath: basePath,
+  assetPrefix: basePath ? `${basePath}/` : "",
   trailingSlash: true,
   typescript: {
     ignoreBuildErrors: true,

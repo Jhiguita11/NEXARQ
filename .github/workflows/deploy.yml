@@ -31,6 +31,8 @@ jobs:
         run: bun run build
         env:
           NODE_ENV: production
+          # GitHub Pages sirve el sitio bajo /NEXARQ/
+          NEXT_PUBLIC_BASE_PATH: /NEXARQ
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
