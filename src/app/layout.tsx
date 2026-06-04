@@ -9,6 +9,10 @@ const inter = Inter({
   display: "swap",
 });
 
+// Next.js NO prefija con basePath las URLs de metadata (icons/og). Lo hacemos
+// manualmente para que funcionen tanto en GitHub Pages (/NEXARQ) como en raiz.
+const BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+
 export const metadata: Metadata = {
   title: "VALLE ALTO | Recorrido Virtual 360°",
   description:
@@ -25,10 +29,10 @@ export const metadata: Metadata = {
   authors: [{ name: "NEXARQ 360" }],
   icons: {
     icon: [
-      { url: "/favicon.svg", type: "image/svg+xml" },
-      { url: "/icon.png", type: "image/png", sizes: "512x512" },
+      { url: `${BASE}/favicon.svg`, type: "image/svg+xml" },
+      { url: `${BASE}/icon.png`, type: "image/png", sizes: "512x512" },
     ],
-    apple: [{ url: "/apple-icon.png", sizes: "180x180" }],
+    apple: [{ url: `${BASE}/apple-icon.png`, sizes: "180x180" }],
   },
   openGraph: {
     title: "VALLE ALTO | Recorrido Virtual 360°",
@@ -37,7 +41,7 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: "/projects/melendez/valle-alto/panoramas/tipo-b/sala.jpg",
+        url: `${BASE}/projects/melendez/valle-alto/panoramas/tipo-b/sala.jpg`,
         width: 1200,
         height: 630,
         alt: "Sala Comedor — Apartamento Tipo B, Valle Alto",
@@ -48,7 +52,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "VALLE ALTO | Recorrido Virtual 360°",
     description: "Explore cada espacio de Valle Alto con tecnología panorámica interactiva 360°.",
-    images: ["/projects/melendez/valle-alto/panoramas/tipo-b/sala.jpg"],
+    images: [`${BASE}/projects/melendez/valle-alto/panoramas/tipo-b/sala.jpg`],
   },
 };
 
