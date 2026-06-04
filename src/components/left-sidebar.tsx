@@ -96,6 +96,7 @@ export default function LeftSidebar() {
   };
 
   const apartments = config.buildings.flatMap((b) => b.apartments);
+  const amenities = config.amenities;
 
   // Al entrar a un apartamento desde el sidebar, expandir su seccion y navegar
   const handleSelectApartment = (aptId: string) => {
@@ -109,6 +110,19 @@ export default function LeftSidebar() {
       // Solo navegar al apartamento si es distinto al actual
       if (!selectedApartment || selectedApartment.id !== aptId) {
         setApartment(apt);
+      }
+    }
+  };
+
+  // Amenities: se comporta como un "apartamento" especial (reutiliza el motor de escenas)
+  const handleSelectAmenities = () => {
+    if (!amenities) return;
+    if (expandedAptId === amenities.id) {
+      setExpandedAptId(null);
+    } else {
+      setExpandedAptId(amenities.id);
+      if (!selectedApartment || selectedApartment.id !== amenities.id) {
+        setApartment(amenities);
       }
     }
   };
@@ -353,28 +367,97 @@ export default function LeftSidebar() {
               );
             })}
 
-            {/* AMENITIES (placeholder — contenido se agregara despues) */}
-            <button
-              type="button"
-              disabled
-              className="flex items-center gap-3 px-5 py-3 w-full text-left transition-all duration-150 cursor-not-allowed"
-              style={{ color: 'rgba(232,217,176,0.45)' }}
-              title="Próximamente"
-            >
-              <Sparkles size={14} className="shrink-0 opacity-70" />
-              <span className="text-[12px] font-semibold tracking-widest uppercase">
-                Amenities
-              </span>
-              <span
-                className="ml-auto text-[9px] tracking-wider uppercase px-1.5 py-0.5 rounded"
-                style={{
-                  background: 'rgba(232,217,176,0.08)',
-                  color: 'rgba(232,217,176,0.4)',
-                }}
-              >
-                Próx.
-              </span>
-            </button>
+            {/* AMENITIES (recorridos 360 de zonas comunes) */}
+            {amenities && amenities.scenes.length > 0 && (() => {
+              const isExpanded = expandedAptId === amenities.id;
+              const isActive = selectedApartment?.id === amenities.id;
+              return (
+                <div>
+                  <button
+                    type="button"
+                    onClick={handleSelectAmenities}
+                    className="flex items-center gap-3 px-5 py-3 w-full text-left transition-all duration-150"
+                    style={{
+                      color: isActive ? '#E8D9B0' : 'rgba(232,217,176,0.65)',
+                      background: isActive ? 'rgba(232,217,176,0.08)' : 'transparent',
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!isActive) {
+                        (e.currentTarget as HTMLButtonElement).style.color = '#E8D9B0';
+                        (e.currentTarget as HTMLButtonElement).style.background = 'rgba(232,217,176,0.05)';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!isActive) {
+                        (e.currentTarget as HTMLButtonElement).style.color = 'rgba(232,217,176,0.65)';
+                        (e.currentTarget as HTMLButtonElement).style.background = 'transparent';
+                      }
+                    }}
+                  >
+                    <Sparkles size={14} className="shrink-0" style={{ opacity: isActive ? 1 : 0.7 }} />
+                    <span className="flex-1 text-[12px] font-semibold tracking-widest uppercase truncate">
+                      Amenities
+                    </span>
+                    <ChevronRight
+                      size={14}
+                      className="shrink-0 transition-transform duration-200"
+                      style={{
+                        transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)',
+                        opacity: 0.5,
+                      }}
+                    />
+                  </button>
+
+                  {/* Escenas de amenities (submenu) */}
+                  {isExpanded && (
+                    <div className="flex flex-col" style={{ background: 'rgba(0,0,0,0.2)' }}>
+                      {amenities.scenes.map((scene) => {
+                        const isCurrentScene = isActive && scene.id === currentSceneId;
+                        return (
+                          <button
+                            key={scene.id}
+                            onClick={() => {
+                              if (!isActive) setApartment(amenities);
+                              setCurrentScene(scene.id);
+                            }}
+                            className="flex items-center gap-3 pl-10 pr-4 py-2.5 w-full text-left transition-all duration-150"
+                            style={{
+                              color: isCurrentScene ? '#E8D9B0' : 'rgba(232,217,176,0.5)',
+                              background: isCurrentScene ? 'rgba(232,217,176,0.08)' : 'transparent',
+                            }}
+                            onMouseEnter={(e) => {
+                              if (!isCurrentScene) {
+                                (e.currentTarget as HTMLButtonElement).style.color = 'rgba(232,217,176,0.85)';
+                                (e.currentTarget as HTMLButtonElement).style.background = 'rgba(232,217,176,0.04)';
+                              }
+                            }}
+                            onMouseLeave={(e) => {
+                              if (!isCurrentScene) {
+                                (e.currentTarget as HTMLButtonElement).style.color = 'rgba(232,217,176,0.5)';
+                                (e.currentTarget as HTMLButtonElement).style.background = 'transparent';
+                              }
+                            }}
+                          >
+                            <span className="shrink-0" style={{ opacity: isCurrentScene ? 1 : 0.55 }}>
+                              {getRoomIcon(scene.name)}
+                            </span>
+                            <span className="flex-1 text-[11px] font-medium truncate">
+                              {scene.name}
+                            </span>
+                            {isCurrentScene && (
+                              <span
+                                className="shrink-0 w-1.5 h-1.5 rounded-full"
+                                style={{ background: '#E8D9B0' }}
+                              />
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
 
             {/* Separador */}
             <div style={{ height: 1, background: 'rgba(232,217,176,0.08)', margin: '2px 0' }} />

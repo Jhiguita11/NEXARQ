@@ -129,6 +129,12 @@ export interface ApartmentConfig {
   /** Optional hotspot position override (% of building image) */
   hotspotX?: number;
   hotspotY?: number;
+  /**
+   * Indica explicitamente si el apartamento esta disponible para recorrer.
+   * false = mostrar como "Proximamente" en el selector y sidebar.
+   * Si se omite, se determina automaticamente segun las escenas.
+   */
+  available?: boolean;
   /** Scenes for this apartment */
   scenes: SceneConfig[];
   /** Floor plan for this apartment */
@@ -173,4 +179,10 @@ export interface TourConfig {
   gallery?: GalleryImageConfig[];
   /** Plantas arquitectonicas del proyecto (sin burbujas) */
   plantas?: GalleryImageConfig[];
+  /**
+   * Amenities del proyecto como recorridos 360 (lobby, piscina, etc).
+   * Se modela como un "apartamento" especial para reutilizar el motor de
+   * escenas: cada amenity es una escena navegable desde el sidebar.
+   */
+  amenities?: ApartmentConfig;
 }

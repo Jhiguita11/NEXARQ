@@ -1,0 +1,95 @@
+COORDENADAS BURBUJAS TIPO A
+
+VISTA ACCESO
+
+Burbuja Sala Comedor
+pitch: -1, yaw: -59.4
+
+burbuja alcoba auxiliar
+pitch: -0.9, yaw: -26.3
+
+burbuja alcoba principal
+NO VISIBLE
+
+burbuja espacio multiple
+pitch: -0.4, yaw: -7.1
+
+
+VISTA SALA COMEDOR
+
+
+burbuja acceso 
+pitch: -0.8, yaw: 121.1
+
+
+burbuja alcoba principal
+pitch: -0.8, yaw: 65.8
+
+
+burbuja espacio multiple
+pitch: -1.4, yaw: 42.8
+
+
+VISTA ALCOBA AUXILIAR
+
+burbuja espacio multiple
+pitch: -17.8, yaw: 110.5
+
+burbuja alcoba principal
+pitch: -2.6, yaw: 111.2
+
+
+VISTA ALCOBA PRINCIPAL
+
+burbuja baño alcoba principal
+pitch: -1.7, yaw: 121.6
+
+
+burbuja acceso
+pitch: -1.7, yaw: -151.5
+
+burbuja espacio multiple
+NO VISIBLE
+
+VISTA ESPACIO MULTIPLE
+
+burbuja ver como alcoba
+pitch: -1.7, yaw: -151.5
+
+burbuja alcoba auxiliar
+pitch: -2, yaw: -117.5
+
+burbuja acceso
+pitch: -1.4, yaw: 171.7
+
+burbuja sala comedor
+pitch: -5.2, yaw: -144.1
+
+burbuja alcoba `principal
+pitch: -1, yaw: 138.6
+
+
+VISTA ESPACIO MULTIPLE 
+
+burbuja alcoba auxiliar 
+NO VISIBLE
+
+burbuja ver como espacio multiple
+pitch: -1.7, yaw: -151.5
+
+VISTA BAÑO ALCOBA PRINCIPAL
+
+burbuja alcoba principal 
+pitch: 0.8, yaw: -5.4
+
+coordenadas floor plan 
+// Posiciones calibradas — pegar dotX/dotY en cada room
+  { sceneId: 'va-ta-acceso', dotX: 65.7, dotY: 83.4 },
+  { sceneId: 'va-ta-sala', dotX: 48.1, dotY: 66.6 },
+  { sceneId: 'va-ta-estudio', dotX: 60.2, dotY: 38.5 },
+  { sceneId: 'va-ta-alcoba-principal', dotX: 73.2, dotY: 45.8 },
+  { sceneId: 'va-ta-alcoba-auxiliar', dotX: 50.8, dotY: 44.5 },
+  { sceneId: 'va-ta-alcoba-opcion-2', dotX: 20.4, dotY: 41.9 },
+  { sceneId: 'va-ta-bano', dotX: 78.4, dotY: 61.4 },
+
+  

@@ -117,6 +117,8 @@ export default function FloorPlan() {
   }, [expanded]);
 
   if (!showFloorPlan) return null;
+  // Sin habitaciones (p.ej. Amenities) no hay plano que mostrar.
+  if (!rooms.length) return null;
 
   const svgWidth = expanded ? 900 : 320;
   const svgHeight = expanded ? 600 : 240;

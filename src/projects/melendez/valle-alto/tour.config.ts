@@ -26,6 +26,7 @@ const PANO_A  = (path: string) => assetPath(`/projects/melendez/valle-alto/panor
 const PANO_B  = (path: string) => assetPath(`/projects/melendez/valle-alto/panoramas/tipo-b/${path}`);
 const BRAND   = (path: string) => assetPath(`/projects/melendez/branding/${path}`);
 const PLAN    = (path: string) => assetPath(`/projects/melendez/valle-alto/floor-plans/${path}`);
+const AMENITY = (path: string) => assetPath(`/projects/melendez/valle-alto/images/exterior/${path}`);
 
 // --- Bloque de marca compartido por ambos tours ---
 const sharedBrand = {
@@ -49,8 +50,15 @@ const sharedTheme = {
 // ============================================================
 //  TOUR — APARTAMENTO TIPO A
 //
-//  Escenas: Entrada · Sala · Cocina · Alcoba Principal · Bano Principal · Balcon
+//  Escenas: Acceso · Sala Comedor · Espacio Multiple · Alcoba Principal
+//           Alcoba Auxiliar · Espacio Multiple 2 · Bano
 //  Panoramas: public/projects/melendez/valle-alto/panoramas/tipo-a/
+//    acceso.jpg · sala.jpg · estudio.jpg · alcoba-principal.jpg
+//    alcoba-auxiliar.jpg · alcoba-opcion-2.jpg · bano.jpg
+//
+//  NOTA: estructura espejada del Tipo B. Los angulos de hotspots
+//  y playbackAnimations son un PUNTO DE PARTIDA — recalibrar con ?debug=1
+//  ya que los renders del Tipo A tienen encuadres propios.
 // ============================================================
 export const valleAltoTipoA: TourConfig = {
 
@@ -68,7 +76,7 @@ export const valleAltoTipoA: TourConfig = {
         {
           id: 'va-tipo-a',
           name: 'Apartamento Tipo A',
-          description: 'Entrada · Sala · Cocina · Alcoba Principal · Bano Principal · Balcon',
+          description: 'Acceso · Sala Comedor · Espacio Multiple · 2 Alcobas · Bano',
           floor: 0,
           position: 0,
           bedrooms: 2,
@@ -77,91 +85,129 @@ export const valleAltoTipoA: TourConfig = {
 
           scenes: [
 
-            // --- ESCENA: ENTRADA ---
+            // --- ESCENA: ACCESO ---
             {
-              id: 'va-ta-entrada',
-              name: 'Entrada',
-              description: 'Hall de acceso',
-              panorama: PANO_A('entrada.jpg'),
+              id: 'va-ta-acceso',
+              name: 'Acceso',
+              description: 'Hall de entrada',
+              panorama: PANO_A('acceso.jpg'),
               defaultView: { pitch: 0, yaw: 0, hfov: 100 },
               hotspots: [
                 {
-                  id: 'va-ta-ent-to-sala',
-                  pitch: 0, yaw: 45,
+                  id: 'va-ta-acc-to-sala',
+                  pitch: -1, yaw: -59.4,
                   type: 'scene',
-                  label: 'Sala',
+                  label: 'Sala Comedor',
                   description: 'Ir a la sala',
                   targetSceneId: 'va-ta-sala',
                 },
                 {
-                  id: 'va-ta-ent-to-cocina',
-                  pitch: 0, yaw: -45,
+                  id: 'va-ta-acc-to-alc-aux',
+                  pitch: -0.9, yaw: -26.3,
                   type: 'scene',
-                  label: 'Cocina',
-                  description: 'Ir a la cocina',
-                  targetSceneId: 'va-ta-cocina',
+                  label: 'Alcoba Auxiliar',
+                  description: 'Ir a la alcoba auxiliar',
+                  targetSceneId: 'va-ta-alcoba-auxiliar',
+                },
+                {
+                  id: 'va-ta-acc-to-estudio',
+                  pitch: -0.4, yaw: -7.1,
+                  type: 'scene',
+                  label: 'Espacio Multiple',
+                  description: 'Ir al espacio multiple',
+                  targetSceneId: 'va-ta-estudio',
                 },
               ],
             },
 
-            // --- ESCENA: SALA ---
+            // --- ESCENA: SALA COMEDOR ---
             {
               id: 'va-ta-sala',
-              name: 'Sala',
-              description: 'Sala y comedor',
+              name: 'Sala Comedor',
+              description: 'Sala y comedor integrados',
               panorama: PANO_A('sala.jpg'),
               defaultView: { pitch: 0, yaw: 0, hfov: 100 },
               hotspots: [
                 {
-                  id: 'va-ta-sala-to-ent',
-                  pitch: 0, yaw: 180,
+                  id: 'va-ta-sala-to-acceso',
+                  pitch: -0.8, yaw: 121.1,
                   type: 'scene',
-                  label: 'Entrada',
-                  description: 'Ir a la entrada',
-                  targetSceneId: 'va-ta-entrada',
+                  label: 'Acceso',
+                  description: 'Ir al acceso',
+                  targetSceneId: 'va-ta-acceso',
                 },
                 {
-                  id: 'va-ta-sala-to-cocina',
-                  pitch: 0, yaw: 90,
-                  type: 'scene',
-                  label: 'Cocina',
-                  description: 'Ir a la cocina',
-                  targetSceneId: 'va-ta-cocina',
-                },
-                {
-                  id: 'va-ta-sala-to-alcoba',
-                  pitch: 0, yaw: -90,
+                  id: 'va-ta-sala-to-alc-ppal',
+                  pitch: -0.8, yaw: 65.8,
                   type: 'scene',
                   label: 'Alcoba Principal',
                   description: 'Ir a la alcoba principal',
                   targetSceneId: 'va-ta-alcoba-principal',
                 },
                 {
-                  id: 'va-ta-sala-to-balcon',
-                  pitch: 0, yaw: 0,
+                  id: 'va-ta-sala-to-estudio',
+                  pitch: -1.4, yaw: 42.8,
                   type: 'scene',
-                  label: 'Balcon',
-                  description: 'Ir al balcon',
-                  targetSceneId: 'va-ta-balcon',
+                  label: 'Espacio Multiple',
+                  description: 'Ir al espacio multiple',
+                  targetSceneId: 'va-ta-estudio',
                 },
               ],
             },
 
-            // --- ESCENA: COCINA ---
+            // --- ESCENA: ESPACIO MULTIPLE ---
             {
-              id: 'va-ta-cocina',
-              name: 'Cocina',
-              description: 'Cocina integral',
-              panorama: PANO_A('cocina.jpg'),
+              id: 'va-ta-estudio',
+              name: 'Espacio Multiple',
+              description: 'Zona flexible / espacio multiple',
+              panorama: PANO_A('estudio.jpg'),
               defaultView: { pitch: 0, yaw: 0, hfov: 100 },
+              variants: [
+                {
+                  id: 'estudio',
+                  label: 'Como estudio',
+                  panorama: PANO_A('estudio.jpg'),
+                },
+                {
+                  id: 'alcoba',
+                  label: 'Como alcoba',
+                  linkSceneId: 'va-ta-alcoba-opcion-2',
+                  linkVariantId: 'alcoba',
+                },
+              ],
+              variantButton: { pitch: -1.3, yaw: -24.1 },
               hotspots: [
                 {
-                  id: 'va-ta-coc-to-sala',
-                  pitch: 0, yaw: 0,
+                  id: 'va-ta-est-to-sala',
+                  pitch: -5.2, yaw: -144.1,
                   type: 'scene',
-                  label: 'Sala',
-                  description: 'Ir a la sala',
+                  label: 'Sala Comedor',
+                  description: 'Volver a la sala',
                   targetSceneId: 'va-ta-sala',
+                },
+                {
+                  id: 'va-ta-est-to-acceso',
+                  pitch: -1.4, yaw: 171.7,
+                  type: 'scene',
+                  label: 'Acceso',
+                  description: 'Ir al acceso',
+                  targetSceneId: 'va-ta-acceso',
+                },
+                {
+                  id: 'va-ta-est-to-alc-aux',
+                  pitch: -2, yaw: -117.5,
+                  type: 'scene',
+                  label: 'Alcoba Auxiliar',
+                  description: 'Ir a la alcoba auxiliar',
+                  targetSceneId: 'va-ta-alcoba-auxiliar',
+                },
+                {
+                  id: 'va-ta-est-to-alc-ppal',
+                  pitch: -1, yaw: 138.6,
+                  type: 'scene',
+                  label: 'Alcoba Principal',
+                  description: 'Ir a la alcoba principal',
+                  targetSceneId: 'va-ta-alcoba-principal',
                 },
               ],
             },
@@ -175,122 +221,170 @@ export const valleAltoTipoA: TourConfig = {
               defaultView: { pitch: 0, yaw: 0, hfov: 100 },
               hotspots: [
                 {
-                  id: 'va-ta-alc-to-bano',
-                  pitch: 0, yaw: 90,
+                  id: 'va-ta-alc-ppal-to-bano',
+                  pitch: -1.7, yaw: 121.6,
                   type: 'scene',
-                  label: 'Bano Principal',
-                  description: 'Ir al bano principal',
-                  targetSceneId: 'va-ta-bano-principal',
+                  label: 'Baño Alcoba Principal',
+                  description: 'Ir al baño',
+                  targetSceneId: 'va-ta-bano',
                 },
                 {
-                  id: 'va-ta-alc-to-sala',
-                  pitch: 0, yaw: 180,
+                  id: 'va-ta-alc-ppal-to-acceso',
+                  pitch: -1.7, yaw: -151.5,
                   type: 'scene',
-                  label: 'Sala',
-                  description: 'Volver a la sala',
-                  targetSceneId: 'va-ta-sala',
+                  label: 'Acceso',
+                  description: 'Ir al acceso',
+                  targetSceneId: 'va-ta-acceso',
                 },
               ],
             },
 
-            // --- ESCENA: BANO PRINCIPAL ---
+            // --- ESCENA: ALCOBA AUXILIAR ---
             {
-              id: 'va-ta-bano-principal',
-              name: 'Bano Principal',
-              description: 'Bano privado de la alcoba principal',
-              panorama: PANO_A('bano-principal.jpg'),
+              id: 'va-ta-alcoba-auxiliar',
+              name: 'Alcoba Auxiliar',
+              description: 'Segunda alcoba',
+              panorama: PANO_A('alcoba-auxiliar.jpg'),
               defaultView: { pitch: 0, yaw: 0, hfov: 100 },
               hotspots: [
                 {
-                  id: 'va-ta-bano-to-alc',
-                  pitch: 0, yaw: 0,
+                  id: 'va-ta-alc-aux-to-estudio',
+                  pitch: -17.8, yaw: 110.5,
+                  type: 'scene',
+                  label: 'Espacio Multiple',
+                  description: 'Ir al espacio multiple',
+                  targetSceneId: 'va-ta-estudio',
+                },
+                {
+                  id: 'va-ta-alc-aux-to-alc-ppal',
+                  pitch: -2.6, yaw: 111.2,
                   type: 'scene',
                   label: 'Alcoba Principal',
-                  description: 'Volver a la alcoba',
+                  description: 'Ir a la alcoba principal',
                   targetSceneId: 'va-ta-alcoba-principal',
                 },
               ],
             },
 
-            // --- ESCENA: BALCON ---
+            // --- ESCENA: ESPACIO MULTIPLE 2 ---
             {
-              id: 'va-ta-balcon',
-              name: 'Balcon',
-              description: 'Balcon con vista al conjunto',
-              panorama: PANO_A('balcon.jpg'),
+              id: 'va-ta-alcoba-opcion-2',
+              name: 'Espacio Multiple 2',
+              description: 'Alcoba adicional / cuarto flexible',
+              panorama: PANO_A('alcoba-opcion-2.jpg'),
+              defaultView: { pitch: 0, yaw: 0, hfov: 100 },
+              variants: [
+                {
+                  id: 'alcoba',
+                  label: 'Como alcoba',
+                  panorama: PANO_A('alcoba-opcion-2.jpg'),
+                },
+                {
+                  id: 'multiple',
+                  label: 'Como espacio multiple',
+                  linkSceneId: 'va-ta-estudio',
+                  linkVariantId: 'estudio',
+                },
+              ],
+              variantButton: { pitch: -1.3, yaw: -24.1 },
+              // Sin hotspots de escena: desde aqui solo se sale con el boton
+              // de variante "ver como espacio multiple" (navega de vuelta al estudio).
+              hotspots: [],
+            },
+
+            // --- ESCENA: BAÑO ALCOBA PRINCIPAL ---
+            {
+              id: 'va-ta-bano',
+              name: 'Baño Alcoba Principal',
+              description: 'Baño de la alcoba principal',
+              panorama: PANO_A('bano.jpg'),
               defaultView: { pitch: 0, yaw: 0, hfov: 100 },
               hotspots: [
                 {
-                  id: 'va-ta-bal-to-sala',
-                  pitch: 0, yaw: 180,
+                  id: 'va-ta-bano-to-alc-ppal',
+                  pitch: 0.8, yaw: -5.4,
                   type: 'scene',
-                  label: 'Sala',
-                  description: 'Volver a la sala',
-                  targetSceneId: 'va-ta-sala',
+                  label: 'Alcoba Principal',
+                  description: 'Volver a la alcoba principal',
+                  targetSceneId: 'va-ta-alcoba-principal',
                 },
               ],
             },
 
           ],
 
+          // --- PLANO DE PLANTA TIPO A ---
+          // Imagen real: CM_VA_Plantas Ambientadas_Piso 1_Obra Blanca_APTO A LUPA_Final_T.jpg
+          // dotX/dotY en % del area total de la imagen (detectados de la marcacion de burbujas cian)
+          // Los rects son areas de click centradas en el dot (no se renderizan en modo imagen)
           floorPlan: {
-            width: 300,
-            height: 200,
-            background: 'rgba(0, 0, 0, 0.6)',
+            width: 1000,
+            height: 800,
+            background: 'transparent',
+            backgroundImage: PLAN('CM_VA_Plantas Ambientadas_Piso 1_Obra Blanca_APTO A LUPA_Final_T.jpg'),
             rooms: [
+              // Acceso — entrada principal (parte inferior)
               {
-                id: 'fp-ta-entrada',
-                sceneId: 'va-ta-entrada',
-                label: 'Entrada',
-                x: 120, y: 80, width: 60, height: 40,
-                fill: 'rgba(255,255,255,0.08)',
-                stroke: 'rgba(255,255,255,0.2)',
-                adjacentTo: ['va-ta-sala'],
+                id: 'fp-ta-acceso',
+                sceneId: 'va-ta-acceso',
+                label: 'Acceso',
+                x: 637, y: 647, width: 40, height: 40,
+                dotX: 65.7, dotY: 83.4,
+                adjacentTo: ['va-ta-sala', 'va-ta-alcoba-auxiliar', 'va-ta-estudio', 'va-ta-alcoba-principal'],
               },
+              // Sala Comedor — centro
               {
                 id: 'fp-ta-sala',
                 sceneId: 'va-ta-sala',
-                label: 'Sala',
-                x: 10, y: 10, width: 100, height: 100,
-                fill: 'rgba(255,255,255,0.08)',
-                stroke: 'rgba(255,255,255,0.2)',
-                adjacentTo: ['va-ta-entrada', 'va-ta-cocina', 'va-ta-alcoba-principal', 'va-ta-balcon'],
+                label: 'Sala Comedor',
+                x: 461, y: 513, width: 40, height: 40,
+                dotX: 48.1, dotY: 66.6,
+                adjacentTo: ['va-ta-acceso', 'va-ta-alcoba-principal', 'va-ta-estudio'],
               },
+              // Espacio Multiple — habitacion central con la mesa redonda
               {
-                id: 'fp-ta-cocina',
-                sceneId: 'va-ta-cocina',
-                label: 'Cocina',
-                x: 120, y: 10, width: 80, height: 60,
-                fill: 'rgba(255,255,255,0.08)',
-                stroke: 'rgba(255,255,255,0.2)',
-                adjacentTo: ['va-ta-sala'],
+                id: 'fp-ta-estudio',
+                sceneId: 'va-ta-estudio',
+                label: 'Espacio Multiple',
+                x: 582, y: 288, width: 40, height: 40,
+                dotX: 60.2, dotY: 38.5,
+                adjacentTo: ['va-ta-sala', 'va-ta-acceso', 'va-ta-alcoba-principal', 'va-ta-alcoba-auxiliar', 'va-ta-alcoba-opcion-2'],
               },
+              // Alcoba Principal — derecha
               {
-                id: 'fp-ta-alcoba',
+                id: 'fp-ta-alc-ppal',
                 sceneId: 'va-ta-alcoba-principal',
-                label: 'Alc. Ppal',
-                x: 210, y: 10, width: 80, height: 90,
-                fill: 'rgba(255,255,255,0.08)',
-                stroke: 'rgba(255,255,255,0.2)',
-                adjacentTo: ['va-ta-sala', 'va-ta-bano-principal'],
+                label: 'Alcoba Principal',
+                x: 712, y: 346, width: 40, height: 40,
+                dotX: 73.2, dotY: 45.8,
+                adjacentTo: ['va-ta-estudio', 'va-ta-bano', 'va-ta-sala', 'va-ta-acceso', 'va-ta-alcoba-auxiliar'],
               },
+              // Alcoba Auxiliar — centro superior
+              {
+                id: 'fp-ta-alc-aux',
+                sceneId: 'va-ta-alcoba-auxiliar',
+                label: 'Alcoba Auxiliar',
+                x: 488, y: 336, width: 40, height: 40,
+                dotX: 50.8, dotY: 44.5,
+                adjacentTo: ['va-ta-acceso', 'va-ta-estudio', 'va-ta-alcoba-principal'],
+              },
+              // Espacio Multiple 2 — pieza separada izquierda
+              {
+                id: 'fp-ta-alc-op2',
+                sceneId: 'va-ta-alcoba-opcion-2',
+                label: 'Espacio Multiple 2',
+                x: 184, y: 315, width: 40, height: 40,
+                dotX: 20.4, dotY: 41.9,
+                adjacentTo: ['va-ta-estudio'],
+              },
+              // Bano Alcoba Principal — derecha (vestier/wc alcoba)
               {
                 id: 'fp-ta-bano',
-                sceneId: 'va-ta-bano-principal',
-                label: 'Bano',
-                x: 210, y: 110, width: 80, height: 50,
-                fill: 'rgba(255,255,255,0.08)',
-                stroke: 'rgba(255,255,255,0.2)',
+                sceneId: 'va-ta-bano',
+                label: 'Baño Alcoba Principal',
+                x: 784, y: 451, width: 40, height: 40,
+                dotX: 78.4, dotY: 61.4,
                 adjacentTo: ['va-ta-alcoba-principal'],
-              },
-              {
-                id: 'fp-ta-balcon',
-                sceneId: 'va-ta-balcon',
-                label: 'Balcon',
-                x: 10, y: 120, width: 100, height: 60,
-                fill: 'rgba(255,255,255,0.08)',
-                stroke: 'rgba(255,255,255,0.2)',
-                adjacentTo: ['va-ta-sala'],
               },
             ],
           },
@@ -694,6 +788,62 @@ export const valleAltoTipoB: TourConfig = {
   showWelcome: true,
 };
 
+// ============================================================
+//  AMENITIES — recorridos 360 de zonas comunes
+//
+//  Se modela como un "apartamento" especial (id: 'amenities') para
+//  reutilizar el motor de escenas. Cada amenity es una escena
+//  independiente (sin hotspots): se navega entre ellas desde el sidebar.
+//  Panoramas: public/projects/melendez/valle-alto/images/exterior/
+// ============================================================
+const amenities: ApartmentConfig = {
+  id: 'amenities',
+  name: 'Amenities',
+  description: 'Zonas comunes · Lobby · Piscina · Parqueadero · Mascotas',
+  floor: 0,
+  position: 0,
+  bedrooms: 0,
+  bathrooms: 0,
+  area: 0,
+  available: true,
+  scenes: [
+    {
+      id: 'va-am-lobby',
+      name: 'Lobby',
+      description: 'Lobby de acceso',
+      panorama: AMENITY('CM_VALLE ALTO_LOBBY.jpg'),
+      defaultView: { pitch: 0, yaw: 0, hfov: 100 },
+      hotspots: [],
+    },
+    {
+      id: 'va-am-piscina',
+      name: 'Piscina',
+      description: 'Zona de piscina',
+      panorama: AMENITY('CM_VALLE ALTO_PISCINA.jpg'),
+      defaultView: { pitch: 0, yaw: 0, hfov: 100 },
+      hotspots: [],
+    },
+    {
+      id: 'va-am-parqueadero',
+      name: 'Parqueadero',
+      description: 'Zona de parqueaderos',
+      panorama: AMENITY('CM_VALLE ALTO_PARQUEADERO.jpg'),
+      defaultView: { pitch: 0, yaw: 0, hfov: 100 },
+      hotspots: [],
+    },
+    {
+      id: 'va-am-mascotas',
+      name: 'Zona de Mascotas',
+      description: 'Zona para mascotas',
+      panorama: AMENITY('CM_VALLE ALTO_MASCOTAS.jpg'),
+      defaultView: { pitch: 0, yaw: 0, hfov: 100 },
+      hotspots: [],
+    },
+  ],
+  // Las amenities no tienen plano de planta.
+  floorPlan: { width: 1000, height: 800, background: 'transparent', rooms: [] },
+};
+
 // --- Config combinado: ambas tipologias en un solo edificio ---
 // Este es el export por defecto — muestra Tipo A y Tipo B en el selector.
 const valleAlto: TourConfig = {
@@ -715,32 +865,38 @@ const valleAlto: TourConfig = {
   showFloorPlan: true,
   showWelcome: true,
 
+  // ─── Amenities (recorridos 360 de zonas comunes) ────────────────
+  amenities,
+
   // ─── Galeria de renders del proyecto ────────────────────────────
   // Agregar aqui los renders de gimnasio, piscina, zonas comunes, etc.
   // Las imagenes deben estar en public/projects/melendez/valle-alto/images/renders/
   gallery: [
-    // Ejemplo:
-    // { id: 'gym',      src: assetPath('/projects/melendez/valle-alto/images/renders/gimnasio.jpg'),  title: 'Gimnasio' },
-    // { id: 'pool',     src: assetPath('/projects/melendez/valle-alto/images/renders/piscina.jpg'),   title: 'Piscina' },
-    // { id: 'lobby',    src: assetPath('/projects/melendez/valle-alto/images/renders/lobby.jpg'),     title: 'Lobby' },
-    // { id: 'fachada',  src: assetPath('/projects/melendez/valle-alto/images/exterior/fachada.jpg'),  title: 'Fachada' },
+    { id: 'sala',          src: assetPath('/projects/melendez/valle-alto/images/renders/sala.jpg'),          title: 'Sala' },
+    { id: 'cocina',        src: assetPath('/projects/melendez/valle-alto/images/renders/cocina.jpg'),        title: 'Cocina' },
+    { id: 'estudio',       src: assetPath('/projects/melendez/valle-alto/images/renders/estudio.jpg'),       title: 'Estudio' },
+    { id: 'hab-principal', src: assetPath('/projects/melendez/valle-alto/images/renders/hab-principal.jpg'), title: 'Habitación Principal' },
+    { id: 'hab-auxiliar',  src: assetPath('/projects/melendez/valle-alto/images/renders/hab-auxiliar.jpg'),  title: 'Habitación Auxiliar' },
+    { id: 'bano',          src: assetPath('/projects/melendez/valle-alto/images/renders/bano.jpg'),          title: 'Baño' },
+    { id: 'balcon',        src: assetPath('/projects/melendez/valle-alto/images/renders/balcon.jpg'),        title: 'Balcón' },
+    { id: 'zona-ropas',    src: assetPath('/projects/melendez/valle-alto/images/renders/zona-ropas.jpg'),    title: 'Zona de Ropas' },
+    { id: 'gimnasio',      src: assetPath('/projects/melendez/valle-alto/images/renders/gimnasio.jpg'),      title: 'Gimnasio' },
   ],
 
   // ─── Plantas arquitectonicas (sin burbujas) ─────────────────────
   plantas: [
+    {
+      id: 'planta-tipo-a',
+      src: assetPath('/projects/melendez/valle-alto/floor-plans/CM_VA_Plantas Ambientadas_Piso 1_Obra Blanca_APTO A LUPA_Final_T.jpg'),
+      title: 'Apartamento Tipo A',
+      caption: 'Área construida 72 m²',
+    },
     {
       id: 'planta-tipo-b',
       src: assetPath('/projects/melendez/valle-alto/floor-plans/CM_VA_Plantas Ambientadas_Piso 1_Obra Blanca_APTO B LUPA_Final_T.jpg'),
       title: 'Apartamento Tipo B',
       caption: 'Área construida 60 m² · Área privada 55 m²',
     },
-    // Cuando este la planta del Tipo A, agregar aqui:
-    // {
-    //   id: 'planta-tipo-a',
-    //   src: assetPath('/projects/melendez/valle-alto/floor-plans/<archivo-tipo-a>.jpg'),
-    //   title: 'Apartamento Tipo A',
-    //   caption: 'Área construida XX m² · Área privada XX m²',
-    // },
   ],
 };
 
