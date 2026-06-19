@@ -11,6 +11,7 @@ const INTRO_MS = 2600;
 
 export default function PlaybackOverlay() {
   const stopPlayback  = useTourStore((s) => s.stopPlayback);
+  const playbackAuto  = useTourStore((s) => s.playbackAuto);
   const nextScene     = useTourStore((s) => s.nextScene);
   const prevScene     = useTourStore((s) => s.prevScene);
   const currentSceneId    = useTourStore((s) => s.currentSceneId);
@@ -42,6 +43,25 @@ export default function PlaybackOverlay() {
 
   return (
     <div className="fixed inset-0 z-[80] pointer-events-none select-none">
+
+      {/* ── Bloqueo de interacción (solo playback MANUAL) ──
+         El overlay es pointer-events-none, así que sin esta capa los clics
+         atraviesan y navegarían el tour (hotspots) o arrastrarían el panorama.
+         Captura y descarta clic/arrastre/scroll sobre el panorama hasta que el
+         usuario pulse la X. En el playback automático (por inactividad) NO se
+         bloquea: cualquier interacción debe poder reanudar el control. */}
+      {!playbackAuto && (
+        <div
+          aria-hidden
+          className="absolute inset-0 pointer-events-auto"
+          style={{ zIndex: 1, cursor: 'default' }}
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={(e) => e.stopPropagation()}
+          onContextMenu={(e) => e.preventDefault()}
+          onWheel={(e) => e.preventDefault()}
+          onTouchStart={(e) => e.preventDefault()}
+        />
+      )}
 
       {/* ── Animación de entrada (intro cinematográfica) ── */}
       {showIntro && (
@@ -149,7 +169,7 @@ export default function PlaybackOverlay() {
 
       {/* Controles de navegación manual + barra de progreso */}
       <div
-        className="absolute bottom-0 left-0 right-0 pointer-events-auto"
+        className="absolute bottom-0 left-0 right-0 z-10 pointer-events-auto"
         style={{ padding: '0 20px 20px' }}
       >
         {/* Barra de progreso */}

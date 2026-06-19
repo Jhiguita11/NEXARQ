@@ -143,6 +143,12 @@ export interface ApartmentConfig {
   hotspotX?: number;
   hotspotY?: number;
   /**
+   * Dirección hacia la que se despliega la tarjeta de info en el selector al
+   * pasar el cursor. Por defecto 'up' (hacia arriba). Útil para hotspots
+   * cerca de un borde donde la tarjeta no cabe en la dirección por defecto.
+   */
+  cardDir?: 'up' | 'down' | 'left' | 'right';
+  /**
    * Indica explicitamente si el apartamento esta disponible para recorrer.
    * false = mostrar como "Proximamente" en el selector y sidebar.
    * Si se omite, se determina automaticamente segun las escenas.
@@ -177,6 +183,20 @@ export interface GalleryImageConfig {
   caption?: string;
 }
 
+// Ajustes globales del modo reproducción (velocidades, holds, HFOV).
+// Todos opcionales: si se omiten, se usan los valores por defecto de
+// playback-utils.ts. Calibrables en vivo desde la pestaña Playback de ?debug=1.
+export interface PlaybackSettings {
+  /** Velocidad del paneo principal en °/s (menor = más contemplativo). */
+  panSpeed?: number;
+  /** Velocidad de la transición entre tramos en °/s. */
+  transitionSpeed?: number;
+  /** Duración de una toma estática (from == to) en ms. */
+  staticHoldMs?: number;
+  /** HFOV usado durante el modo reproducción. */
+  hfov?: number;
+}
+
 export interface TourConfig {
   brand: BrandConfig;
   theme: ThemeConfig;
@@ -198,4 +218,6 @@ export interface TourConfig {
    * escenas: cada amenity es una escena navegable desde el sidebar.
    */
   amenities?: ApartmentConfig;
+  /** Ajustes globales del modo reproducción (velocidad, holds, HFOV). */
+  playback?: PlaybackSettings;
 }

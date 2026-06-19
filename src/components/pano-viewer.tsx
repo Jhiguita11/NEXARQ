@@ -19,7 +19,8 @@ import {
   PLAYBACK_HFOV,
 } from '@/lib/playback-utils';
 import { useTourStore } from '@/lib/tour-store';
-import { assetPath } from '@/lib/asset-path';
+import { assetPath, mobilePanorama } from '@/lib/asset-path';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -414,6 +415,13 @@ const PanoViewer = forwardRef<PanoViewerHandle, PanoViewerProps>(
     const selectedVariants = useTourStore((s) => s.selectedVariants);
     const setSceneVariant = useTourStore((s) => s.setSceneVariant);
     const setCurrentScene = useTourStore((s) => s.setCurrentScene);
+    const playbackSettings = useTourStore((s) => s.config.playback);
+    const pbHfov = playbackSettings?.hfov ?? PLAYBACK_HFOV;
+
+    /* ── Resolucion segun dispositivo ──────────────────────────────
+       PC: panoramas originales 8000px. Movil: versiones 4000px
+       (subcarpeta mobile/) para un recorrido mas fluido. */
+    const isMobile = useIsMobile();
 
     /* ── Current scene memo ────────────────────────────────────── */
     const currentScene = scenes.find((s) => s.id === currentSceneId);
@@ -480,7 +488,9 @@ const PanoViewer = forwardRef<PanoViewerHandle, PanoViewerProps>(
         const variants = scene.variants ?? [];
         const variantId = selectedVariants[sceneId];
         const variant = variants.find((v) => v.id === variantId);
-        const panorama = variant?.panorama ?? scene.panorama;
+        const rawPanorama = variant?.panorama ?? scene.panorama;
+        // En movil cargamos la version reducida (4000px) para mayor fluidez.
+        const panorama = isMobile ? mobilePanorama(rawPanorama) : rawPanorama;
         const defaultView = variant?.defaultView ?? scene.defaultView;
         // Si hay override, lo usamos como vista inicial (preserva direccion)
         const initialView = viewOverride ?? defaultView;
@@ -544,8 +554,12 @@ const PanoViewer = forwardRef<PanoViewerHandle, PanoViewerProps>(
           pitch: initialView?.pitch ?? 0,
           yaw: initialView?.yaw ?? 0,
           // Playback: HFOV amplio para mostrar el mayor espacio posible
-          hfov: isPlaybackMode ? PLAYBACK_HFOV : (initialView?.hfov ?? 100),
-          maxHfov: isPlaybackMode ? 150 : 120,
+          hfov: isPlaybackMode ? pbHfov : (initialView?.hfov ?? 100),
+          // maxHfov debe permitir el HFOV de reproducción aunque el viewer se
+          // haya construido en vista normal (al entrar a reproducción NO se
+          // reconstruye; los efectos hacen setHfov en caliente y pannellum lo
+          // recorta a maxHfov). Por eso lo dejamos siempre >= pbHfov.
+          maxHfov: Math.max(120, pbHfov + 10),
           // Playback: sin autoRotate — la animación lookAt es más cinematográfica
           autoRotate: debugEnabled ? 0 : (isPlaybackMode ? 0 : (autoRotate ? autoRotateSpeed : 0)),
           autoRotateInactivityDelay: debugEnabled ? 0 : (autoRotate && !isPlaybackMode ? 2000 : 0),
@@ -564,7 +578,7 @@ const PanoViewer = forwardRef<PanoViewerHandle, PanoViewerProps>(
           maxPitch: 85,
         };
       },
-      [scenes, autoRotate, autoRotateSpeed, onHotspotClick, debugEnabled, selectedVariants, setSceneVariant, setCurrentScene],
+      [scenes, autoRotate, autoRotateSpeed, onHotspotClick, debugEnabled, selectedVariants, setSceneVariant, setCurrentScene, isMobile, pbHfov],
     );
 
     /* ── Crea viewer en un layer especifico (A o B) ────────────── */
@@ -653,8 +667,8 @@ const PanoViewer = forwardRef<PanoViewerHandle, PanoViewerProps>(
         const playScene = scenes.find((s) => s.id === currentSceneId);
         const first = playScene?.playbackAnimations?.[0];
         preservedView = first
-          ? { pitch: first.from.pitch, yaw: first.from.yaw, hfov: PLAYBACK_HFOV }
-          : { pitch: playScene?.defaultView?.pitch ?? 0, yaw: playScene?.defaultView?.yaw ?? 0, hfov: PLAYBACK_HFOV };
+          ? { pitch: first.from.pitch, yaw: first.from.yaw, hfov: pbHfov }
+          : { pitch: playScene?.defaultView?.pitch ?? 0, yaw: playScene?.defaultView?.yaw ?? 0, hfov: pbHfov };
       } else {
         try {
           if (activeViewer) {
@@ -719,7 +733,7 @@ const PanoViewer = forwardRef<PanoViewerHandle, PanoViewerProps>(
             const adjScene = scenes.find((s) => s.id === adjId);
             if (adjScene) {
               const img = new Image();
-              img.src = adjScene.panorama;
+              img.src = isMobile ? mobilePanorama(adjScene.panorama) : adjScene.panorama;
             }
           }
         }, CROSSFADE_MS + 50);
@@ -880,7 +894,7 @@ const PanoViewer = forwardRef<PanoViewerHandle, PanoViewerProps>(
         if (viewerRef.current) {
           clearInterval(waitForViewer);
           try {
-            (viewerRef.current as any)?.setHfov?.(PLAYBACK_HFOV, false);
+            (viewerRef.current as any)?.setHfov?.(pbHfov, false);
             (viewerRef.current as any)?.setPitch?.(animations[0].from.pitch, false);
             (viewerRef.current as any)?.setYaw?.(animations[0].from.yaw, false);
           } catch { /* ignore */ }

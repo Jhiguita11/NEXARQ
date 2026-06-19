@@ -1,4 +1,4 @@
-import { TourConfig } from '@/lib/tour-types';
+import { TourConfig, ApartmentConfig } from '@/lib/tour-types';
 import { assetPath } from '@/lib/asset-path';
 
 // ============================================================
@@ -82,6 +82,8 @@ export const valleAltoTipoA: TourConfig = {
           bedrooms: 2,
           bathrooms: 2,
           area: 72,
+          hotspotX: 92.3, hotspotY: 12.6,
+          cardDir: 'left',
 
           scenes: [
 
@@ -430,6 +432,8 @@ export const valleAltoTipoB: TourConfig = {
           bedrooms: 3,
           bathrooms: 1,
           area: 60,
+          hotspotX: 60.6, hotspotY: 19.3,
+          cardDir: 'down',
 
           scenes: [
 
@@ -805,13 +809,15 @@ export const valleAltoTipoB: TourConfig = {
 const amenities: ApartmentConfig = {
   id: 'amenities',
   name: 'Amenities',
-  description: 'Zonas comunes · Lobby · Piscina · Parqueadero · Mascotas',
+  description: 'Zonas comunes · Lobby · Piscina · BBQ · Parqueadero · Mascotas',
   floor: 0,
   position: 0,
   bedrooms: 0,
   bathrooms: 0,
   area: 0,
   available: true,
+  // Posición del ojo de Amenities en el hero (reposicionable en ?debug=1).
+  hotspotX: 38.7, hotspotY: 46.2,
   scenes: [
     {
       id: 'va-am-lobby',
@@ -826,6 +832,14 @@ const amenities: ApartmentConfig = {
       name: 'Piscina',
       description: 'Zona de piscina',
       panorama: AMENITY('CM_VALLE ALTO_PISCINA.jpg'),
+      defaultView: { pitch: 0, yaw: 0, hfov: 100 },
+      hotspots: [],
+    },
+    {
+      id: 'va-am-bbq',
+      name: 'Zona BBQ',
+      description: 'Zona de BBQ',
+      panorama: AMENITY('CM_VALLE ALTO_BBQ.jpg'),
       defaultView: { pitch: 0, yaw: 0, hfov: 100 },
       hotspots: [],
     },
@@ -878,6 +892,8 @@ const valleAlto: TourConfig = {
   // Agregar aqui los renders de gimnasio, piscina, zonas comunes, etc.
   // Las imagenes deben estar en public/projects/melendez/valle-alto/images/renders/
   gallery: [
+    { id: 'aereo-dia',     src: assetPath('/projects/melendez/valle-alto/images/renders/aereo-dia.jpg'),     title: 'Vista Aérea · Día' },
+    { id: 'aereo-noche',   src: assetPath('/projects/melendez/valle-alto/images/renders/aereo-noche.jpg'),   title: 'Vista Aérea · Noche' },
     { id: 'sala',          src: assetPath('/projects/melendez/valle-alto/images/renders/sala.jpg'),          title: 'Sala' },
     { id: 'cocina',        src: assetPath('/projects/melendez/valle-alto/images/renders/cocina.jpg'),        title: 'Cocina' },
     { id: 'estudio',       src: assetPath('/projects/melendez/valle-alto/images/renders/estudio.jpg'),       title: 'Estudio' },

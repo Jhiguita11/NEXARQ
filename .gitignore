@@ -2,6 +2,8 @@
 
 # dependencies
 node_modules
+# Solo bun como gestor de paquetes
+package-lock.json
 /.pnp
 .pnp.*
 .yarn/*

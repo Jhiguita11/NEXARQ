@@ -28,6 +28,8 @@ export default function FloorPlan() {
   const [draggingScene, setDraggingScene] = useState<string | null>(null);
   const svgRef = useRef<SVGSVGElement | null>(null);
   const [debugCopied, setDebugCopied] = useState(false);
+  // Offset de orientación del radar por escena (ajuste en vivo en ?debug=1 con [ ])
+  const [radarOffsets, setRadarOffsets] = useState<Record<string, number>>({});
 
   // Devuelve la posicion efectiva (override si existe, si no la original)
   const effectiveDot = (room: FloorPlanRoomConfig) => {
@@ -35,6 +37,10 @@ export default function FloorPlan() {
     if (ov) return ov;
     return { dotX: room.dotX ?? 50, dotY: room.dotY ?? 50 };
   };
+
+  // Offset efectivo del radar (override de debug si existe, si no el del config).
+  const effectiveRadarOffset = (room: FloorPlanRoomConfig) =>
+    radarOffsets[room.sceneId] ?? room.radarYawOffset ?? 0;
 
   // Convierte el evento de mouse a coordenadas (%) dentro del SVG
   const eventToPct = (e: React.MouseEvent | MouseEvent) => {
@@ -72,18 +78,20 @@ export default function FloorPlan() {
       const ov = debugOverrides[r.sceneId];
       const dx = ov?.dotX ?? r.dotX ?? 0;
       const dy = ov?.dotY ?? r.dotY ?? 0;
-      return `  { sceneId: '${r.sceneId}', dotX: ${dx}, dotY: ${dy} },`;
+      const off = radarOffsets[r.sceneId] ?? r.radarYawOffset ?? 0;
+      return `  { sceneId: '${r.sceneId}', dotX: ${dx}, dotY: ${dy}, radarYawOffset: ${off} },`;
     });
-    const out = '// Posiciones calibradas — pegar dotX/dotY en cada room\n' + lines.join('\n');
+    const out = '// Calibrado — pegar dotX/dotY/radarYawOffset en cada room\n' + lines.join('\n');
     try {
       navigator.clipboard.writeText(out);
       setDebugCopied(true);
       setTimeout(() => setDebugCopied(false), 1800);
     } catch { /* ignore */ }
-  }, [debugOverrides, rooms]);
+  }, [debugOverrides, radarOffsets, rooms]);
 
   const debugReset = useCallback(() => {
     setDebugOverrides({});
+    setRadarOffsets({});
   }, []);
 
   const primary = '#E8D9B0';
@@ -115,6 +123,24 @@ export default function FloorPlan() {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [expanded]);
+
+  // Debug (?debug=1): ajustar el offset del radar de la escena actual con [ y ]
+  // (Shift = ±5°). El valor se ve en el panel debug y se incluye en "copiar todo".
+  useEffect(() => {
+    if (!debugEnabled) return;
+    const room = rooms.find((r) => r.sceneId === currentSceneId);
+    if (!room) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== '[' && e.key !== ']') return;
+      const t = e.target as HTMLElement;
+      if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
+      const base = radarOffsets[room.sceneId] ?? room.radarYawOffset ?? 0;
+      const step = (e.shiftKey ? 5 : 1) * (e.key === ']' ? 1 : -1);
+      setRadarOffsets((prev) => ({ ...prev, [room.sceneId]: Math.round((base + step) * 10) / 10 }));
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [debugEnabled, currentSceneId, rooms, radarOffsets]);
 
   if (!showFloorPlan) return null;
   // Sin habitaciones (p.ej. Amenities) no hay plano que mostrar.
@@ -435,7 +461,7 @@ export default function FloorPlan() {
                           {/* Cono de vision grande (rota con el yaw) */}
                           <g
                             className="pointer-events-none fp-radar-cone"
-                            transform={`rotate(${viewerYaw + (room.radarYawOffset ?? 0)}, ${dot.cx}, ${dot.cy})`}
+                            transform={`rotate(${viewerYaw + effectiveRadarOffset(room)}, ${dot.cx}, ${dot.cy})`}
                           >
                             <path
                               d={`M ${dot.cx} ${dot.cy} L ${lx} ${ly} A ${coneR} ${coneR} 0 0 1 ${rx2} ${ry2} Z`}
@@ -630,7 +656,7 @@ export default function FloorPlan() {
                         return (
                           <g
                             className="pointer-events-none fp-radar-cone"
-                            transform={`rotate(${viewerYaw + (room.radarYawOffset ?? 0)}, ${center.cx}, ${center.cy})`}
+                            transform={`rotate(${viewerYaw + effectiveRadarOffset(room)}, ${center.cx}, ${center.cy})`}
                           >
                             <path
                               d={`M ${center.cx} ${center.cy} L ${lx} ${ly} A ${coneR} ${coneR} 0 0 1 ${rx2} ${ry2} Z`}
@@ -685,7 +711,15 @@ export default function FloorPlan() {
           >
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
               <span style={{ color: '#5DD5F0', fontWeight: 700, letterSpacing: 1, fontSize: 10 }}>
-                ARRASTRA LAS BURBUJAS · {Object.keys(debugOverrides).length} editadas
+                ARRASTRA BURBUJAS · {Object.keys(debugOverrides).length} ed · RADAR [ ] AJUSTA
+                {currentScene && (
+                  <span style={{ color: '#E8D9B0', fontWeight: 400, marginLeft: 6 }}>
+                    · {currentSceneName} radarYawOffset{' '}
+                    <b style={{ color: '#5DD5F0' }}>
+                      {radarOffsets[currentSceneId] ?? (rooms.find((r) => r.sceneId === currentSceneId)?.radarYawOffset ?? 0)}°
+                    </b>
+                  </span>
+                )}
               </span>
               <div style={{ display: 'flex', gap: 6 }}>
                 <button
