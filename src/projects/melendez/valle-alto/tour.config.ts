@@ -803,13 +803,13 @@ export const valleAltoTipoB: TourConfig = {
 //
 //  Se modela como un "apartamento" especial (id: 'amenities') para
 //  reutilizar el motor de escenas. Cada amenity es una escena
-//  independiente (sin hotspots): se navega entre ellas desde el sidebar.
+//  independiente (sin hotspots): se navega entre ellas desde el sidebar o desde las burbujas si tiene.
 //  Panoramas: public/projects/melendez/valle-alto/images/exterior/
 // ============================================================
 const amenities: ApartmentConfig = {
   id: 'amenities',
   name: 'Amenities',
-  description: 'Zonas comunes · Lobby · Piscina · BBQ · Parqueadero · Mascotas',
+  description: 'Zonas comunes · Car Lobby · Piscina · BBQ · Circuito Patinaje · Mascotas',
   floor: 0,
   position: 0,
   bedrooms: 0,
@@ -821,11 +821,36 @@ const amenities: ApartmentConfig = {
   scenes: [
     {
       id: 'va-am-lobby',
-      name: 'Lobby',
-      description: 'Lobby de acceso',
+      name: 'Car Lobby',
+      description: 'Car Lobby de acceso',
       panorama: AMENITY('CM_VALLE ALTO_LOBBY.jpg'),
       defaultView: { pitch: 0, yaw: 0, hfov: 100 },
-      hotspots: [],
+      hotspots: [
+        {
+          id: 'va-am-lobby-to-piscina',
+          pitch: 3.2, yaw: -38.5,
+          type: 'scene',
+          label: 'Piscina',
+          description: 'Ir a la piscina',
+          targetSceneId: 'va-am-piscina',
+        },
+        {
+          id: 'va-am-lobby-to-patinaje',
+          pitch: 2, yaw: 1.3,
+          type: 'scene',
+          label: 'Circuito Patinaje',
+          description: 'Ir al circuito de patinaje',
+          targetSceneId: 'va-am-parqueadero',
+        },
+        {
+          id: 'va-am-lobby-to-mascotas',
+          pitch: 2.6, yaw: -6.3,
+          type: 'scene',
+          label: 'Zona de Mascotas',
+          description: 'Ir a la zona de mascotas',
+          targetSceneId: 'va-am-mascotas',
+        },
+      ],
     },
     {
       id: 'va-am-piscina',
@@ -833,7 +858,24 @@ const amenities: ApartmentConfig = {
       description: 'Zona de piscina',
       panorama: AMENITY('CM_VALLE ALTO_PISCINA.jpg'),
       defaultView: { pitch: 0, yaw: 0, hfov: 100 },
-      hotspots: [],
+      hotspots: [
+        {
+          id: 'va-am-piscina-to-bbq',
+          pitch: 0.4, yaw: 29.4,
+          type: 'scene',
+          label: 'Zona BBQ',
+          description: 'Ir a la zona BBQ',
+          targetSceneId: 'va-am-bbq',
+        },
+        {
+          id: 'va-am-piscina-to-lobby',
+          pitch: 1.2, yaw: -54.5,
+          type: 'scene',
+          label: 'Car Lobby',
+          description: 'Ir al Car Lobby',
+          targetSceneId: 'va-am-lobby',
+        },
+      ],
     },
     {
       id: 'va-am-bbq',
@@ -841,15 +883,57 @@ const amenities: ApartmentConfig = {
       description: 'Zona de BBQ',
       panorama: AMENITY('CM_VALLE ALTO_BBQ.jpg'),
       defaultView: { pitch: 0, yaw: 0, hfov: 100 },
-      hotspots: [],
+      hotspots: [
+        {
+          id: 'va-am-bbq-to-piscina',
+          pitch: 3.6, yaw: -158.8,
+          type: 'scene',
+          label: 'Piscina',
+          description: 'Ir a la piscina',
+          targetSceneId: 'va-am-piscina',
+        },
+        {
+          id: 'va-am-bbq-to-lobby',
+          pitch: 3.3, yaw: -64.5,
+          type: 'scene',
+          label: 'Car Lobby',
+          description: 'Ir al Car Lobby',
+          targetSceneId: 'va-am-lobby',
+        },
+      ],
     },
     {
       id: 'va-am-parqueadero',
-      name: 'Parqueadero',
-      description: 'Zona de parqueaderos',
+      name: 'Circuito Patinaje',
+      description: 'Circuito de patinaje',
       panorama: AMENITY('CM_VALLE ALTO_PARQUEADERO.jpg'),
       defaultView: { pitch: 0, yaw: 0, hfov: 100 },
-      hotspots: [],
+      hotspots: [
+        {
+          id: 'va-am-patinaje-to-mascotas',
+          pitch: -1, yaw: 173.8,
+          type: 'scene',
+          label: 'Zona de Mascotas',
+          description: 'Ir a la zona de mascotas',
+          targetSceneId: 'va-am-mascotas',
+        },
+        {
+          id: 'va-am-patinaje-to-lobby',
+          pitch: 1, yaw: 5.8,
+          type: 'scene',
+          label: 'Car Lobby',
+          description: 'Ir al Car Lobby',
+          targetSceneId: 'va-am-lobby',
+        },
+        {
+          id: 'va-am-patinaje-to-piscina',
+          pitch: -0.2, yaw: 90.2,
+          type: 'scene',
+          label: 'Piscina',
+          description: 'Ir a la piscina',
+          targetSceneId: 'va-am-piscina',
+        },
+      ],
     },
     {
       id: 'va-am-mascotas',
@@ -857,7 +941,32 @@ const amenities: ApartmentConfig = {
       description: 'Zona para mascotas',
       panorama: AMENITY('CM_VALLE ALTO_MASCOTAS.jpg'),
       defaultView: { pitch: 0, yaw: 0, hfov: 100 },
-      hotspots: [],
+      hotspots: [
+        {
+          id: 'va-am-mascotas-to-patinaje',
+          pitch: -0.3, yaw: -8.3,
+          type: 'scene',
+          label: 'Circuito Patinaje',
+          description: 'Ir al circuito de patinaje',
+          targetSceneId: 'va-am-parqueadero',
+        },
+        {
+          id: 'va-am-mascotas-to-lobby',
+          pitch: 0.6, yaw: 2.7,
+          type: 'scene',
+          label: 'Car Lobby',
+          description: 'Ir al Car Lobby',
+          targetSceneId: 'va-am-lobby',
+        },
+        {
+          id: 'va-am-mascotas-to-piscina',
+          pitch: 0, yaw: 45,
+          type: 'scene',
+          label: 'Piscina',
+          description: 'Ir a la piscina',
+          targetSceneId: 'va-am-piscina',
+        },
+      ],
     },
   ],
   // Las amenities no tienen plano de planta.

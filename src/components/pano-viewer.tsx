@@ -252,6 +252,27 @@ function roomIcon(label: string, type: HotspotConfig['type']): string {
   if (l.includes('entrada') || l.includes('hall') || l.includes('acceso'))
     return `<svg viewBox="0 0 24 24" fill="none" ${S} width="20" height="20"><path d="M13 4h3a2 2 0 0 1 2 2v14"/><path d="M2 20h3"/><path d="M13 20h9"/><path d="M10 12v.01"/><path d="M13 4.562v16.157a1 1 0 0 1-1.267.962L4 20V5.562a2 2 0 0 1 1.533-1.94l6-1.5a2 2 0 0 1 2.467 1.94Z"/></svg>`;
 
+  // ── Amenities ──
+  // Piscina — olas
+  if (l.includes('piscina') || l.includes('pool'))
+    return `<svg viewBox="0 0 24 24" fill="none" ${S} width="20" height="20"><path d="M2 6c.6.5 1.2 1 2.5 1C7 7 7 5 9.5 5s2.5 2 5 2 2.5-2 5-2c1.3 0 1.9.5 2.5 1"/><path d="M2 12c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2s2.5 2 5 2 2.5-2 5-2c1.3 0 1.9.5 2.5 1"/><path d="M2 18c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2s2.5 2 5 2 2.5-2 5-2c1.3 0 1.9.5 2.5 1"/></svg>`;
+
+  // Car Lobby / Parqueo — carro
+  if (l.includes('lobby') || l.includes('carro') || l.includes('parqueo') || l.includes('parqueadero') || /\bcar\b/.test(l))
+    return `<svg viewBox="0 0 24 24" fill="none" ${S} width="20" height="20"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg>`;
+
+  // Circuito Patinaje — circuito / ruta
+  if (l.includes('patin') || l.includes('circuito'))
+    return `<svg viewBox="0 0 24 24" fill="none" ${S} width="20" height="20"><circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/></svg>`;
+
+  // Zona BBQ — llama
+  if (l.includes('bbq') || l.includes('parrilla') || l.includes('asado'))
+    return `<svg viewBox="0 0 24 24" fill="none" ${S} width="20" height="20"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>`;
+
+  // Mascotas — huella
+  if (l.includes('mascota') || l.includes('pet'))
+    return `<svg viewBox="0 0 24 24" fill="none" ${S} width="20" height="20"><circle cx="11" cy="4" r="2"/><circle cx="18" cy="8" r="2"/><circle cx="20" cy="16" r="2"/><path d="M9 10a5 5 0 0 1 5 5v3.5a3.5 3.5 0 0 1-6.84 1.045Q6.52 17.48 4.46 16.84A3.5 3.5 0 0 1 5.5 10Z"/></svg>`;
+
   // Default — arrow
   return `<svg viewBox="0 0 24 24" fill="none" ${S} width="20" height="20"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>`;
 }
