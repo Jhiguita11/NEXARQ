@@ -50,7 +50,7 @@ const sharedTheme = {
 // ============================================================
 //  TOUR — APARTAMENTO TIPO A
 //
-//  Escenas: Acceso · Sala Comedor · Espacio Multiple · Alcoba Principal
+//  Escenas: Acceso · Sala · Espacio Multiple · Alcoba Principal
 //           Alcoba Auxiliar · Espacio Multiple 2 · Bano
 //  Panoramas: public/projects/melendez/valle-alto/panoramas/tipo-a/
 //    acceso.jpg · sala.jpg · estudio.jpg · alcoba-principal.jpg
@@ -76,7 +76,7 @@ export const valleAltoTipoA: TourConfig = {
         {
           id: 'va-tipo-a',
           name: 'Apartamento Tipo A',
-          description: 'Acceso · Sala Comedor · Espacio Multiple · 2 Alcobas · Bano',
+          description: 'Acceso · Sala · Espacio Multiple · 2 Alcobas · Bano',
           floor: 0,
           position: 0,
           bedrooms: 2,
@@ -99,7 +99,7 @@ export const valleAltoTipoA: TourConfig = {
                   id: 'va-ta-acc-to-sala',
                   pitch: -1, yaw: -59.4,
                   type: 'scene',
-                  label: 'Sala Comedor',
+                  label: 'Sala',
                   description: 'Ir a la sala',
                   targetSceneId: 'va-ta-sala',
                 },
@@ -125,7 +125,7 @@ export const valleAltoTipoA: TourConfig = {
             // --- ESCENA: SALA COMEDOR ---
             {
               id: 'va-ta-sala',
-              name: 'Sala Comedor',
+              name: 'Sala',
               description: 'Sala y comedor integrados',
               panorama: PANO_A('sala.jpg'),
               defaultView: { pitch: 0, yaw: 0, hfov: 100 },
@@ -183,7 +183,7 @@ export const valleAltoTipoA: TourConfig = {
                   id: 'va-ta-est-to-sala',
                   pitch: -5.2, yaw: -144.1,
                   type: 'scene',
-                  label: 'Sala Comedor',
+                  label: 'Sala',
                   description: 'Volver a la sala',
                   targetSceneId: 'va-ta-sala',
                 },
@@ -334,11 +334,11 @@ export const valleAltoTipoA: TourConfig = {
                 dotX: 65.7, dotY: 83.4,
                 adjacentTo: ['va-ta-sala', 'va-ta-alcoba-auxiliar', 'va-ta-estudio', 'va-ta-alcoba-principal'],
               },
-              // Sala Comedor — centro
+              // Sala — centro
               {
                 id: 'fp-ta-sala',
                 sceneId: 'va-ta-sala',
-                label: 'Sala Comedor',
+                label: 'Sala',
                 x: 461, y: 513, width: 40, height: 40,
                 dotX: 48.1, dotY: 66.6,
                 adjacentTo: ['va-ta-acceso', 'va-ta-alcoba-principal', 'va-ta-estudio'],
@@ -404,7 +404,7 @@ export const valleAltoTipoA: TourConfig = {
 // ============================================================
 //  TOUR — APARTAMENTO TIPO B
 //
-//  Escenas: Acceso · Sala Comedor · Espacio Multiple · Alcoba Principal
+//  Escenas: Acceso · Sala · Espacio Multiple · Alcoba Principal
 //           Alcoba Auxiliar · Espacio Multiple 2 · Bano
 //  Panoramas: public/projects/melendez/valle-alto/panoramas/tipo-b/
 //    acceso.jpg · sala.jpg · estudio.jpg · alcoba-principal.jpg
@@ -426,7 +426,7 @@ export const valleAltoTipoB: TourConfig = {
         {
           id: 'va-tipo-b',
           name: 'Apartamento Tipo B',
-          description: 'Acceso · Sala Comedor · Espacio Multiple · 3 Alcobas · Bano',
+          description: 'Acceso · Sala · Espacio Multiple · 3 Alcobas · Bano',
           floor: 0,
           position: 1,
           bedrooms: 3,
@@ -454,7 +454,7 @@ export const valleAltoTipoB: TourConfig = {
                   id: 'va-tb-acc-to-sala',
                   pitch: 0, yaw: 9.6,
                   type: 'scene',
-                  label: 'Sala Comedor',
+                  label: 'Sala',
                   description: 'Ir a la sala',
                   targetSceneId: 'va-tb-sala',
                 },
@@ -488,7 +488,7 @@ export const valleAltoTipoB: TourConfig = {
             // --- ESCENA: SALA COMEDOR ---
             {
               id: 'va-tb-sala',
-              name: 'Sala Comedor',
+              name: 'Sala',
               description: 'Sala y comedor integrados',
               panorama: PANO_B('sala.jpg'),
               defaultView: { pitch: 0, yaw: 0, hfov: 100 },
@@ -496,7 +496,7 @@ export const valleAltoTipoB: TourConfig = {
                 { from: { pitch: -12.7, yaw: 131.9 }, to: { pitch: -12.7, yaw: 131.9 } },
                 { from: { pitch:  -5.5, yaw: -40.2 }, to: { pitch:  -6.5, yaw:  30.9 } },
               ],
-              // Hotspots visibles desde la Sala Comedor (Alcoba Principal NO es visible).
+              // Hotspots visibles desde la Sala (Alcoba Principal NO es visible).
               hotspots: [
                 {
                   id: 'va-tb-sala-to-acceso',
@@ -561,7 +561,7 @@ export const valleAltoTipoB: TourConfig = {
                   id: 'va-tb-est-to-sala',
                   pitch: -1.8, yaw: 61.6,
                   type: 'scene',
-                  label: 'Sala Comedor',
+                  label: 'Sala',
                   description: 'Volver a la sala',
                   targetSceneId: 'va-tb-sala',
                 },
@@ -632,7 +632,7 @@ export const valleAltoTipoB: TourConfig = {
               playbackAnimations: [
                 { from: { pitch: -11.7, yaw: 78.3 }, to: { pitch: -11.2, yaw: -17.8 } },
               ],
-              // Sala Comedor NO es visible desde la Alcoba Auxiliar.
+              // Sala NO es visible desde la Alcoba Auxiliar.
               hotspots: [
                 {
                   id: 'va-tb-alc-aux-to-estudio',
@@ -673,7 +673,7 @@ export const valleAltoTipoB: TourConfig = {
               playbackAnimations: [
                 { from: { pitch: -13, yaw: 139.8 }, to: { pitch: -13, yaw: 85.4 } },
               ],
-              // Sala Comedor NO es visible desde Espacio Multiple 2.
+              // Sala NO es visible desde Espacio Multiple 2.
               hotspots: [
                 {
                   id: 'va-tb-op2-to-aux',
@@ -729,11 +729,11 @@ export const valleAltoTipoB: TourConfig = {
                 dotX: 74.3, dotY: 65.3,
                 adjacentTo: ['va-tb-sala'],
               },
-              // Sala Comedor
+              // Sala
               {
                 id: 'fp-tb-sala',
                 sceneId: 'va-tb-sala',
-                label: 'Sala Comedor',
+                label: 'Sala',
                 x: 760, y: 210, width: 40, height: 40,
                 dotX: 78.4, dotY: 23.6,
                 adjacentTo: ['va-tb-acceso', 'va-tb-estudio', 'va-tb-alcoba-auxiliar'],
