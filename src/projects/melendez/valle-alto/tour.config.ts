@@ -960,7 +960,7 @@ const amenities: ApartmentConfig = {
         },
         {
           id: 'va-am-mascotas-to-piscina',
-          pitch: 0, yaw: 45,
+          pitch: 1.2, yaw: 39.6,
           type: 'scene',
           label: 'Piscina',
           description: 'Ir a la piscina',

@@ -1,7 +1,7 @@
 // ============================================================
-//  GENERADOR DE PANORAMAS MOVILES (4000px)
+//  GENERADOR DE PANORAMAS MOVILES (3000px)
 //
-//  Crea versiones reducidas a 4000px de ancho de cada panorama
+//  Crea versiones reducidas a 3000px de ancho de cada panorama
 //  equirectangular y las guarda en una subcarpeta `mobile/` junto
 //  al original. El viewer carga estas versiones en dispositivos
 //  moviles para un recorrido mas fluido; en PC se mantienen los
@@ -15,8 +15,8 @@ const sharp = require('sharp');
 const fs = require('fs');
 const path = require('path');
 
-const MOBILE_WIDTH = 4000; // 4000x2000 (ratio 2:1 equirectangular)
-const JPEG_QUALITY = 82;
+const MOBILE_WIDTH = 3000; // 3000x1500 (ratio 2:1 equirectangular) — más liviano en móvil
+const JPEG_QUALITY = 80;
 
 // Carpetas que contienen panoramas equirectangulares de fuente.
 const SOURCE_DIRS = [

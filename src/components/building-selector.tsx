@@ -95,13 +95,17 @@ export default function BuildingSelector() {
       className="fixed inset-0 z-[200] bg-black overflow-hidden"
       style={{ animation: 'selectorFadeIn 0.9s cubic-bezier(0.4,0,0.2,1) both' }}
     >
-      {/* ── Background image ── */}
+      {/* ── Background image ── (movil: versión ligera de 1600px) */}
       <div className="absolute inset-0">
-        <img
-          src={assetPath('/building.jpg')}
-          alt="Edificio"
-          className="w-full h-full object-cover"
-        />
+        <picture>
+          <source media="(max-width: 767px)" srcSet={assetPath('/building-mobile.jpg')} />
+          <img
+            src={assetPath('/building.jpg')}
+            alt="Edificio"
+            className="w-full h-full object-cover"
+            fetchPriority="high"
+          />
+        </picture>
         <div className="absolute inset-0 bg-black/35" />
       </div>
 

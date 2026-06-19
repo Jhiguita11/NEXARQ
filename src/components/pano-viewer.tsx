@@ -510,8 +510,12 @@ const PanoViewer = forwardRef<PanoViewerHandle, PanoViewerProps>(
         const variantId = selectedVariants[sceneId];
         const variant = variants.find((v) => v.id === variantId);
         const rawPanorama = variant?.panorama ?? scene.panorama;
-        // En movil cargamos la version reducida (4000px) para mayor fluidez.
-        const panorama = isMobile ? mobilePanorama(rawPanorama) : rawPanorama;
+        // En movil cargamos la version reducida para mayor fluidez. Importante:
+        // comprobamos el viewport REAL en el momento de construir (cliente), no
+        // solo el estado isMobile — que arranca en false y podria provocar que
+        // el primer panorama cargado en un movil fuese el de 8000px (lentisimo).
+        const wantMobile = isMobile || (typeof window !== 'undefined' && window.innerWidth < 768);
+        const panorama = wantMobile ? mobilePanorama(rawPanorama) : rawPanorama;
         const defaultView = variant?.defaultView ?? scene.defaultView;
         // Si hay override, lo usamos como vista inicial (preserva direccion)
         const initialView = viewOverride ?? defaultView;
@@ -750,11 +754,16 @@ const PanoViewer = forwardRef<PanoViewerHandle, PanoViewerProps>(
           const adjIds = (loadedScene?.hotspots ?? [])
             .filter((h) => h.type === 'scene' && h.targetSceneId)
             .map((h) => h.targetSceneId!);
+          const wantMobile = isMobile || (typeof window !== 'undefined' && window.innerWidth < 768);
           for (const adjId of adjIds) {
             const adjScene = scenes.find((s) => s.id === adjId);
             if (adjScene) {
               const img = new Image();
-              img.src = isMobile ? mobilePanorama(adjScene.panorama) : adjScene.panorama;
+              // Prioridad baja: precargar vecinos no debe competir con la escena
+              // actual ni con el primer render (sobre todo en redes moviles).
+              try { (img as HTMLImageElement & { fetchPriority?: string }).fetchPriority = 'low'; } catch { /* ignore */ }
+              img.decoding = 'async';
+              img.src = wantMobile ? mobilePanorama(adjScene.panorama) : adjScene.panorama;
             }
           }
         }, CROSSFADE_MS + 50);
