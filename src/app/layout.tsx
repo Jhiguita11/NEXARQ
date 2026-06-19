@@ -41,10 +41,10 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: `${BASE}/projects/melendez/valle-alto/panoramas/tipo-b/sala.jpg`,
-        width: 1200,
-        height: 630,
-        alt: "Sala Comedor — Apartamento Tipo B, Valle Alto",
+        url: `${BASE}/building-mobile.jpg`,
+        width: 1600,
+        height: 900,
+        alt: "Valle Alto — Constructora Meléndez",
       },
     ],
   },
@@ -52,7 +52,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "VALLE ALTO | Recorrido Virtual 360°",
     description: "Explore cada espacio de Valle Alto con tecnología panorámica interactiva 360°.",
-    images: [`${BASE}/projects/melendez/valle-alto/panoramas/tipo-b/sala.jpg`],
+    images: [`${BASE}/building-mobile.jpg`],
   },
 };
 
@@ -63,6 +63,16 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es" suppressHydrationWarning>
+      <head>
+        {/* Preconexión al CDN del visor 360 (Pannellum) para que cargue antes
+            al entrar a un recorrido. */}
+        <link rel="preconnect" href="https://cdn.jsdelivr.net" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
+        {/* Preload del hero del selector — empieza a descargarse en paralelo
+            con el JS, mientras corre el splash. Versión según viewport. */}
+        <link rel="preload" as="image" href={`${BASE}/building-mobile.jpg`} media="(max-width: 767px)" />
+        <link rel="preload" as="image" href={`${BASE}/building.jpg`} media="(min-width: 768px)" />
+      </head>
       <body
         className={`${inter.variable} antialiased bg-black text-white overflow-hidden`}
         style={{ margin: 0, padding: 0, width: "100vw", height: "100vh" }}
