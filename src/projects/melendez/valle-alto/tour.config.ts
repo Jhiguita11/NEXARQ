@@ -1012,6 +1012,8 @@ const valleAlto: TourConfig = {
     { id: 'balcon',        src: assetPath('/projects/melendez/valle-alto/images/renders/balcon.jpg'),        title: 'Balcón' },
     { id: 'zona-ropas',    src: assetPath('/projects/melendez/valle-alto/images/renders/zona-ropas.jpg'),    title: 'Zona de Ropas' },
     { id: 'gimnasio',      src: assetPath('/projects/melendez/valle-alto/images/renders/gimnasio.jpg'),      title: 'Gimnasio' },
+    { id: 'lobby',         src: assetPath('/projects/melendez/valle-alto/images/renders/lobby.jpg'),         title: 'Lobby' },
+    { id: 'piscina',       src: assetPath('/projects/melendez/valle-alto/images/renders/piscina.jpg'),       title: 'Piscina' },
   ],
 
   // ─── Plantas arquitectonicas (sin burbujas) ─────────────────────
