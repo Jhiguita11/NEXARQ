@@ -82,6 +82,7 @@ export const valleAltoTipoA: TourConfig = {
           bedrooms: 2,
           bathrooms: 2,
           area: 72,
+          areaPrivada: 55,
           hotspotX: 92.3, hotspotY: 12.6,
           cardDir: 'left',
 
@@ -432,6 +433,7 @@ export const valleAltoTipoB: TourConfig = {
           bedrooms: 3,
           bathrooms: 1,
           area: 60,
+          areaPrivada: 55,
           hotspotX: 60.6, hotspotY: 19.3,
           cardDir: 'down',
 

@@ -1,14 +1,20 @@
-// Prefijo base de los assets. DEBE coincidir con el basePath de next.config.ts.
-// Se controla con la misma variable de entorno:
-//   • GitHub Pages -> NEXT_PUBLIC_BASE_PATH="/NEXARQ"
-//   • Raiz dominio -> sin variable (vacio)
+// Prefijo base de los assets.
+//   • GitHub Pages         -> NEXT_PUBLIC_BASE_PATH="/NEXARQ"  (rutas absolutas con subpath)
+//   • Raíz de dominio       -> sin variable (rutas absolutas desde /)
+//   • Entrega PORTABLE      -> NEXT_PUBLIC_RELATIVE="1" (rutas RELATIVAS al documento,
+//                              para que el tour funcione en CUALQUIER subcarpeta del
+//                              servidor sin recompilar; requiere trailingSlash:true).
 const base = process.env.NEXT_PUBLIC_BASE_PATH ?? '';
+const relative = process.env.NEXT_PUBLIC_RELATIVE === '1';
 
 export function assetPath(path: string): string {
+  // Modo portable: './...' resuelve contra la carpeta del documento (carpeta/).
+  //   assetPath('/projects/x.jpg') -> './projects/x.jpg'
+  if (relative) return `.${path}`;
   return `${base}${path}`;
 }
 
-// Convierte la URL de un panorama a su version movil (4000px), ubicada en
+// Convierte la URL de un panorama a su version movil (3000px), ubicada en
 // una subcarpeta `mobile/` junto al original. Ej:
 //   .../panoramas/tipo-a/sala.jpg -> .../panoramas/tipo-a/mobile/sala.jpg
 // Estas versiones las genera scripts/generate-mobile-panoramas.js y el viewer

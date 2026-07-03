@@ -137,8 +137,10 @@ export interface ApartmentConfig {
   bedrooms: number;
   /** Number of bathrooms */
   bathrooms: number;
-  /** Area in m² */
+  /** Área construida en m² */
   area: number;
+  /** Área privada en m² (opcional; se muestra junto a la construida) */
+  areaPrivada?: number;
   /** Optional hotspot position override (% of building image) */
   hotspotX?: number;
   hotspotY?: number;

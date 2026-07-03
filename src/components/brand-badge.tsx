@@ -20,6 +20,17 @@ export default function BrandBadge() {
         <p className="text-xs font-bold tracking-wide max-w-[120px] sm:max-w-none truncate" style={{ color: '#E8D9B0' }}>
           {selectedApartment ? selectedApartment.name : config.brand.name}
         </p>
+        {/* Áreas debajo del tipo de apartamento (solo apartamentos con área) */}
+        {selectedApartment && selectedApartment.area > 0 && (
+          <p className="text-[10px] md:text-[11px] font-semibold leading-tight" style={{ color: 'rgba(232,217,176,0.75)' }}>
+            Área construida {selectedApartment.area} m²
+            {selectedApartment.areaPrivada ? (
+              <>
+                <br />Área privada {selectedApartment.areaPrivada} m²
+              </>
+            ) : null}
+          </p>
+        )}
         <p className="hidden sm:block text-[10px] text-white/30">
           {selectedApartment ? config.brand.tagline : 'Recorrido Virtual'}
         </p>

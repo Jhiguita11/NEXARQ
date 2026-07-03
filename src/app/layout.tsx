@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
+import { assetPath } from "@/lib/asset-path";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -9,9 +10,9 @@ const inter = Inter({
   display: "swap",
 });
 
-// Next.js NO prefija con basePath las URLs de metadata (icons/og). Lo hacemos
-// manualmente para que funcionen tanto en GitHub Pages (/NEXARQ) como en raiz.
-const BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+// Next.js NO prefija con basePath las URLs de metadata (icons/og). Usamos
+// assetPath para que funcionen en GitHub Pages (/NEXARQ), en raiz y en el
+// build PORTABLE (rutas relativas para cualquier subcarpeta).
 
 export const metadata: Metadata = {
   title: "VALLE ALTO | Recorrido Virtual 360°",
@@ -29,10 +30,10 @@ export const metadata: Metadata = {
   authors: [{ name: "NEXARQ 360" }],
   icons: {
     icon: [
-      { url: `${BASE}/favicon.svg`, type: "image/svg+xml" },
-      { url: `${BASE}/icon.png`, type: "image/png", sizes: "512x512" },
+      { url: assetPath(`/favicon.svg`), type: "image/svg+xml" },
+      { url: assetPath(`/icon.png`), type: "image/png", sizes: "512x512" },
     ],
-    apple: [{ url: `${BASE}/apple-icon.png`, sizes: "180x180" }],
+    apple: [{ url: assetPath(`/apple-icon.png`), sizes: "180x180" }],
   },
   openGraph: {
     title: "VALLE ALTO | Recorrido Virtual 360°",
@@ -41,7 +42,7 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: `${BASE}/building-mobile.jpg`,
+        url: assetPath(`/building-mobile.jpg`),
         width: 1600,
         height: 900,
         alt: "Valle Alto — Constructora Meléndez",
@@ -52,7 +53,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "VALLE ALTO | Recorrido Virtual 360°",
     description: "Explore cada espacio de Valle Alto con tecnología panorámica interactiva 360°.",
-    images: [`${BASE}/building-mobile.jpg`],
+    images: [assetPath(`/building-mobile.jpg`)],
   },
 };
 
@@ -70,8 +71,8 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
         {/* Preload del hero del selector — empieza a descargarse en paralelo
             con el JS, mientras corre el splash. Versión según viewport. */}
-        <link rel="preload" as="image" href={`${BASE}/building-mobile.jpg`} media="(max-width: 767px)" />
-        <link rel="preload" as="image" href={`${BASE}/building.jpg`} media="(min-width: 768px)" />
+        <link rel="preload" as="image" href={assetPath(`/building-mobile.jpg`)} media="(max-width: 767px)" />
+        <link rel="preload" as="image" href={assetPath(`/building.jpg`)} media="(min-width: 768px)" />
       </head>
       <body
         className={`${inter.variable} antialiased bg-black text-white overflow-hidden`}
