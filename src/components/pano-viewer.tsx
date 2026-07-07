@@ -460,7 +460,7 @@ const PanoViewer = forwardRef<PanoViewerHandle, PanoViewerProps>(
       document.head.appendChild(tag);
     }, []);
 
-    /* ── Load Pannellum from CDN ───────────────────────────────── */
+    /* ── Load Pannellum (empaquetado localmente, sin CDN) ──────── */
     useEffect(() => {
       if (scriptReady) return;
 
@@ -470,8 +470,7 @@ const PanoViewer = forwardRef<PanoViewerHandle, PanoViewerProps>(
         const link = document.createElement('link');
         link.id = cssId;
         link.rel = 'stylesheet';
-        link.href =
-          'https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css';
+        link.href = assetPath('/vendor/pannellum/pannellum.css');
         document.head.appendChild(link);
       }
 
@@ -492,8 +491,7 @@ const PanoViewer = forwardRef<PanoViewerHandle, PanoViewerProps>(
 
       const script = document.createElement('script');
       script.id = jsId;
-      script.src =
-        'https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js';
+      script.src = assetPath('/vendor/pannellum/pannellum.js');
       script.async = true;
       script.addEventListener('load', () => setScriptReady(true), { once: true });
       document.body.appendChild(script);

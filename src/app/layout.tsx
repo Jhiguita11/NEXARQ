@@ -65,10 +65,6 @@ export default function RootLayout({
   return (
     <html lang="es" suppressHydrationWarning>
       <head>
-        {/* Preconexión al CDN del visor 360 (Pannellum) para que cargue antes
-            al entrar a un recorrido. */}
-        <link rel="preconnect" href="https://cdn.jsdelivr.net" crossOrigin="anonymous" />
-        <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
         {/* Preload del hero del selector — empieza a descargarse en paralelo
             con el JS, mientras corre el splash. Versión según viewport. */}
         <link rel="preload" as="image" href={assetPath(`/building-mobile.jpg`)} media="(max-width: 767px)" />
