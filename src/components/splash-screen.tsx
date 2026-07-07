@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { assetPath } from '@/lib/asset-path';
 import BrandLogo from '@/components/brand-logo';
 
@@ -19,16 +19,23 @@ interface SplashScreenProps {
 export default function SplashScreen({ onComplete }: SplashScreenProps) {
   const [phase, setPhase] = useState<'enter' | 'hold' | 'exit'>('enter');
 
+  // Referencia estable a onComplete: el temporizador debe correr UNA sola vez al
+  // montar. Si dependiéramos de `onComplete` (que el padre recrea en cada render),
+  // el efecto se reiniciaría en cada render y el splash NUNCA se cerraría
+  // (quedaba pegado tapando el selector → pantalla "negra").
+  const onCompleteRef = useRef(onComplete);
+  onCompleteRef.current = onComplete;
+
   useEffect(() => {
     const holdTimer = setTimeout(() => setPhase('hold'), 100);
     const exitTimer = setTimeout(() => setPhase('exit'), 2800);
-    const doneTimer = setTimeout(() => onComplete(), 3600);
+    const doneTimer = setTimeout(() => onCompleteRef.current(), 3600);
     return () => {
       clearTimeout(holdTimer);
       clearTimeout(exitTimer);
       clearTimeout(doneTimer);
     };
-  }, [onComplete]);
+  }, []);
 
   const visible = phase !== 'enter';
 

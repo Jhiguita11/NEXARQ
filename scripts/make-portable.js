@@ -39,9 +39,16 @@ let html = 0, css = 0;
 walk(OUT, (file) => {
   if (file.endsWith('.html')) {
     let s = fs.readFileSync(file, 'utf8');
-    // Rutas internas de Next -> relativas al documento (conservando /_next/).
-    // Cubre <script>, <link>, preloads y el payload embebido (\"/_next/...\").
-    s = s.split('/_next/').join('./_next/');
+    // SOLO reescribe las referencias de recursos en atributos de etiquetas
+    // (src="/_next/..." y href="/_next/...") -> relativas al documento.
+    //
+    // IMPORTANTE: NO tocar el payload RSC embebido (self.__next_f), que
+    // contiene rutas como \"src\":\"/_next/...\" y [\"/_next/...\"]. El
+    // patrón `="/_next/` es EXCLUSIVO de los atributos de <script>/<link>;
+    // el payload usa comillas escapadas. Reescribir el payload corrompía la
+    // hidratación y provocaba un bucle de render (el splash nunca se cerraba
+    // -> pantalla "negra"). Verificado con Playwright.
+    s = s.split('="/_next/').join('="./_next/');
     fs.writeFileSync(file, s);
     html++;
   } else if (file.endsWith('.css')) {
