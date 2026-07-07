@@ -1,10 +1,14 @@
 // ============================================================
-//  POST-PROCESO: BUILD PORTABLE Y BLINDADO (cualquier subcarpeta)
+//  POST-PROCESO: BUILD PORTABLE (cualquier subcarpeta)
 //
-//  1) Convierte las rutas de Next (/_next/...) a RELATIVAS, para que el
-//     tour funcione en CUALQUIER subcarpeta del servidor sin recompilar.
-//  2) Renombra la carpeta "_next" -> "assets" (sin guion bajo), porque
-//     algunos hostings compartidos bloquean carpetas que empiezan por "_".
+//  Convierte las rutas de Next (/_next/...) a RELATIVAS, para que el
+//  tour funcione publicado en CUALQUIER subcarpeta del servidor
+//  (dominio.com/loquesea/) sin recompilar.
+//
+//  IMPORTANTE: NO se renombra la carpeta _next. El runtime de Turbopack
+//  exige que la ruta del script contenga "/_next/" (hace
+//  currentScript.src.indexOf("/_next/") y lanza error si no está), así
+//  que renombrarla rompe el arranque (pantalla negra). Se conserva _next.
 //
 //  Requisitos del build:
 //    - trailingSlash: true
@@ -31,32 +35,23 @@ if (!fs.existsSync(OUT)) {
   process.exit(1);
 }
 
-// 1) Renombrar la carpeta _next -> assets (evita bloqueo del guion bajo).
-const nextDir = path.join(OUT, '_next');
-const assetsDir = path.join(OUT, 'assets');
-if (fs.existsSync(nextDir)) {
-  if (fs.existsSync(assetsDir)) fs.rmSync(assetsDir, { recursive: true, force: true });
-  fs.renameSync(nextDir, assetsDir);
-}
-
-// 2) Reescribir referencias en HTML y CSS.
 let html = 0, css = 0;
 walk(OUT, (file) => {
   if (file.endsWith('.html')) {
     let s = fs.readFileSync(file, 'utf8');
-    // Rutas internas de Next -> relativas al documento y con carpeta "assets".
+    // Rutas internas de Next -> relativas al documento (conservando /_next/).
     // Cubre <script>, <link>, preloads y el payload embebido (\"/_next/...\").
-    s = s.split('/_next/').join('./assets/');
+    s = s.split('/_next/').join('./_next/');
     fs.writeFileSync(file, s);
     html++;
   } else if (file.endsWith('.css')) {
     let s = fs.readFileSync(file, 'utf8');
-    // Los .css viven en assets/static/chunks/ y referencian fuentes en
-    // assets/static/media/ -> ruta relativa desde chunks/ es ../media/.
+    // Los .css viven en _next/static/chunks/ y referencian fuentes en
+    // _next/static/media/ -> ruta relativa desde chunks/ es ../media/.
     const before = s;
     s = s.split('/_next/static/media/').join('../media/');
     if (s !== before) { fs.writeFileSync(file, s); css++; }
   }
 });
 
-console.log(`✅ Portable + blindado listo. _next->assets renombrado. HTML: ${html}, CSS: ${css}`);
+console.log(`✅ Portable listo (conservando _next). HTML: ${html}, CSS: ${css}`);
