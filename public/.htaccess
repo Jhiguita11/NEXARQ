@@ -1,36 +1,34 @@
-# ====================================================================
-#  Recorrido Virtual 360 — configuracion de la carpeta (Apache/LiteSpeed)
-#  Objetivo: que el tour cargue bien en cualquier hosting compartido.
-# ====================================================================
+# ─────────────────────────────────────────────────────────────────────────────
+# Tour 360 — Valle Alto (Constructora Meléndez)
+# Evita que el CDN/optimizador de imágenes (Hostinger hcdn, LiteSpeed u otros)
+# REDIMENSIONE o RECOMPRIMA los panoramas. La directiva estándar "no-transform"
+# (RFC 7234) indica a cualquier intermediario que NO puede transformar el
+# contenido. Sin esto, los equirectangulares de 8000px se degradan y el tour se
+# ve borroso.
+# ─────────────────────────────────────────────────────────────────────────────
 
-# Archivo de inicio
+<IfModule mod_headers.c>
+  <FilesMatch "\.(jpe?g|png|webp|gif|avif|svg)$">
+    Header set Cache-Control "public, max-age=31536000, no-transform"
+    Header set X-Content-Type-Options "nosniff"
+  </FilesMatch>
+</IfModule>
+
+# MIME correctos por si el servidor no los define (imágenes, JS, CSS, fuentes)
+<IfModule mod_mime.c>
+  AddType image/jpeg             .jpg .jpeg
+  AddType image/png              .png
+  AddType image/webp             .webp
+  AddType image/svg+xml          .svg
+  AddType application/javascript .js
+  AddType text/css               .css
+  AddType font/woff2             .woff2
+</IfModule>
+
+# Archivo de inicio de la carpeta
 DirectoryIndex index.html
 
-# Redirige la carpeta sin "/" final a la version con "/" (rutas relativas OK)
-<IfModule mod_dir.c>
-  DirectorySlash On
-</IfModule>
-
-# --- Desactiva la cache de LiteSpeed SOLO para esta carpeta ---
-# Evita que el servidor siga mostrando una version vieja o un 404 cacheado.
-<IfModule LiteSpeed>
-  RewriteEngine On
-  RewriteRule .* - [E=Cache-Control:no-cache]
-</IfModule>
-
-# --- Tipos MIME correctos (por si el servidor no los reconoce) ---
-<IfModule mod_mime.c>
-  AddType application/javascript        .js
-  AddType text/css                      .css
-  AddType image/svg+xml                 .svg
-  AddType font/woff2                    .woff2
-  AddType application/json              .json
-  AddType image/jpeg                    .jpg .jpeg
-  AddType image/png                     .png
-  AddType image/webp                    .webp
-</IfModule>
-
-# --- Permite el acceso a todos los archivos del tour ---
+# Permite el acceso a todos los archivos del tour
 <IfModule mod_authz_core.c>
   Require all granted
 </IfModule>
