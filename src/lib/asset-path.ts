@@ -1,16 +1,14 @@
-// Prefijo base de los assets.
-//   • GitHub Pages         -> NEXT_PUBLIC_BASE_PATH="/NEXARQ"  (rutas absolutas con subpath)
-//   • Raíz de dominio       -> sin variable (rutas absolutas desde /)
-//   • Entrega PORTABLE      -> NEXT_PUBLIC_RELATIVE="1" (rutas RELATIVAS al documento,
-//                              para que el tour funcione en CUALQUIER subcarpeta del
-//                              servidor sin recompilar; requiere trailingSlash:true).
-const base = process.env.NEXT_PUBLIC_BASE_PATH ?? '';
-const relative = process.env.NEXT_PUBLIC_RELATIVE === '1';
+// Prefijo base de los assets de la app (panoramas, hero, logos):
+//   • GitHub Pages    -> NEXT_PUBLIC_BASE_PATH="/NEXARQ" (rutas absolutas con subpath)
+//   • Raíz de dominio  -> sin variable (rutas absolutas desde /)
+//   • Entrega PORTABLE -> NEXT_PUBLIC_PORTABLE_BUILD="1" -> base '.' -> rutas
+//     RELATIVAS al documento ('./projects/x.jpg'), para servir en CUALQUIER
+//     subcarpeta. Va de la mano de assetPrefix "./" en next.config (igual que
+//     el proyecto Mirriñao). Requiere trailingSlash:true.
+const portable = process.env.NEXT_PUBLIC_PORTABLE_BUILD === '1';
+const base = portable ? '.' : process.env.NEXT_PUBLIC_BASE_PATH ?? '';
 
 export function assetPath(path: string): string {
-  // Modo portable: './...' resuelve contra la carpeta del documento (carpeta/).
-  //   assetPath('/projects/x.jpg') -> './projects/x.jpg'
-  if (relative) return `.${path}`;
   return `${base}${path}`;
 }
 
