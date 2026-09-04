@@ -81,7 +81,7 @@ export const valleAltoTipoA: TourConfig = {
           position: 0,
           bedrooms: 2,
           bathrooms: 2,
-          area: 72,
+          area: 60,
           areaPrivada: 55,
           hotspotX: 92.3, hotspotY: 12.6,
           cardDir: 'left',
@@ -1024,7 +1024,7 @@ const valleAlto: TourConfig = {
       id: 'planta-tipo-a',
       src: assetPath('/projects/melendez/valle-alto/floor-plans/CM_VA_Plantas Ambientadas_Piso 1_Obra Blanca_APTO A LUPA_Final_T.jpg'),
       title: 'Apartamento Tipo A',
-      caption: 'Área construida 72 m²',
+      caption: 'Área construida 60 m² · Área privada 55 m²',
     },
     {
       id: 'planta-tipo-b',
