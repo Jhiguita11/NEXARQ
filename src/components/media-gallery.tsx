@@ -208,8 +208,10 @@ export default function MediaGallery() {
                 </button>
               )}
 
-              {/* Imagen */}
-              <div className="mg-stage relative max-w-[min(94vw,1400px)] max-h-[78vh] flex items-center justify-center">
+              {/* Imagen + caption: columna en flujo normal, para que el texto
+                  nunca se superponga con los puntos ni se salga de pantalla.
+                  La imagen cede altura (flex-shrink) cuando la ventana es baja. */}
+              <div className="mg-stage flex flex-col items-center justify-center gap-3 w-full h-full min-h-0 max-w-[min(94vw,1400px)]">
                 {current && (
                   <img
                     key={current.id}
@@ -219,8 +221,10 @@ export default function MediaGallery() {
                     onLoad={() => setImgLoaded(true)}
                     draggable={false}
                     style={{
+                      flex: '0 1 auto',
+                      minHeight: 0,
                       maxWidth: '100%',
-                      maxHeight: '78vh',
+                      maxHeight: '100%',
                       objectFit: 'contain',
                       opacity: imgLoaded ? 1 : 0,
                       transition: 'opacity 0.35s ease',
@@ -231,7 +235,7 @@ export default function MediaGallery() {
                 {/* Caption */}
                 {current && (current.title || current.caption) && (
                   <div
-                    className="absolute -bottom-12 left-0 right-0 text-center px-4 select-none"
+                    className="shrink-0 w-full text-center px-4 select-none"
                     style={{ animation: 'mg-fade-in 0.6s ease 0.2s both' }}
                   >
                     {current.title && (
