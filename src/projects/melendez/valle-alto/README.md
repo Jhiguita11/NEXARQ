@@ -7,10 +7,22 @@ Este proyecto tiene **dos tours**, uno por cada tipología de apartamento:
 | Tour    | Export            | Estado       | Panoramas                                     |
 |---------|-------------------|--------------|-----------------------------------------------|
 | Tipo B  | `valleAltoTipoB`  | Activo       | 7 JPGs entregados y funcionando               |
-| Tipo A  | `valleAltoTipoA`  | Pendiente    | En espera — cliente entregará panoramas       |
+| Tipo A  | `valleAltoTipoA`  | Activo       | 7 JPGs entregados y funcionando               |
 
-El selector de apartamentos muestra ambas tipologías, pero el Tipo A aparece
-como "Próximamente" hasta que se coloquen sus panoramas reales.
+Ambas tipologías están activas, en el tour web y en el modo VR.
+
+## Modo VR
+
+`public/vr.html` no lleva las escenas escritas a mano: se generan desde este
+mismo `tour.config.ts`, que es la única fuente de verdad. Tras tocar escenas,
+hotspots o variantes hay que regenerarlas, y tras añadir panoramas nuevos hay
+que producir sus versiones reducidas (el Quest no renderiza 8000×4000):
+
+```bash
+bun scripts/generate-vr-panoramas.mjs public/projects/melendez/valle-alto/panoramas/tipo-a
+bun scripts/generate-vr-panoramas.mjs public/projects/melendez/valle-alto/panoramas/tipo-b
+bun scripts/generate-vr-scenes.ts
+```
 
 ---
 

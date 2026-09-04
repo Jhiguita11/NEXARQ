@@ -16,18 +16,45 @@
       display: flex; align-items: center; gap: 8px;
     }
     #back { top: 16px; left: 16px; }
+    #swap {
+      top: 16px; right: 16px; font-family: inherit; cursor: pointer;
+      transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+    }
+    #swap:hover {
+      background: rgba(232,217,176,0.14); border-color: rgba(232,217,176,0.45);
+      color: #F5EDD8;
+    }
     #title {
       top: 16px; left: 50%; transform: translateX(-50%); position: fixed;
       background: rgba(0,0,0,0.45); border: 1px solid rgba(232,217,176,0.18);
       color: #F5EDD8; backdrop-filter: blur(12px); border-radius: 999px;
       padding: 8px 18px; font-size: 13px; font-weight: 700; letter-spacing: 0.04em;
     }
+    /* Acción principal: se mantiene en beige sólido para que destaque sobre
+       las píldoras de vidrio (que son secundarias), pero con forma de píldora
+       como el resto, sombra neutra en vez del resplandor beige que la hacía
+       pesada, y un icono SVG que hereda el color en lugar del emoji. */
     #enter {
-      bottom: 28px; left: 50%; transform: translateX(-50%); position: fixed; pointer-events: auto;
-      background: #E8D9B0; color: #1a1512; border: none; border-radius: 16px;
-      padding: 16px 30px; font-size: 17px; font-weight: 800; cursor: pointer;
-      box-shadow: 0 6px 28px rgba(232,217,176,0.45);
+      position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+      pointer-events: auto; display: flex; align-items: center; gap: 10px;
+      background: #E8D9B0; color: #1a1512; border: none; border-radius: 999px;
+      padding: 15px 34px; font-family: inherit; font-size: 15px; font-weight: 700;
+      letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+      transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
     }
+    #enter svg { width: 21px; height: 21px; flex: none; }
+    /* El translateX(-50%) hay que repetirlo: transform reemplaza, no acumula */
+    #enter:hover {
+      background: #F5EDD8;
+      transform: translateX(-50%) translateY(-1px);
+      box-shadow: 0 11px 28px rgba(0,0,0,0.42);
+    }
+    #enter:active {
+      transform: translateX(-50%) translateY(0);
+      box-shadow: 0 5px 16px rgba(0,0,0,0.35);
+    }
+    #enter:focus-visible { outline: 2px solid #F5EDD8; outline-offset: 3px; }
   </style>
 </head>
 <body>
@@ -39,11 +66,12 @@
 
     <a-assets timeout="15000" id="assets"></a-assets>
 
-    <!-- Cielo: radius 50 para no exceder el far plane del Quest -->
-    <a-sky id="sky" radius="50"></a-sky>
+    <!-- Cielo: radius 50 para no exceder el far plane del Quest.
+         center-on-eye lo mantiene centrado en la cabeza del usuario. -->
+    <a-sky id="sky" radius="50" center-on-eye></a-sky>
 
-    <!-- Hotspots se inyectan aquí -->
-    <a-entity id="hotspots"></a-entity>
+    <!-- Hotspots se inyectan aquí (también centrados en el ojo) -->
+    <a-entity id="hotspots" center-on-eye></a-entity>
 
     <!-- Cámara + cursor de mirada -->
     <a-camera id="cam" wasd-controls-enabled="false" position="0 1.6 0">
@@ -52,6 +80,12 @@
         geometry="primitive: ring; radiusInner: 0.012; radiusOuter: 0.02"
         material="color: #E8D9B0; shader: flat; opacity: 0.7"
         raycaster="objects: .clickable"></a-entity>
+
+      <!-- Cambio de apartamento dentro del modo inmersivo. Va anclado a la
+           cámara y por debajo del centro: siempre está a mano sin tapar la
+           vista, y se pulsa con el láser del mando. -->
+      <a-image id="swap3d" class="clickable" visible="false"
+        position="0 -0.62 -1.6" draw-on-top="6"></a-image>
     </a-camera>
 
     <!-- Mandos del Quest con láser apuntador -->
@@ -63,44 +97,396 @@
   <div id="ui">
     <a id="back" class="btn" href="./">◀ Salir de VR</a>
     <div id="title">Recorrido VR</div>
+    <button id="swap" class="btn" type="button">Ver Tipo A</button>
   </div>
-  <button id="enter">🥽 Entrar en Modo VR</button>
+  <button id="enter">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M4 8h16a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-3.2a2 2 0 0 1-1.6-.8l-.8-1.1a1.7 1.7 0 0 0-2.8 0l-.8 1.1a2 2 0 0 1-1.6.8H4a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2z"/>
+      <path d="M6.5 8V6.6A1.6 1.6 0 0 1 8.1 5h7.8a1.6 1.6 0 0 1 1.6 1.6V8"/>
+    </svg>
+    Entrar en Modo VR
+  </button>
 
   <script>
     // ── Calibración (ajustar al probar en el Quest) ──
-    var YAW_OFFSET = 0;        // rota los hotspots si no alinean con el panorama
+    // YAW_OFFSET = -90: los yaw/pitch de las escenas están copiados del tour
+    // Pannellum, y las dos convenciones no coinciden. Medido empíricamente
+    // comparando el render de <a-sky> con recortes del equirectangular:
+    // la cámara a rotation.y = θ muestra la yaw ψ de Pannellum con ψ = 90 − θ,
+    // de donde el yaw local del hotspot es ψ − 90. Sin este offset las burbujas
+    // aparecían giradas 90° respecto de las puertas que señalan.
+    var YAW_OFFSET = -90;      // rota los hotspots si no alinean con el panorama
     var SKY_MIRRORED = false;  // espeja el panorama si se ve al revés
     var SKY_RADIUS = 50;
     var HOTSPOT_R = 8;
 
-    // ── Datos del recorrido (Tipo B — Valle Alto) ──
-    // Rutas RELATIVAS: funcionan con o sin basePath (GitHub Pages /NEXARQ/)
-    var BASE = 'projects/melendez/valle-alto/panoramas/tipo-b/vr/';
-    var SCENES = {
-      'acceso':    { name: 'Acceso', img: BASE+'acceso.jpg', hotspots: [
-        { label:'Sala Comedor', yaw:9.6, pitch:0, to:'sala' },
-        { label:'Alcoba Auxiliar', yaw:-35.6, pitch:-2.2, to:'aux' },
-        { label:'Alcoba Principal', yaw:-45.8, pitch:-2.2, to:'principal' },
-        { label:'Espacio Multiple', yaw:-55.3, pitch:-9.3, to:'estudio' } ] },
-      'sala':      { name: 'Sala Comedor', img: BASE+'sala.jpg', hotspots: [
-        { label:'Acceso', yaw:-172.6, pitch:0, to:'acceso' },
-        { label:'Espacio Multiple', yaw:-146.4, pitch:0, to:'estudio' },
-        { label:'Alcoba Auxiliar', yaw:-99, pitch:0, to:'aux' } ] },
-      'estudio':   { name: 'Espacio Multiple', img: BASE+'estudio.jpg', hotspots: [
-        { label:'Sala Comedor', yaw:61.6, pitch:-1.8, to:'sala' },
-        { label:'Acceso', yaw:142, pitch:-2.1, to:'acceso' },
-        { label:'Alcoba Auxiliar', yaw:-33.7, pitch:-1.7, to:'aux' },
-        { label:'Alcoba Principal', yaw:-57.1, pitch:-1.3, to:'principal' } ] },
-      'principal': { name: 'Alcoba Principal', img: BASE+'alcoba-principal.jpg', hotspots: [
-        { label:'Espacio Multiple', yaw:149, pitch:-1.2, to:'estudio' },
-        { label:'Baño', yaw:-118.4, pitch:-0.3, to:'bano' } ] },
-      'aux':       { name: 'Alcoba Auxiliar', img: BASE+'alcoba-auxiliar.jpg', hotspots: [
-        { label:'Espacio Multiple', yaw:176.9, pitch:-1.5, to:'estudio' } ] },
-      'op2':       { name: 'Espacio Multiple 2', img: BASE+'alcoba-opcion-2.jpg', hotspots: [
-        { label:'Alcoba Auxiliar', yaw:1, pitch:-1, to:'aux' } ] },
-      'bano':      { name: 'Baño Alcoba Principal', img: BASE+'bano.jpg', hotspots: [
-        { label:'Alcoba Principal', yaw:7.6, pitch:-0.4, to:'principal' } ] }
+    // <<< ESCENAS GENERADAS — no editar a mano; sale de tour.config.ts.
+    // Regenerar con:  bun scripts/generate-vr-scenes.ts >>>
+    var TOURS = {
+      "a": {
+        "id": "a",
+        "name": "Apartamento Tipo A",
+        "area": 60,
+        "areaPrivada": 55,
+        "inicio": "acceso",
+        "scenes": {
+          "acceso": {
+            "id": "va-ta-acceso",
+            "name": "Acceso",
+            "img": "projects/melendez/valle-alto/panoramas/tipo-a/vr/acceso.jpg",
+            "hotspots": [
+              {
+                "label": "Sala",
+                "yaw": -59.4,
+                "pitch": -1,
+                "to": "sala",
+                "kind": "scene"
+              },
+              {
+                "label": "Alcoba Auxiliar",
+                "yaw": -26.3,
+                "pitch": -0.9,
+                "to": "alcoba-auxiliar",
+                "kind": "scene"
+              },
+              {
+                "label": "Espacio Multiple",
+                "yaw": -7.1,
+                "pitch": -0.4,
+                "to": "estudio",
+                "kind": "scene"
+              }
+            ]
+          },
+          "sala": {
+            "id": "va-ta-sala",
+            "name": "Sala",
+            "img": "projects/melendez/valle-alto/panoramas/tipo-a/vr/sala.jpg",
+            "hotspots": [
+              {
+                "label": "Acceso",
+                "yaw": 121.1,
+                "pitch": -0.8,
+                "to": "acceso",
+                "kind": "scene"
+              },
+              {
+                "label": "Alcoba Principal",
+                "yaw": 65.8,
+                "pitch": -0.8,
+                "to": "alcoba-principal",
+                "kind": "scene"
+              },
+              {
+                "label": "Espacio Multiple",
+                "yaw": 42.8,
+                "pitch": -1.4,
+                "to": "estudio",
+                "kind": "scene"
+              }
+            ]
+          },
+          "estudio": {
+            "id": "va-ta-estudio",
+            "name": "Espacio Multiple",
+            "img": "projects/melendez/valle-alto/panoramas/tipo-a/vr/estudio.jpg",
+            "hotspots": [
+              {
+                "label": "Sala",
+                "yaw": -144.1,
+                "pitch": -5.2,
+                "to": "sala",
+                "kind": "scene"
+              },
+              {
+                "label": "Acceso",
+                "yaw": 171.7,
+                "pitch": -1.4,
+                "to": "acceso",
+                "kind": "scene"
+              },
+              {
+                "label": "Alcoba Auxiliar",
+                "yaw": -117.5,
+                "pitch": -2,
+                "to": "alcoba-auxiliar",
+                "kind": "scene"
+              },
+              {
+                "label": "Alcoba Principal",
+                "yaw": 138.6,
+                "pitch": -1,
+                "to": "alcoba-principal",
+                "kind": "scene"
+              },
+              {
+                "label": "Ver como alcoba",
+                "yaw": -24.1,
+                "pitch": -1.3,
+                "to": "alcoba-opcion-2",
+                "kind": "variant"
+              }
+            ]
+          },
+          "alcoba-principal": {
+            "id": "va-ta-alcoba-principal",
+            "name": "Alcoba Principal",
+            "img": "projects/melendez/valle-alto/panoramas/tipo-a/vr/alcoba-principal.jpg",
+            "hotspots": [
+              {
+                "label": "Baño Alcoba Principal",
+                "yaw": 121.6,
+                "pitch": -1.7,
+                "to": "bano",
+                "kind": "scene"
+              },
+              {
+                "label": "Acceso",
+                "yaw": -151.5,
+                "pitch": -1.7,
+                "to": "acceso",
+                "kind": "scene"
+              }
+            ]
+          },
+          "alcoba-auxiliar": {
+            "id": "va-ta-alcoba-auxiliar",
+            "name": "Alcoba Auxiliar",
+            "img": "projects/melendez/valle-alto/panoramas/tipo-a/vr/alcoba-auxiliar.jpg",
+            "hotspots": [
+              {
+                "label": "Espacio Multiple",
+                "yaw": 110.5,
+                "pitch": -17.8,
+                "to": "estudio",
+                "kind": "scene"
+              },
+              {
+                "label": "Alcoba Principal",
+                "yaw": 111.2,
+                "pitch": -2.6,
+                "to": "alcoba-principal",
+                "kind": "scene"
+              }
+            ]
+          },
+          "alcoba-opcion-2": {
+            "id": "va-ta-alcoba-opcion-2",
+            "name": "Espacio Multiple 2",
+            "img": "projects/melendez/valle-alto/panoramas/tipo-a/vr/alcoba-opcion-2.jpg",
+            "hotspots": [
+              {
+                "label": "Ver como espacio multiple",
+                "yaw": -24.1,
+                "pitch": -1.3,
+                "to": "estudio",
+                "kind": "variant"
+              }
+            ]
+          },
+          "bano": {
+            "id": "va-ta-bano",
+            "name": "Baño Alcoba Principal",
+            "img": "projects/melendez/valle-alto/panoramas/tipo-a/vr/bano.jpg",
+            "hotspots": [
+              {
+                "label": "Alcoba Principal",
+                "yaw": -5.4,
+                "pitch": 0.8,
+                "to": "alcoba-principal",
+                "kind": "scene"
+              }
+            ]
+          }
+        }
+      },
+      "b": {
+        "id": "b",
+        "name": "Apartamento Tipo B",
+        "area": 60,
+        "areaPrivada": 55,
+        "inicio": "acceso",
+        "scenes": {
+          "acceso": {
+            "id": "va-tb-acceso",
+            "name": "Acceso",
+            "img": "projects/melendez/valle-alto/panoramas/tipo-b/vr/acceso.jpg",
+            "hotspots": [
+              {
+                "label": "Sala",
+                "yaw": 9.6,
+                "pitch": 0,
+                "to": "sala",
+                "kind": "scene"
+              },
+              {
+                "label": "Alcoba Auxiliar",
+                "yaw": -35.6,
+                "pitch": -2.2,
+                "to": "alcoba-auxiliar",
+                "kind": "scene"
+              },
+              {
+                "label": "Alcoba Principal",
+                "yaw": -45.8,
+                "pitch": -2.2,
+                "to": "alcoba-principal",
+                "kind": "scene"
+              },
+              {
+                "label": "Espacio Multiple",
+                "yaw": -55.3,
+                "pitch": -9.3,
+                "to": "estudio",
+                "kind": "scene"
+              }
+            ]
+          },
+          "sala": {
+            "id": "va-tb-sala",
+            "name": "Sala",
+            "img": "projects/melendez/valle-alto/panoramas/tipo-b/vr/sala.jpg",
+            "hotspots": [
+              {
+                "label": "Acceso",
+                "yaw": -172.6,
+                "pitch": 0,
+                "to": "acceso",
+                "kind": "scene"
+              },
+              {
+                "label": "Espacio Multiple",
+                "yaw": -146.4,
+                "pitch": 0,
+                "to": "estudio",
+                "kind": "scene"
+              },
+              {
+                "label": "Alcoba Auxiliar",
+                "yaw": -99,
+                "pitch": 0,
+                "to": "alcoba-auxiliar",
+                "kind": "scene"
+              }
+            ]
+          },
+          "estudio": {
+            "id": "va-tb-estudio",
+            "name": "Espacio Multiple",
+            "img": "projects/melendez/valle-alto/panoramas/tipo-b/vr/estudio.jpg",
+            "hotspots": [
+              {
+                "label": "Sala",
+                "yaw": 61.6,
+                "pitch": -1.8,
+                "to": "sala",
+                "kind": "scene"
+              },
+              {
+                "label": "Acceso",
+                "yaw": 142,
+                "pitch": -2.1,
+                "to": "acceso",
+                "kind": "scene"
+              },
+              {
+                "label": "Alcoba Auxiliar",
+                "yaw": -33.7,
+                "pitch": -1.7,
+                "to": "alcoba-auxiliar",
+                "kind": "scene"
+              },
+              {
+                "label": "Alcoba Principal",
+                "yaw": -57.1,
+                "pitch": -1.3,
+                "to": "alcoba-principal",
+                "kind": "scene"
+              },
+              {
+                "label": "Ver como alcoba",
+                "yaw": -146.6,
+                "pitch": 3.4,
+                "to": "alcoba-opcion-2",
+                "kind": "variant"
+              }
+            ]
+          },
+          "alcoba-principal": {
+            "id": "va-tb-alcoba-principal",
+            "name": "Alcoba Principal",
+            "img": "projects/melendez/valle-alto/panoramas/tipo-b/vr/alcoba-principal.jpg",
+            "hotspots": [
+              {
+                "label": "Espacio Multiple",
+                "yaw": 149,
+                "pitch": -1.2,
+                "to": "estudio",
+                "kind": "scene"
+              },
+              {
+                "label": "Baño Alcoba Principal",
+                "yaw": -118.4,
+                "pitch": -0.3,
+                "to": "bano",
+                "kind": "scene"
+              }
+            ]
+          },
+          "alcoba-auxiliar": {
+            "id": "va-tb-alcoba-auxiliar",
+            "name": "Alcoba Auxiliar",
+            "img": "projects/melendez/valle-alto/panoramas/tipo-b/vr/alcoba-auxiliar.jpg",
+            "hotspots": [
+              {
+                "label": "Espacio Multiple",
+                "yaw": 176.9,
+                "pitch": -1.5,
+                "to": "estudio",
+                "kind": "scene"
+              }
+            ]
+          },
+          "alcoba-opcion-2": {
+            "id": "va-tb-alcoba-opcion-2",
+            "name": "Espacio Multiple 2",
+            "img": "projects/melendez/valle-alto/panoramas/tipo-b/vr/alcoba-opcion-2.jpg",
+            "hotspots": [
+              {
+                "label": "Alcoba Auxiliar",
+                "yaw": -178.2,
+                "pitch": -3.1,
+                "to": "alcoba-auxiliar",
+                "kind": "scene"
+              },
+              {
+                "label": "Ver como espacio multiple",
+                "yaw": -33.8,
+                "pitch": -2.2,
+                "to": "estudio",
+                "kind": "variant"
+              }
+            ]
+          },
+          "bano": {
+            "id": "va-tb-bano",
+            "name": "Baño Alcoba Principal",
+            "img": "projects/melendez/valle-alto/panoramas/tipo-b/vr/bano.jpg",
+            "hotspots": [
+              {
+                "label": "Alcoba Principal",
+                "yaw": 7.6,
+                "pitch": -0.4,
+                "to": "alcoba-principal",
+                "kind": "scene"
+              }
+            ]
+          }
+        }
+      }
     };
+    // <<< FIN ESCENAS GENERADAS >>>
 
     // pitch/yaw (grados) → posición XYZ
     function pos(yawDeg, pitchDeg, r) {
@@ -110,15 +496,202 @@
       return [sign * r * Math.cos(p) * Math.sin(yaw), r * Math.sin(p), -r * Math.cos(p) * Math.cos(yaw)];
     }
 
-    // Componente: orientar el hotspot hacia el centro (cámara)
+    // Componente: orientar el hotspot hacia el centro de su contenedor (el ojo).
+    // Planos y textos miran hacia su +Z, así que basta girar en Y hasta que +Z
+    // apunte al origen local: rotar (0,0,1) un ángulo θ da (senθ, 0, cosθ), y la
+    // dirección hacia el origen es (-x, ·, -z), de donde θ = atan2(-x, -z).
+    // (Antes se usaba lookAt + rotateY(PI); ese giro extra dejaba las caras
+    // mirando al lado contrario y, como <a-text> es de una sola cara, las
+    // etiquetas se veían vacías — solo sobrevivían los discos, por ser dobles.)
     AFRAME.registerComponent('look-center', {
       init: function () {
-        var el = this.el;
-        setTimeout(function () {
-          var o = el.object3D;
-          o.lookAt(0, o.position.y, 0);
-          o.rotateY(Math.PI);
-        }, 0);
+        var o = this.el.object3D;
+        o.rotation.set(0, Math.atan2(-o.position.x, -o.position.z), 0);
+      }
+    });
+
+    // El panorama y los hotspots se centran en el ojo, no en el origen.
+    // La cámara está a 1.60 m de altura: con los hotspots colgados del origen
+    // todos caían ~11° por debajo de donde marca su pitch (atan(1.6/8)). En VR
+    // además el usuario puede moverse, así que se sigue su posición cada frame.
+    AFRAME.registerComponent('center-on-eye', {
+      tick: function () {
+        var cam = this.el.sceneEl.camera;
+        if (cam) cam.getWorldPosition(this.el.object3D.position);
+      }
+    });
+
+    // Orden de dibujado explícito. Las piezas de una burbuja son planos
+    // translúcidos y COPLANARES: sin esto three.js las ordena por distancia,
+    // empatan, y el resultado cambia de frame en frame — de ahí el halo
+    // emborronando las etiquetas. Con depthTest desactivado y un renderOrder
+    // fijo el apilado es determinista, y como las etiquetas van en un orden
+    // superior al de TODAS las burbujas, ninguna aureola vecina las tapa.
+    AFRAME.registerComponent('draw-on-top', {
+      schema: { type: 'number', default: 1 },
+      init: function () {
+        var order = this.data, el = this.el;
+        var apply = function () {
+          el.object3D.traverse(function (o) {
+            if (!o.isMesh || !o.material) return;
+            o.renderOrder = order;
+            o.material.depthTest = false;
+            o.material.needsUpdate = true;
+          });
+        };
+        apply();
+        el.addEventListener('loaded', apply);
+        el.addEventListener('object3dset', apply);
+        el.addEventListener('materialtextureloaded', apply);
+      }
+    });
+
+    // ── Iconos de las burbujas ──────────────────────────────────────
+    // SVG en línea (mismo trazo fino y redondeado que los iconos Lucide que ya
+    // usa el sitio) servidos como data URI. Van dibujados en blanco y se tiñen
+    // con el beige de marca desde el material, así que un solo SVG por forma.
+    function icon(paths) {
+      var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 24 24"'
+              + ' fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round"'
+              + ' stroke-linejoin="round">' + paths + '</svg>';
+      return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+    }
+
+    var ICONS = {
+      cama:       icon('<path d="M3 19V6"/><path d="M3 12h13a5 5 0 0 1 5 5v2"/>'
+                     + '<path d="M3 19h18"/><path d="M6.5 12V9.5h4.5V12"/>'),
+      sofa:       icon('<path d="M4.5 10.5V8a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v2.5"/>'
+                     + '<path d="M2.5 17.5v-3.8a1.6 1.6 0 0 1 3.2 0v1.1h12.6v-1.1a1.6 1.6 0 0 1 3.2 0v3.8z"/>'
+                     + '<path d="M5.5 17.5v2"/><path d="M18.5 17.5v2"/>'),
+      escritorio: icon('<rect x="3" y="4.5" width="18" height="11" rx="1.5"/>'
+                     + '<path d="M12 15.5v3.5"/><path d="M8 19h8"/>'),
+      bano:       icon('<path d="M3 12.5h18V15a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4z"/>'
+                     + '<path d="M7 12.5V6.4a2.2 2.2 0 0 1 4.4 0"/>'
+                     + '<path d="M6.5 19l-1.3 2"/><path d="M17.5 19l1.3 2"/>'),
+      puerta:     icon('<path d="M5 21V4a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v17"/>'
+                     + '<path d="M3 21h18"/><path d="M15.4 12.4h.01"/>'),
+      flecha:     icon('<path d="M12 19V5"/><path d="M6 11l6-6 6 6"/>'),
+      // Capas: para los botones de variante ("Ver como alcoba"), igual que el
+      // icono que usa el tour web para el mismo botón.
+      capas:      icon('<path d="M12 3l9 4.6-9 4.6-9-4.6z"/>'
+                     + '<path d="M3 12.3l9 4.6 9-4.6"/>'
+                     + '<path d="M3 16.7l9 4.6 9-4.6"/>')
+    };
+
+    // Icono según la etiqueta del hotspot, sin tildes y en minúsculas
+    function iconFor(label, kind) {
+      // Los botones de variante van siempre con el icono de capas, aunque su
+      // texto diga "alcoba": no llevan a otra habitación, cambian el montaje
+      // de la misma.
+      if (kind === 'variant') return ICONS.capas;
+      var s = label.toLowerCase()
+        .replace(/[áàä]/g, 'a').replace(/[éè]/g, 'e').replace(/[íï]/g, 'i')
+        .replace(/[óö]/g, 'o').replace(/[úü]/g, 'u').replace(/ñ/g, 'n');
+      if (s.indexOf('alcoba') >= 0 || s.indexOf('habitacion') >= 0) return ICONS.cama;
+      if (s.indexOf('sala') >= 0 || s.indexOf('comedor') >= 0)      return ICONS.sofa;
+      if (s.indexOf('espacio') >= 0 || s.indexOf('estudio') >= 0)   return ICONS.escritorio;
+      if (s.indexOf('bano') >= 0)                                   return ICONS.bano;
+      if (s.indexOf('acceso') >= 0 || s.indexOf('entrada') >= 0)    return ICONS.puerta;
+      return ICONS.flecha;
+    }
+
+    // Píldora de la etiqueta dibujada en canvas (fuente del sistema → acentos
+    // y Ñ correctos). Se pinta al doble de resolución de la que se ve para que
+    // el texto aguante el acercamiento del visor sin pixelarse.
+    function labelCanvas(text) {
+      var FS = 72, PAD_X = 46, PAD_Y = 26;
+      var FONT = '700 ' + FS + 'px system-ui, "Segoe UI", Roboto, Arial, sans-serif';
+      var cv = document.createElement('canvas');
+      var ctx = cv.getContext('2d');
+      ctx.font = FONT;
+      cv.width  = Math.ceil(ctx.measureText(text).width) + PAD_X * 2;
+      cv.height = FS + PAD_Y * 2;
+
+      ctx = cv.getContext('2d');            // redimensionar reinicia el estado
+      ctx.font = FONT;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+
+      var w = cv.width, hh = cv.height, r = hh / 2;
+      ctx.beginPath();
+      ctx.moveTo(r, 0);
+      ctx.arcTo(w, 0, w, r, r);
+      ctx.arcTo(w, hh, w - r, hh, r);
+      ctx.arcTo(0, hh, 0, hh - r, r);
+      ctx.arcTo(0, 0, r, 0, r);
+      ctx.closePath();
+      ctx.fillStyle = 'rgba(10,8,6,0.86)';
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(232,217,176,0.32)';
+      ctx.lineWidth = 3;
+      ctx.stroke();
+
+      ctx.fillStyle = '#F5EDD8';
+      ctx.fillText(text, w / 2, hh / 2 + 2);
+      return cv;
+    }
+
+    // ── Texturas de la burbuja ──────────────────────────────────────
+    // Pintadas en canvas y usadas sobre un quad: sin mallas polares no hay
+    // aristas internas que puedan asomar en el relleno translúcido.
+    // Todas llevan npot:true en el material, que en A-Frame desactiva los
+    // mipmaps. Es necesario: un PNG de canvas guarda los píxeles transparentes
+    // con RGB negro (el canvas 2D siempre premultiplica), así que al reducir la
+    // textura three.js promedia ese negro con el beige y aparece un cuadrado
+    // oscuro alrededor del dibujo — el borde negro clásico del alfa sin
+    // premultiplicar. Sin mipmaps se acabó.
+    var BUBBLE_W = 0.98;                 // lado del plano, en metros
+
+    function circleTexture(draw) {
+      var S = 512, c = document.createElement('canvas');
+      c.width = c.height = S;
+      draw(c.getContext('2d'), S);
+      return c.toDataURL('image/png');
+    }
+
+    function bubbleTexture(discAlpha) {
+      return circleTexture(function (ctx, S) {
+        var cx = S / 2;
+        ctx.beginPath();
+        ctx.arc(cx, cx, S * 0.435, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(10,8,6,' + discAlpha + ')';
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(cx, cx, S * 0.445, 0, Math.PI * 2);
+        ctx.lineWidth = S * 0.034;
+        ctx.strokeStyle = '#E8D9B0';
+        ctx.stroke();
+      });
+    }
+
+    var BUBBLE_TEX       = bubbleTexture(0.34);
+    var BUBBLE_TEX_HOVER = bubbleTexture(0.64);
+    var HALO_TEX = circleTexture(function (ctx, S) {
+      ctx.beginPath();
+      ctx.arc(S / 2, S / 2, S * 0.41, 0, Math.PI * 2);
+      ctx.lineWidth = S * 0.055;
+      ctx.strokeStyle = '#fff';
+      ctx.stroke();
+    });
+
+    // Pulso del halo: escala y opacidad calculadas del mismo reloj, así que no
+    // pueden desfasarse entre sí. Al usar el tiempo global, todas las burbujas
+    // laten a la vez, que además queda más tranquilo que cada una por su lado.
+    AFRAME.registerComponent('pulse', {
+      schema: {
+        dur:     { default: 2400 },
+        from:    { default: 0.30 },
+        to:      { default: 1.0 },
+        opacity: { default: 0.5 }
+      },
+      tick: function (time) {
+        var d = this.data;
+        var t = (time % d.dur) / d.dur;
+        var e = 1 - (1 - t) * (1 - t);            // easeOutQuad
+        var s = d.from + (d.to - d.from) * e;
+        this.el.object3D.scale.set(s, s, s);
+        var m = this.el.getObject3D('mesh');
+        if (m) m.material.opacity = d.opacity * (1 - e);
       }
     });
 
@@ -126,17 +699,63 @@
     var hsRoot = document.getElementById('hotspots');
     var titleEl = document.getElementById('title');
 
+    // ── Apartamento activo ──────────────────────────────────────────
+    // TOUR apunta a TOURS.a o TOURS.b. Las claves de escena son iguales en los
+    // dos ('acceso', 'estudio', …), así que al cambiar de apartamento se puede
+    // aterrizar en la misma habitación en vez de volver al principio.
+    var TOUR = TOURS.b;
+    var sceneKey = TOUR.inicio;
+
+    /** Acepta la clave corta ('estudio') o el id completo del tour web
+     *  ('va-tb-estudio'), que es lo que manda el enlace del sidebar. */
+    function resolveScene(tour, wanted) {
+      if (!wanted) return null;
+      if (tour.scenes[wanted]) return wanted;
+      for (var k in tour.scenes) if (tour.scenes[k].id === wanted) return k;
+      return null;
+    }
+
+    /** Deduce el apartamento a partir del id de escena del tour web, para que
+     *  al entrar a VR desde el Tipo A no se caiga siempre en el Tipo B. */
+    function tourOf(wanted) {
+      for (var t in TOURS) if (resolveScene(TOURS[t], wanted)) return t;
+      return null;
+    }
+
+    function setTour(tourId, wantedScene) {
+      TOUR = TOURS[tourId] || TOURS.b;
+      preload(TOUR);
+      updateSwitch();
+      loadScene(resolveScene(TOUR, wantedScene) || TOUR.inicio);
+    }
+
     function loadScene(id) {
-      var sc = SCENES[id];
+      var sc = TOUR.scenes[id];
       if (!sc) return;
+      sceneKey = id;
       sky.setAttribute('src', sc.img);
       sky.setAttribute('material', 'shader: flat; src: ' + sc.img);
       if (SKY_MIRRORED) sky.setAttribute('scale', '-1 1 1');
-      titleEl.textContent = sc.name;
+      titleEl.textContent = sc.name + ' · ' + TOUR.name.replace('Apartamento ', '');
 
       while (hsRoot.firstChild) hsRoot.removeChild(hsRoot.firstChild);
 
-      sc.hotspots.forEach(function (h) {
+      // Etiquetas escalonadas: dos hotspots separados por pocos grados (p. ej.
+      // las dos alcobas del Acceso, a 10°) tienen las píldoras solapadas. Una
+      // píldora abarca ~10° a esta distancia, así que por debajo de 14° se baja
+      // la etiqueta de una de ellas a un segundo nivel.
+      var LABEL_MIN_SEP = 14;
+      var level = {}, prev = null;
+      sc.hotspots.map(function (h, i) { return { i: i, yaw: h.yaw }; })
+        .sort(function (a, b) { return a.yaw - b.yaw; })
+        .forEach(function (o) {
+          var d = Math.abs(o.yaw - (prev ? prev.yaw : 1e9)) % 360;
+          if (d > 180) d = 360 - d;
+          level[o.i] = (prev && d < LABEL_MIN_SEP) ? 1 - level[prev.i] : 0;
+          prev = o;
+        });
+
+      sc.hotspots.forEach(function (h, hi) {
         var p = pos(h.yaw, h.pitch, HOTSPOT_R);
         var el = document.createElement('a-entity');
         el.setAttribute('position', p[0] + ' ' + p[1] + ' ' + p[2]);
@@ -146,64 +765,163 @@
         // el raycaster no intersecta (los visuales son hijos aparte).
         el.classList.add('clickable');
         el.setAttribute('geometry', 'primitive: circle; radius: 0.7');
-        el.setAttribute('material', 'opacity: 0; transparent: true; side: double');
+        el.setAttribute('material', 'opacity: 0; transparent: true; side: double; depthWrite: false');
 
-        var disc = document.createElement('a-circle');
-        disc.setAttribute('radius', '0.55');
-        disc.setAttribute('material', 'color: #0a0a0a; shader: flat; opacity: 0.55; side: double');
-        el.appendChild(disc);
+        // ── Pulso: crece DESDE EL CENTRO y se apaga al llegar al anillo.
+        // Un solo plano con textura y un solo componente moviendo escala y
+        // opacidad a la vez: antes eran dos animation__ independientes que
+        // podían desfasarse (si la pestaña se congela y se reanuda), dejando
+        // el aro a tamaño completo y opacidad alta sobre el resto del dibujo.
+        var halo = document.createElement('a-image');
+        halo.setAttribute('width', String(BUBBLE_W));
+        halo.setAttribute('height', String(BUBBLE_W));
+        halo.setAttribute('position', '0 0 0.010');
+        halo.setAttribute('material', {
+          shader: 'flat', src: HALO_TEX, color: '#E8D9B0',
+          transparent: true, side: 'double', depthTest: false, npot: true
+        });
+        halo.setAttribute('pulse', '');
+        halo.setAttribute('draw-on-top', '3');
+        el.appendChild(halo);
 
-        var ring = document.createElement('a-ring');
-        ring.setAttribute('radius-inner', '0.45');
-        ring.setAttribute('radius-outer', '0.55');
-        ring.setAttribute('material', 'color: #E8D9B0; shader: flat; side: double');
-        el.appendChild(ring);
+        // Disco + anillo en UN SOLO plano con textura.
+        // Antes eran un <a-circle> (abanico de 32 triángulos que convergen en
+        // el centro) y un <a-ring> (rejilla polar de 32×10). Esa malla polar
+        // translúcida es justo la forma del patrón radial que se veía en el
+        // relleno; un quad con la textura pintada en canvas no tiene aristas
+        // internas que puedan asomar, y además baja de 3 mallas a 1.
+        var bubble = document.createElement('a-image');
+        bubble.setAttribute('width', String(BUBBLE_W));
+        bubble.setAttribute('height', String(BUBBLE_W));
+        bubble.setAttribute('position', '0 0 0.004');
+        bubble.setAttribute('material', {
+          shader: 'flat', src: BUBBLE_TEX,
+          transparent: true, side: 'double', depthTest: false, npot: true
+        });
+        bubble.setAttribute('draw-on-top', '1');
+        el.appendChild(bubble);
 
-        var bg = document.createElement('a-plane');
-        bg.setAttribute('position', '0 -0.9 0');
-        bg.setAttribute('width', String(Math.max(1.2, h.label.length * 0.22 + 0.5)));
-        bg.setAttribute('height', '0.42');
-        bg.setAttribute('material', 'color: #0a0a0a; shader: flat; opacity: 0.7; side: double');
-        el.appendChild(bg);
+        // Icono del destino (cama, sofá, escritorio, baño, puerta).
+        // El material va por objeto y no como cadena "clave: valor" porque el
+        // data URI lleva ':' y ';' y rompería el parser de estilos de A-Frame.
+        var ico = document.createElement('a-image');
+        ico.setAttribute('width', '0.46');
+        ico.setAttribute('height', '0.46');
+        ico.setAttribute('position', '0 0 0.012');
+        ico.setAttribute('material', {
+          shader: 'flat', src: iconFor(h.label, h.kind), color: '#E8D9B0',
+          transparent: true, side: 'double', depthTest: false, npot: true
+        });
+        ico.setAttribute('draw-on-top', '4');
+        el.appendChild(ico);
 
-        var txt = document.createElement('a-text');
-        txt.setAttribute('value', h.label.toUpperCase());
-        txt.setAttribute('align', 'center');
-        txt.setAttribute('position', '0 -0.9 0.02');
-        txt.setAttribute('color', '#F5EDD8');
-        txt.setAttribute('width', '5');
-        el.appendChild(txt);
+        // ── Etiqueta: un solo plano con la píldora pintada en canvas ──
+        // No se usa <a-text>: ninguna fuente de A-Frame cubre la Ñ (el atlas
+        // MSDF de roboto y el SDF de dejavu son ASCII), así que "BAÑO" salía
+        // como "BAO". El canvas usa la fuente del sistema, de paso da esquinas
+        // redondeadas y un texto más nítido, y ahorra un objeto por burbuja.
+        var LABEL_Y = -0.72 - level[hi] * 0.40;
+        var cv = labelCanvas(h.label.toUpperCase());
+        var lblH = 0.30, lblW = lblH * cv.width / cv.height;
 
-        el.addEventListener('mouseenter', function(){ el.setAttribute('scale','1.18 1.18 1.18'); });
-        el.addEventListener('mouseleave', function(){ el.setAttribute('scale','1 1 1'); });
+        var lbl = document.createElement('a-plane');
+        lbl.setAttribute('width', String(lblW));
+        lbl.setAttribute('height', String(lblH));
+        lbl.setAttribute('position', '0 ' + LABEL_Y + ' 0.01');
+        lbl.setAttribute('material', {
+          shader: 'flat', src: cv.toDataURL('image/png'),
+          transparent: true, side: 'double', depthTest: false, npot: true
+        });
+        lbl.setAttribute('draw-on-top', '5');
+        el.appendChild(lbl);
+
+        // Realce al apuntar: crece y el anillo se rellena
+        el.addEventListener('mouseenter', function () {
+          el.setAttribute('animation__h', 'property: scale; to: 1.15 1.15 1.15; dur: 160; easing: easeOutQuad');
+          bubble.setAttribute('material', 'src', BUBBLE_TEX_HOVER);
+        });
+        el.addEventListener('mouseleave', function () {
+          el.setAttribute('animation__h', 'property: scale; to: 1 1 1; dur: 160; easing: easeOutQuad');
+          bubble.setAttribute('material', 'src', BUBBLE_TEX);
+        });
         el.addEventListener('click', function () { loadScene(h.to); });
 
         hsRoot.appendChild(el);
       });
     }
 
-    // Precargar imágenes en a-assets
+    // Precargar los panoramas del apartamento activo (solo los suyos: cargar
+    // los 14 de golpe satura la memoria de texturas del Quest).
     var assets = document.getElementById('assets');
-    Object.keys(SCENES).forEach(function (id) {
-      var img = document.createElement('img');
-      img.setAttribute('crossorigin', 'anonymous');
-      img.src = SCENES[id].img;
-      assets.appendChild(img);
-    });
+    var precargados = {};
+    function preload(tour) {
+      Object.keys(tour.scenes).forEach(function (k) {
+        var src = tour.scenes[k].img;
+        if (precargados[src]) return;
+        precargados[src] = true;
+        var img = document.createElement('img');
+        img.setAttribute('crossorigin', 'anonymous');
+        img.src = src;
+        assets.appendChild(img);
+      });
+    }
 
-    // Escena inicial (?scene=acceso por defecto)
+    // ── Cambio de apartamento ───────────────────────────────────────
+    // Dos accesos, porque ninguno sirve en los dos modos:
+    //  · Píldora 3D anclada a la cámara, algo por debajo del centro: es la
+    //    única que existe dentro del modo inmersivo, donde el overlay 2D no se
+    //    ve. Se pulsa con el láser del mando (el cursor de mirada apunta al
+    //    frente y la píldora se mueve con la cabeza, así que nunca la cruza).
+    //  · Botón 2D arriba a la derecha, para el escritorio.
+    var swapBtn = document.getElementById('swap');
+    var swap3D  = document.getElementById('swap3d');
+
+    function otherTourId() { return TOUR.id === 'a' ? 'b' : 'a'; }
+    function swapLabel()   { return 'Ver ' + TOURS[otherTourId()].name.replace('Apartamento ', ''); }
+
+    function updateSwitch() {
+      swapBtn.textContent = swapLabel();
+      var cv = labelCanvas(swapLabel().toUpperCase());
+      var h = 0.10, w = h * cv.width / cv.height;
+      swap3D.setAttribute('width', String(w));
+      swap3D.setAttribute('height', String(h));
+      swap3D.setAttribute('material', {
+        shader: 'flat', src: cv.toDataURL('image/png'),
+        transparent: true, side: 'double', depthTest: false, npot: true
+      });
+    }
+
+    function swapTour() {
+      // Se conserva la habitación: las claves de escena son iguales en A y B.
+      setTour(otherTourId(), sceneKey);
+    }
+    swapBtn.addEventListener('click', swapTour);
+    swap3D.addEventListener('click', swapTour);
+
+    // Arranque: ?apto=a|b y ?scene=<clave o id del tour web>
     var params = new URLSearchParams(location.search);
-    var start = params.get('scene') || 'acceso';
+    var wanted = params.get('scene');
+    var apto = params.get('apto') || tourOf(wanted) || 'b';
     var sceneEl = document.querySelector('a-scene');
-    if (sceneEl.hasLoaded) loadScene(start);
-    else sceneEl.addEventListener('loaded', function(){ loadScene(start); });
+    function boot() { setTour(apto, wanted); }
+    if (sceneEl.hasLoaded) boot();
+    else sceneEl.addEventListener('loaded', boot);
 
     // Botón propio "Entrar en Modo VR"
     document.getElementById('enter').addEventListener('click', function () {
       sceneEl.enterVR();
     });
-    sceneEl.addEventListener('enter-vr', function(){ document.getElementById('enter').style.display = 'none'; });
-    sceneEl.addEventListener('exit-vr',  function(){ document.getElementById('enter').style.display = ''; });
+    // La píldora 3D solo dentro del modo inmersivo: fuera de él ya está el
+    // botón 2D de arriba a la derecha, y las dos a la vez se pisan con el
+    // botón de entrar.
+    sceneEl.addEventListener('enter-vr', function () {
+      document.getElementById('enter').style.display = 'none';
+      swap3D.setAttribute('visible', true);
+    });
+    sceneEl.addEventListener('exit-vr', function () {
+      document.getElementById('enter').style.display = '';
+      swap3D.setAttribute('visible', false);
+    });
   </script>
 </body>
 </html>

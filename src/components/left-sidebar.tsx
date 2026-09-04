@@ -60,20 +60,11 @@ export default function LeftSidebar() {
     openGallery,
   } = useTourStore();
 
-  // Mapeo de scene ID del tour (Tipo B) → clave usada en vr.html
-  // vr.html usa claves cortas ('acceso', 'sala', etc.) en lugar de los IDs completos.
-  // Solo las escenas Tipo B tienen VR; si la escena activa no está en el mapa, se usa 'acceso'.
-  const VR_SCENE_MAP: Record<string, string> = {
-    'va-tb-acceso': 'acceso',
-    'va-tb-sala': 'sala',
-    'va-tb-estudio': 'estudio',
-    'va-tb-alcoba-principal': 'principal',
-    'va-tb-alcoba-auxiliar': 'aux',
-    'va-tb-alcoba-opcion-2': 'op2',
-    'va-tb-bano': 'bano',
-  };
-  const vrScene = VR_SCENE_MAP[currentSceneId] ?? 'acceso';
-  const vrHref = assetPath(`/vr.html?scene=${vrScene}`);
+  // vr.html acepta el ID de escena completo del tour y de ahí deduce el
+  // apartamento, así que ya no hace falta una tabla de equivalencias ni queda
+  // limitado al Tipo B: sus escenas se generan desde este mismo tour.config
+  // con scripts/generate-vr-scenes.ts.
+  const vrHref = assetPath(`/vr.html?scene=${currentSceneId}`);
 
   // ID del apartamento expandido en el panel (puede ser distinto al selectedApartment)
   const [expandedAptId, setExpandedAptId] = useState<string | null>(
